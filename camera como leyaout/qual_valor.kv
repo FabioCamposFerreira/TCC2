@@ -1,0 +1,67 @@
+
+<NewLabel@Label>:
+    canvas.before:
+        Color:
+            rgba: 1,1,1,1
+        Rectangle:
+            pos: self.pos
+            size: self.size
+<NewButton@ButtonBehavior+Label>:
+    canvas.before:
+        Color:
+            rgba: 0,0,1,1
+        Ellipse:
+            pos: self.pos
+            size: self.size
+#: import capture capture
+#:import kivy.core.camera  Camera
+
+<Interface>:
+    Screen:
+        name: 'interface'
+        NewButton:
+            size_hint_y: None
+            size_hint_x: None
+            width: 100
+            heigth: 100
+            pos_hint: {"right": 1, 'top':1}
+            text: 'Ajuda'
+            on_release: root.current =  'help'
+
+        BoxLayout:
+            orientation: 'vertical'
+            Camera:
+                id: camera
+                resolution: (640,480)
+                play: True
+            #Label:
+             #   id: label
+              #  text: '1'
+            NewLabel:
+                markup: True
+                text: '[color=ff3333]debug'
+                id: label_debug
+                size_hint_y: None
+                heigth: 1
+            Button:
+                text: 'Ler a Nota'
+                font_size: 50
+                on_release: label_debug.text = '[color=ff3333]'+str(root.capture())
+                size_hint_y: None
+                heigth: 1
+
+
+    Help:
+        name: 'help'
+<Help>:
+    BoxLayout:
+        orientation: 'vertical'
+        Label:
+            text:'texto explicando passo a passo os procedimentos para utilização do aplicativo'
+        Button:
+            text: 'Voltar'
+            size_hint_y: None
+            height: 100
+            on_release: app.root.current = 'interface'
+
+
