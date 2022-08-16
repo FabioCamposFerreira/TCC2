@@ -1,0 +1,28 @@
+#:kivy
+# Author: Fábio Campos
+# Construção do Layout do aplicativo com:
+    # Tela principal (só a camera com um botão de configuração) e a imagem da câmera
+    # Tela Configuração (apresenta opções de configuração
+
+<TelaPrncipal>:
+    BoxLayout:
+        orientation: 'vertical'
+        Camera:
+            id: camera
+            resolution: (640, 3200)
+            play: True
+        Button:
+            text: "Configurar"
+            on_release: root.current = 'telaDeConfiguracao'
+
+<TelaDeConfuguracao>
+    name: 'telaDeConfiguracao'
+    BoxLayout:
+        orientation: 'vertical'
+    Label:
+        text: 'idioma'
+    Label:
+        text: 'Versão'
+    Label:
+        text: 'Versão'
+        
