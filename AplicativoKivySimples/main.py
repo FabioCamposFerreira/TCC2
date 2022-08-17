@@ -2,22 +2,35 @@
 # Código principal para rodar o aplicativo
 
 # verifica se as bibliotecas estão instaladas
+import instalation
+
 try:
-    import instalation
     import kivy
-# se não, instalá elas
 except:
-    instalation.libraries()
+    # se não, instalá elas
+    # instalation.install_kivy() #Pecesa descobrir como responder perguntas durante a instalação como sudo (senha) e y (yes)
+    print("Instale a biblioteca Kivy !")
+
 
 from kivy.core.camera import Camera
 from kivy.app import App
 from kivy.uix.image import Image
 from kivy.uix.widget import Widget
+from kivy.uix.screenmanager import ScreenManager, Screen
 
 
-class CameraApp(App):
+class TelaPrincipal(ScreenManager):
     pass
 
 
+class TelaDeConfiguracao(Screen):
+    pass
+
+
+class Qual_o_valor(App):
+    def build(self):
+        return TelaPrincipal()
+
+
 if __name__ == '__main__':
-    CameraApp().run()
+    Qual_o_valor().run()
