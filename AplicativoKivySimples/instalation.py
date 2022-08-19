@@ -53,10 +53,16 @@ def install_buildozer():
     # Instale o cytron
     os.system("pip install Cython")
     # Corrigindo erro do Cython3
-    os.system("https://stackoverflow.com/questions/66973759/cython-not-found-please-install-it-error-in-buildozer")
+    os.system(
+        "https://stackoverflow.com/questions/66973759/cython-not-found-please-install-it-error-in-buildozer")
     # Tratando erro No module named '_ctypes'
     os.system("sudo apt-get install libffi-dev")
     os.system("buildozer android debug deploy run")
 
-    #https://buildozer.readthedocs.io/en/latest/quickstart.html
-    
+    # https://buildozer.readthedocs.io/en/latest/quickstart.html
+    # Comands to run buildozer
+    # buildozer -v android deploy run logcat | grep python
+
+def install_matplotlib():
+    os.system("python3 -m pip install -U pip")
+    os.system("python3 -m pip install -U matplotlib")

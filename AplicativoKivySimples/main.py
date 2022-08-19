@@ -17,19 +17,38 @@ from kivy.app import App
 from kivy.uix.image import Image
 from kivy.uix.widget import Widget
 from kivy.uix.screenmanager import ScreenManager, Screen
+import processamentoDeImagem
+from matplotlib import pyplot as plt
 
 
-class TelaPrincipal(ScreenManager):
-    pass
+class TelaDaCamera(Screen):
+    def tira_foto(self):
+        camera = self.ids['camera']
+        camera.export_to_png("IMG_.png")
+        # textura = camera.texture
+        # pixels = texture.pixels
+        # print("Captured")
+        im = processamentoDeImagem.open_image("IMG_.png")
+        # # im.show()
+        histograma = processamentoDeImagem.histogram("IMG_.png")
+        plt.plot(histograma)
+        plt.show()
 
 
 class TelaDeConfiguracao(Screen):
+    def inverteCamera(self):
+        # self.manager.get_screen("tela_da_camera").ids.camera.index=int(not self.manager.get_screen("tela_da_camera").ids.camera.index)
+        # print(self.manager.get_screen("tela_da_camera").ids.camera.index)
+        pass
+
+
+class GerenciadorDeTelas(ScreenManager):
     pass
 
 
 class Qual_o_valor(App):
     def build(self):
-        return TelaPrincipal()
+        return GerenciadorDeTelas()
 
 
 if __name__ == '__main__':

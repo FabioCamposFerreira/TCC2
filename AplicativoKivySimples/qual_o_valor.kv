@@ -4,38 +4,66 @@
     # Tela principal (só a camera com um botão de configuração) e a imagem da câmera
     # Tela Configuração (apresenta opções de configuração
 
-<TelaPrincipal>:
-    Screen:
-        name: 'tela_principal'
-        BoxLayout:
-            orientation:'vertical'
-            Camera:
-                id: camera
-                index: 1
-                resolution: (640, 3200)
-                play: True
-            Button:
-                text: "Configurar"
-                size_hint_y: None
-                height: 100
-                on_release: root.current = 'tela_de_configuracao'
-    TelaDeConfiguracao:
-        name: 'tela_de_configuracao'
+<TelaDaCamera>:
+    name: 'tela_da_camera'
+    BoxLayout:
+        orientation:'vertical'
+        Camera:
+            id: camera
+            index: 1
+            resolution: (2048,1536)
+            play: True
+            canvas.before:
+                PushMatrix
+                Scale:
+                    x:2
+                    y:1
+                    origin: self.center
+                Rotate:
+                    angle: -90
+                    origin: self.center
+            canvas.after:
+                PopMatrix
+        Button:
+            text: 'Tirar foto'
+            size_hint_y: None
+            heigth:100
+            on_release: root.tira_foto()
+
+    Button:
+        id:'botao_configuracao'
+        background_color:0,0,0,0
+        size_hint_y: None
+        size_hint_x: None
+        width: 100
+        heigth: 100
+        pos_hint: {"right": 1, 'top':1}
+        on_release: app.root.current = 'tela_de_configuracao'
+        Image:
+            source:'./imagens/configuracao_normal.png'
+            center_x: self.parent.center_x
+            center_y: self.parent.center_y    
 
 <TelaDeConfiguracao>
     name: 'tela_de_configuracao'
     BoxLayout:
         orientation: 'vertical'
+        Button:
+            text: 'Inverter Camera'
+            on_release: root.inverteCamera()
         Label:
-            text: 'idioma'
-        Label:
-            text: 'Versão'
+            text: 'Versão\n 0.01'
         Label:
             text: 'Versão'
         Button:
             text: "Voltar"
             size_hint_y: None
             height: 100
-            on_release: app.root.current = 'tela_principal'
+            on_release: app.root.current = 'tela_da_camera'
 
-        
+<GerenciadorDeTelas>
+    TelaDaCamera:
+        name:"tela_da_camera"
+    TelaDeConfiguracao:
+        name:"tela_de_configuracao"
+    
