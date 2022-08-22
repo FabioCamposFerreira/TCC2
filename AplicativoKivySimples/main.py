@@ -18,21 +18,28 @@ from kivy.uix.image import Image
 from kivy.uix.widget import Widget
 from kivy.uix.screenmanager import ScreenManager, Screen
 import processamentoDeImagem
-from matplotlib import pyplot as plt
+# from matplotlib import pyplot as plt
+from kivy.utils import platform
+import sklearn
+if platform == "android":
+    from android.permissions import request_permissions, Permission
+    request_permissions([Permission.CAMERA])
+
 
 
 class TelaDaCamera(Screen):
     def tira_foto(self):
-        camera = self.ids['camera']
-        camera.export_to_png("IMG_.png")
-        # textura = camera.texture
-        # pixels = texture.pixels
-        # print("Captured")
-        im = processamentoDeImagem.open_image("IMG_.png")
-        # # im.show()
-        histograma = processamentoDeImagem.histogram("IMG_.png")
-        plt.plot(histograma)
-        plt.show()
+        # camera = self.ids['camera']
+        # camera.export_to_png("IMG_.png")
+        # # textura = camera.texture
+        # # pixels = texture.pixels
+        # # print("Captured")
+        # im = processamentoDeImagem.open_image("IMG_.png")
+        # # # im.show()
+        # histograma = processamentoDeImagem.histogram("IMG_.png")
+        # plt.plot(histograma)
+        # plt.show()
+        pass
 
 
 class TelaDeConfiguracao(Screen):
@@ -49,7 +56,6 @@ class GerenciadorDeTelas(ScreenManager):
 class Qual_o_valor(App):
     def build(self):
         return GerenciadorDeTelas()
-
 
 if __name__ == '__main__':
     Qual_o_valor().run()

@@ -63,6 +63,11 @@ def install_buildozer():
     # Comands to run buildozer
     # buildozer -v android deploy run logcat | grep python
 
+
 def install_matplotlib():
     os.system("python3 -m pip install -U pip")
     os.system("python3 -m pip install -U matplotlib")
+
+
+def install_scilit_learn():
+    os.system("pip3 install -U scikit-learn")
