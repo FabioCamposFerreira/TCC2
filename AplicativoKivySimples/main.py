@@ -1,4 +1,5 @@
 # Author: Fábio Campos
+#
 # Código principal para rodar o aplicativo
 
 # verifica se as bibliotecas estão instaladas
