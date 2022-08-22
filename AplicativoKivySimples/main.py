@@ -1,8 +1,9 @@
-# Author: Fábio Campos
+# Author: Fábio Campos X
 # Código principal para rodar o aplicativo
 
 # verifica se as bibliotecas estão instaladas
 import instalation
+
 
 try:
     import kivy
