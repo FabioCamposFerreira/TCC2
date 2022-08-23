@@ -4,6 +4,7 @@
 # verifica se as bibliotecas estão instaladas
 import instalation
 
+
 try:
     import kivy
 except:
