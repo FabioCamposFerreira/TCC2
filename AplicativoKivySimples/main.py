@@ -1,4 +1,9 @@
+<<<<<<< HEAD
 # Author: Fábio Campos X
+=======
+# Author: Fábio Campos
+#
+>>>>>>> e6d744ddda430ba35010f63716e284b9ad304c83
 # Código principal para rodar o aplicativo
 
 # verifica se as bibliotecas estão instaladas
