@@ -1,0 +1,7 @@
+# Um exemplo simples usado para validar os classificadores dentro do aplicativp
+# recebe uma imagem pega o histograma e diz se esta claro ou escuro
+
+data = 
+[
+
+]
