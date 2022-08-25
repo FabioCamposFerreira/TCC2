@@ -45,9 +45,9 @@ def install_buildozer():
     # Comandos parar usuários Linux
     # Instalando e confugurando buildozer
     # Baixando e instalando
-    os.system("git clone https: // github.com/kivy/buildozer.git")
+    os.system("git clone https://github.com/kivy/buildozer.git")
     os.system("cd buildozer")
-    os.system("sudo python setup.py install")
+    os.system("sudo python3 setup.py install")
     # Dentro da pasta do projeto, inicialize o buildozer
     os.system("buildozer init")
     # Edite o arquivo buildozer.spec

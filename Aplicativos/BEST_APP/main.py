@@ -23,8 +23,8 @@ if platform == "android":
 
 class TelaDaCamera(Screen):
     def tira_foto(self):
-        # camera = self.ids['camera']
-        # camera.export_to_png("IMG_.png")
+        camera = self.ids['camera']
+        camera.export_to_png("IMG_.png")
         # textura = camera.texture
         # pixels = texture.pixels
         # print("Captured")
