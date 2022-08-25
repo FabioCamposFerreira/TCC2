@@ -1,3 +1,0 @@
-title=kivycamera
-author=me
-orientation=portrait
