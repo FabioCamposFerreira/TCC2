@@ -1,5 +1,14 @@
+# arquivos especificos do projeto
+*.file
+*.csv
+
+# pastas especificas do projeto
+.buildozer/
+bin/
+
 # Created by https://www.toptal.com/developers/gitignore/api/python
 # Edit at https://www.toptal.com/developers/gitignore?templates=python
+
 
 ### Python ###
 # Byte-compiled / optimized / DLL files
@@ -25,8 +34,6 @@ sdist/
 var/
 wheels/
 share/python-wheels/
-.buildozer/
-bin/
 *.egg-info/
 .installed.cfg
 *.egg
