@@ -1,43 +1,63 @@
 # Um exemplo simples usado para validar os classificadores dentro do aplicativp
 # recebe uma imagem pega o histograma e diz se esta claro ou escuro
-from PIL import Image
 import os
-from matplotlib import pyplot as plt
 import time
-from sklearn.svm import SVC
 import pickle
+import image_processing
+from sklearn.svm import SVC
 
 
-def histogram(arq):
-    """Gera o hitograma da imagem
+def create_X_y(arq):
+    """Return class and feature of the imagem
 
     Args:
         arq: string
-            Caminho da imagem
+            Path of the image
+
+    Returns:
+        X: list
+            Features of the image
+        y: int
+            classe of the feature
+    """
+    print(arq)
+    classe = os.path.basename(arq).split(".")[0]
+    print("| Processando imagem.")
+    X = get_pattern(arq)
+    y = classe
+    return X, y
+
+
+def get_pattern(arq):
+    """Extract image pattern
+
+    Args:
+        arq: string
+            Path of the image
 
     Returns:
         : list
-            O histograma da imagem
+            The histogram of the image
     """
-    im = open_image(arq).getchannel(channel=2)
-    return im.histogram(mask=None, extrema=None)
+    return image_processing.histogram(arq)
 
-
-def open_image(arq):
-
-    im = Image.open(arq).convert(mode='HSV', matrix=None,
-                                 dither=None, palette=0, colors=256)
-    # gira imagem para ela ficar deitada
-    l, h = im.size
-    if l < h:
-        im = im.rotate(angle=90, resample=0, expand=True,
-                       center=None, translate=None, fillcolor=None)
-    return im.resize((5376, 3024), resample=Image.BICUBIC, box=None)
 
 # Salva objetos em arquivos
 
 
 def save_object(obj, file):
+    """??
+
+    Args:
+        obj: 
+            variable, functon or classe to save
+        file: string
+            name of the file to save
+
+    Returns:
+        None
+            ??
+    """
     with open(file, "wb") as f:
         pickle.dump(obj, f, pickle.HIGHEST_PROTOCOL)
         f.closed
@@ -45,44 +65,62 @@ def save_object(obj, file):
 # grava um arquivo objeto SVC treinado
 
 
-def trainer_SVC(X, y, classification_folder):
-    print("Treinando SVC")
+def trainer(X, y, method_name, method):
+    """Trainer scikit-learn classifier usando patterns (X) and your classes (y)
+
+    Args:
+        X: array
+            List of the patterns
+        y: list
+            Names of the classes
+        method_name : str
+            Name of the classifer
+        method : class
+            Scikit-leanr classifier
+    Returns:
+        classifier treined
+            ??
+    """
+    print("Treinando "+method_name)
     st = time.time()
-    svc = SVC(C=1.0, kernel='linear', degree=3, gamma='auto', coef0=0.0, shrinking=True, probability=True, tol=0.001,
-              cache_size=200, class_weight=None, verbose=False, max_iter=-1, decision_function_shape='ovr',
-              random_state=None)
-    svc.fit(X, y)
-    print("\t Treinando SVC durou "+str(time.time()-st)+"segundos")
-    # salva SVC treinado nesta pasta e na pasta de classificação
-    save_object(svc, 'SVC.file')
-    save_object(svc, classification_folder+'SVC.file')
+    method.fit(X, y)
+    print("| Treinamento "
+          + method_name
+          + " durou "
+          + str(time.time()-st)
+          + "segundos")
+    save_object(method, method_name+'.file')
 
-
-# Configarations
-methods = (
-    ("SVC", SVC(C=1.0, kernel='linear', degree=3, gamma='auto', coef0=0.0, shrinking=True, probability=True, tol=0.001,
-                cache_size=200, class_weight=None, verbose=False, max_iter=-1, decision_function_shape='ovr',
-                random_state=None)),
-)
 
 # Configuring
+methods = {
+    "SVC": SVC(C=1.0,
+               kernel='linear',
+               degree=3, gamma='auto',
+               coef0=0.0,
+               shrinking=True,
+               probability=True,
+               tol=0.001,
+               cache_size=200,
+               class_weight=None,
+               verbose=False,
+               max_iter=-1,
+               decision_function_shape='ovr',
+               random_state=None),
+}
 data_base_path = "./../../Data_Base/Data_Base_Claro_Escuro/"
 classes = [0, 1]  # 0:classe escura #1: classe clara
 X = []
 y = []
 
-# Abrindo cada imagem do banco de dados para obter seu histograma da camada V gerando assim X e y
 if __name__ == "__main__":
+    data_base = os.listdir(data_base_path)
     for arq in os.listdir(data_base_path):
-        print("Processando imagem "+arq)
-        classe = arq.split(".")[0]
-        h = histogram(data_base_path+arq)
-        X.append(h)
-        y = y + [classe]
-
-    # treinando X e y
-    # trainer_SVC(X, y)
-    # trainer_RN(X, y)
-    # trainer_KNN(X, y)
-    # tempo total de treinamento
+        cXy = create_X_y(data_base_path+arq)
+        X += [cXy[0]]
+        y += cXy[1]
+    # print("\033[91m {}\033[00m" .format(y))
+    for method in methods:
+        trainer(X, y, method, methods[method])
+    # Total run time
     print(time.perf_counter(), 'segundos')

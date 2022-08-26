@@ -1,37 +1,106 @@
 # Author: Fábio Campos
 # Um exemplo simples usado para validar os classificadores dentro do aplicativp
 # Recebe uma imagem pega o histograma e diz se esta claro ou escuro
-import treinamento_histograma_claro_escuro as treining_codes
+
 import os
 import time
 import pickle
+import treinamento_histograma_claro_escuro as treining_codes
 
 
-def get_pattern(arq):
-    """Extract image pattern
-
+def csv_firts_rows(csv_name, methods):
+    """Create the firts lines in csv file
     Args:
-        arq: string
+        row_last : string
             Path of the image
+        colum_index : string
+            ??
+        rows_len : int
+            ??
 
     Returns:
-        : list
-            The histogram of the image
+        None
     """
-    return treining_codes.histogram(arq)
+    csv_file = open(csv_name, "w")
+    row_1 = "Imagem;Classe Correta"
+    row_2 = "-;-"
+    for method in methods:
+        row_1 += ";" + method+";"+method
+        row_2 += ";" + "Rotulo Gerado;Acertou?"
+        for class_ in classes:
+            row_1 += ";"+method
+            row_2 += ";"+"Prob. da classe " + str(class_)
+    row_1 += ";"+method
+    row_2 += ";"+"Tempo de classificação"
+    csv_file.write(row_1+"\n")
+    csv_file.write(row_2+"\n")
+    csv_file.close()
 
+
+def csv_write_row(csv_name,row):
+    """Add row in .csv
+    Args:
+        csv_name : string
+            Path of the csv file
+
+    Returns:
+        None
+    """
+    csv_file = open(csv_name, "r")
+    csv_file.write(csv_file.read()+"\n"+row)
+    csv_file.close()
+
+
+def csv_write_last_row(csv_name):
+    """Create last line (sum line) in csv
+
+    Args:
+        csv_name : string
+            Path of the csv file
+
+    Returns:
+        None
+    """
+    csv_file = open(csv_name, "r")
+
+    colums = csv_file.readline().split(";")
+    rows_len = len(os.listdir(data_base_path))
+    row_last = ""
+    for colum_index in range(len(colum)):
+        row_last, colum_index = make_sum_csv(row_last, colum_index, rows_len)
+    csv_file.write(row_last+"\n")
+    csv_file.close()
+    print(time.perf_counter(), 'segundos')
+    print("Classificação Concluida!")
 
 def make_sum_csv(row_last, colum_index, rows_len):
+    """Create last line (sum line) in csv
+
+    Args:
+        row_last : string
+            Path of the image
+        colum_index : string
+            ??
+        rows_len : int
+            ??
+
+    Returns:
+        row_last: string
+            ??
+        colum_index : int
+            ??
+    """
     if colum_index >= 25:
         colum_index -= 26
         row_last, colum_index = make_sum_csv(
-            row_last, colum_index, rows_len
+            row_last,
+            colum_index,
+            rows_len
         )
-    if colum[colum_index] == "Acertou?"\
-            or colum[colum_index] == "Tempo de classificação":
-        row_last += ";=SUM(" + chr(colum_index+65) +\
-            str(3) + ":" + chr(colum_index+65) +\
-            str(rows_len+2) + ")"+"/"+str(rows_len)
+    if colum[colum_index] == "Acertou?" or colum[colum_index] == "Tempo de classificação":
+        start_sum = chr(colum_index+65) + str(3)
+        end_sum = chr(colum_index+65) + str(rows_len+2)
+        row_last += ";=SUM("+start_sum+":"+end_sum+")"+"/"+str(rows_len)
     elif colum_index == 0:
         row_last += "% de acertos"
     else:
@@ -47,7 +116,7 @@ def read_object(arq):
             localização do arquivo
 
     Returns:
-        : 
+        dump : object
             O objeto contido no arquivo
     """
     with open(arq, "rb") as f:
@@ -80,46 +149,18 @@ def to_rank(classifier, pattern, correct_class):
 methods = treining_codes.methods
 data_base_path = treining_codes.data_base_path
 classes = treining_codes.classes
-X = []
-y = []
-csv_file = open("resultados_para_cada_imagem.csv", "w")
-line = "path_imagem, class, Clsf1 acertoos,Clsf1.predict,Clsf1.prob[0],Clsf1.prob[1], Clsf1 acertos,Clsf2.predict,Clsf2.prob[0],Clsf2.prob[1],...  "
+csv_name = "acertos_da_classficacao.csv"
 
-# construc title line in csv_file
-row_1 = "Imagem;Classe Correta"
-row_2 = "-;-"
-for method_name, method in methods:
-    row_1 += ";" + method_name+";"+method_name
-    row_2 += ";" + "Rotulo Gerado;Acertou?"
-    for class_ in classes:
-        row_1 += ";"+method_name
-        row_2 += ";"+"Prob. da classe " + str(class_)
-row_1 += ";"+method_name
-row_2 += ";"+"Tempo de classificação"
 
-csv_file.write(row_1+"\n")
-csv_file.write(row_2+"\n")
-# classifing data_base
+csv_firts_rows(csv_name, methods)
 for arq in os.listdir(data_base_path):
     row = ""
-    print("Arquivo: "+arq)
-    class_ = arq.split(".")[0]
-    row = arq+";"+str(class_)
-    print("| Processando imagem")
-    pattern = get_pattern(data_base_path+arq)
+    X, y_corret = treining_codes.create_X_y(arq)
+    row = arq+";"+str(y)
     print("| Classificando")
-    for method_name, method in methods:
-        print("| | Rotulando usando "+method_name)
-        row += to_rank(method_name, pattern, class_)
+    for method in methods:
+        print("| | Rotulando usando "+method)
+        row += to_rank(method, X, y_corret)
     print("| Salvando Resultdados")
-    csv_file.write(row+"\n")
-# make line sum in csv
-colum = row_2.split(";")
-rows_len = len(os.listdir(data_base_path))
-row_last = ""
-for colum_index in range(len(colum)):
-    row_last, colum_index = make_sum_csv(row_last, colum_index, rows_len)
-csv_file.write(row_last+"\n")
-csv_file.close()
-print(time.perf_counter(), 'segundos')
-print("Classificação Concluida!")
+    csv_write_row(csv_name,row)
+csv_write_last_row(csv_name)
