@@ -5,32 +5,13 @@
 # import instalation
 
 from kivy.app import App
-from kivy.uix.image import Image
-from kivy.uix.widget import Widget
-from kivy.uix.label import Label
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.clock import Clock
 from kivy.utils import platform
 from PIL import Image
-import processamentoDeImagem
+import classification as clsf
+import image_processing
 
-
-def classify_image(*largs):
-    """??
-
-    Args:
-        None
-
-    Returns:
-        None
-    """
-    # print(largs)
-    camera = self.ids['camera']
-    pixels = camera.texture.pixels
-    im = Image.frombytes('RGBA', (640, 480), pixels)
-    # y = classifiy(im)
-    y = 4
-    #criar agora metodo para mostrar resultado
 
 def resquests_for_android():
     """??
@@ -49,7 +30,30 @@ def resquests_for_android():
             print("Esperando autorização da camera")
 
 
-class TelaDaCamera(Screen):
+class ScreenCamera(Screen):
+    def __init__(self, **kw):
+        super().__init__(**kw)
+        self.event = Clock.schedule_interval(self.classify_image, 1)
+
+    def classify_image(self, *largs):
+        """??
+
+        Args:
+            None
+
+        Returns:
+            None
+        """
+        camera = self.ids['camera']
+        texture = camera.export_as_image().texture
+        im = image_processing.process_texture(texture)
+        y = clsf.classifiy(im)
+        valor = self.ids['valor']
+        if y != None:
+            valor.text = str(y)
+            valor.color = (1, 1, 0, 1)
+        else:
+            valor.color = (1, 1, 0, 0)
     pass
 
 
@@ -66,12 +70,9 @@ class GerenciadorDeTelas(ScreenManager):
 
 class Qual_o_valor(App):
     def build(self):
-        Clock.schedule_interval(classify_image, INTERVAL)
         return GerenciadorDeTelas()
 
 
 if __name__ == '__main__':
-    INTERVAL = 1
     resquests_for_android()
-    classify_image()
     Qual_o_valor().run()

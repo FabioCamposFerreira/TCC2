@@ -11,7 +11,8 @@ class Interface(ScreenManager):
         camera.export_to_png("IMG_{}.png".format(timestr))
         return ("Captured")
         #  classificacao.classif(self)
-        #  result = open('result.txt', 'r').readlines()
+        #  result = open('result.txt
+r').readlines()
         #  return result
 class Help(Screen):
     pass

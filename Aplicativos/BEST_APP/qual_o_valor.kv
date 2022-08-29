@@ -4,8 +4,11 @@
     # Tela principal (só a camera com um botão de configuração) e a imagem da câmera
     # Tela Configuração (apresenta opções de configuração
 
-<TelaDaCamera>:
-    name: 'tela_da_camera'
+<ScreenCamera>:
+    name: 'screen_camera'
+    on_enter:self.event()
+    on_pre_leave:self.event.cancel()
+
     BoxLayout:
         orientation:'vertical'
         Camera:
@@ -33,7 +36,7 @@
         
 
     Button:
-        id:'botao_configuracao'
+        id:botao_configuracao
         background_color:0,0,0,0
         size_hint_y: None
         size_hint_x: None
@@ -46,9 +49,9 @@
             center_x: self.parent.center_x
             center_y: self.parent.center_y 
     Label:
-        id: 'monitor'
+        id: valor
         text: '10'
-        color: 1,0,0,1
+        color: 1,1,0,0
         font_size: '500dp' 
         pos_hint: {"right": 1, 'top':1}
      
@@ -68,10 +71,10 @@
             text: "Voltar"
             size_hint_y: None
             height: 100
-            on_release: app.root.current = 'tela_da_camera'
+            on_release: app.root.current = 'screen_camera'
 
 <GerenciadorDeTelas>
-    TelaDaCamera:
-        name:"tela_da_camera"
+    ScreenCamera:
+        name:"screen_camera"
     TelaDeConfiguracao:
         name:"tela_de_configuracao"    

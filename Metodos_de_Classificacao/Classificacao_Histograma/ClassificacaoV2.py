@@ -42,7 +42,8 @@ def regimentation(arq, obj_file):
 
 #recebe a pasta a ser classificadoa e o classificador gera um arquivo texto usando os classificadores com dados (nome da imagem, classificador, probabilidades e acerto ou erro) para transformar em csv
 def result(pasta, classifier):
-    temp = open(classifier+'.csv', 'w')
+    temp = open(classifier+'.csv
+w')
     c= 'Treinador;Pasta;Imagem;Classificação;Pontuação;Nota de 2;Nota de 5;Nota de 10;Nota 20;Nota 50;Nota 100;Acuracia\n'
     temp.write(c)
 
