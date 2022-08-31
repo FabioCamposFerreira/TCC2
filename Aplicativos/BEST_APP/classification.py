@@ -1,6 +1,6 @@
 import image_processing
-import pickle
-
+import numpy as np
+import cv2 as cv
 
 def classifiy(im):
     """Extract image pattern
@@ -13,18 +13,17 @@ def classifiy(im):
         y : int or None
             The class labed or None
     """
-    classifier = "SVC"
+    classifier = "SVM"
     pattern = get_pattern(im)
+    pattern = np.matrix(pattern, dtype=np.float32)
     clsf = read_object(classifier+".file")
-    predct_proba = clsf.predict_proba([pattern])
-    id_max = predct_proba[0].argmax()
-    # print("\033[91m {}\033[00m" .format(id_max))
-    # print("\033[92m {}\033[00m" .format(predct_proba[0][id_max]))
+    y = clsf.predict(pattern)[1][0][0]
+    # id_max = predct_proba[0].argmax()
     # analyze criteria for sure
-    if predct_proba[0][id_max] > .7:
-        y = id_max
-    else:
-        y = None
+    # if predct_proba[0][id_max] > .5:
+    #     y = id_max
+    # else:
+    #     y = None
     return y
 
 
@@ -47,12 +46,10 @@ def read_object(arq):
 
     Args:
         arq: string
-            localização do arquivo
+            Localização do arquivo
 
     Returns:
-        dump : object
+        : ??
             O objeto contido no arquivo
     """
-    with open(arq, "rb") as f:
-        dump = pickle.load(f)
-        return dump
+    return cv.ml_SVM.load(arq)

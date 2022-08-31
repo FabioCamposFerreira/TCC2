@@ -66,7 +66,6 @@ def install_buildozer():
 
     # https://buildozer.readthedocs.io/en/latest/quickstart.html
     # Comands to run buildozer
-    # buildozer -v android deploy run logcat | grep python
     # buildozer -v android debug deploy run logcat
     # clear && buildozer -v android debug deploy run logcat | grep python
 
@@ -79,3 +78,12 @@ def install_matplotlib():
 
 def install_scilit_learn():
     os.system("pip3 install -U scikit-learn")
+
+def install_tensorflow():
+    # pip install --upgrade pip
+    # pip install tensorflow --no-cache-dir
+    pass
+
+def install_tensorflow():
+    # pip install sklearn-porter
+    pass

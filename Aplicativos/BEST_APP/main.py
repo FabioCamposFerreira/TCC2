@@ -47,7 +47,10 @@ class ScreenCamera(Screen):
         camera = self.ids['camera']
         texture = camera.export_as_image().texture
         im = image_processing.process_texture(texture)
-        y = clsf.classifiy(im)
+        try:
+            y = clsf.classifiy(im)
+        except Exception as e:
+            print("\033[91m {}\033[00m".format(e))
         valor = self.ids['valor']
         if y != None:
             valor.text = str(y)
