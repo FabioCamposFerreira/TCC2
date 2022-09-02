@@ -1,0 +1,12 @@
+Type,Data Add,Status,Task,Links
+TCC,Set/22,❑,Expandir camera do APP,
+TCC,Set/22,❑,Buscar novos projetos semelhantes ,
+TCC,Set/22,✔,Criar aplicativo intalavel com interface ,
+TCC,Set/22,✔,Usar camera no aplicativo ,
+TCC,Set/22,✔,Utilizar as bibliotes de classificação para verificar se tem compatibilidade ,
+TCC,Set/22,❑,Escrever sobre metodos de avaliação dos classicadores ,
+TCC,Set/22,❑,Usar caixa de bigodes (boxplot) e scatter_matrix para ver dados discrepantes tanto de classificação como o resultado ,
+TCC,Set/22,❑,Escolhe um classificador e gera uma Matrix de desisão ,
+TCC,Set/22,❑,Usar Configure os testes para utilizar validação cruzada de 10 ,
+TCC,Set/22,❑,Usar grafico de comparação presente em  ,https://scikit-learn.org/stable/auto_examples/classification/plot_classifier_comparison.html
+TCC,Set/22,❑,"Pensar em usar o tempo de processamento de cada classificador para escolher o mais rapido, ou mais simples",

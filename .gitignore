@@ -1,7 +1,7 @@
 # arquivos especificos do projeto
 *.file
 *.csv
-
+!TODO.csv
 # pastas especificas do projeto
 .buildozer/
 bin/
