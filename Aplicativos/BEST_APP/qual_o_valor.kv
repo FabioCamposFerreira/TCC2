@@ -14,12 +14,12 @@
         Camera:
             id: camera
             index: 0
-            resolution: (2048,1536)
+            resolution: (640,480)
             play: True
             canvas.before:
                 PushMatrix
                 Scale:
-                    x:2
+                    x:1
                     y:1
                     origin: self.center
                 Rotate:
@@ -52,7 +52,7 @@
         id: valor
         text: '10'
         color: 1,1,0,0
-        font_size: '500dp' 
+        font_size: root.size[1]
         pos_hint: {"right": 1, 'top':1}
      
 

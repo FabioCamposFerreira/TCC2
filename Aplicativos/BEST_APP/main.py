@@ -12,7 +12,6 @@ from PIL import Image
 import classification as clsf
 import image_processing
 
-
 def resquests_for_android():
     """??
 
@@ -31,33 +30,26 @@ def resquests_for_android():
 
 
 class ScreenCamera(Screen):
+
     def __init__(self, **kw):
         super().__init__(**kw)
-        self.event = Clock.schedule_interval(self.classify_image, 1)
+        Clock.schedule_interval(self.classify_image, 2)
 
     def classify_image(self, *largs):
-        """??
-
-        Args:
-            None
-
-        Returns:
-            None
+        """Get and classify image
         """
         camera = self.ids['camera']
         texture = camera.export_as_image().texture
         im = image_processing.process_texture(texture)
-        try:
-            y = clsf.classifiy(im)
-        except Exception as e:
-            print("\033[91m {}\033[00m".format(e))
+        y = clsf.classifiy(im)
         valor = self.ids['valor']
         if y != None:
-            valor.text = str(y)
+            valor.text = str(int(y))
             valor.color = (1, 1, 0, 1)
         else:
             valor.color = (1, 1, 0, 0)
-    pass
+        
+        
 
 
 class TelaDeConfiguracao(Screen):

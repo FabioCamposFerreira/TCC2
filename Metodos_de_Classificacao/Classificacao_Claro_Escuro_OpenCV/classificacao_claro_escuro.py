@@ -36,15 +36,16 @@ def to_rank(classifier, pattern, correct_class):
         correct_class : int
 
     Returns:
-        : str
+        predict_class: int
             ??
+        delta_time: int
     """
     st = time.time()
     clsf = read_object(classifier+".file")
     pattern = np.matrix(pattern, dtype=np.float32)
-    predict_class = clsf.predict(pattern)[1][0][0]
+    predict_class = int(clsf.predict(pattern)[1][0][0])
     delta_time = time.time() - st
-    return 
+    return [predict_class, delta_time]
 
 
 # Configurations
@@ -52,23 +53,17 @@ methods = treining_codes.methods
 data_base_path = treining_codes.data_base_path
 classes = treining_codes.classes
 csv_name = "acertos_da_classficacao.csv"
-results = ""
+results = []
 
-print("| Classificando")
-
+print("Classificando")
 for arq in os.listdir(data_base_path):
-    row = ""
-    X, y_corret = treining_codes.create_X_y(data_base_path+arq)
-    row = arq+";"+str(y_corret)
-    for method in methods:
-        print("| | Rotulando usando "+method)
-        results.append(to_rank(method, X, y_corret))
-    print("| Salvando Resultdados")
     
-csv_construct.firts_rows(csv_name, methods)
-row = csv_construct.predict_line(predict_class, correct_class, delta_time)
-csv_construct.write_row(csv_name, row)
-csv_construct.write_last_row(csv_name)
+    X, y_corret = treining_codes.create_X_y(data_base_path+arq)
+    for method in methods:
+        print("| Rotulando usando "+method)
+        results.append(to_rank(method, X, y_corret)+y_corret+[arq])
+    
+print("Salvando Resultdados em "+csv_name)
+csv_construct.construct(csv_name, methods, results)
 print(time.perf_counter(), 'segundos')
 print("Classificação Concluida!")
-

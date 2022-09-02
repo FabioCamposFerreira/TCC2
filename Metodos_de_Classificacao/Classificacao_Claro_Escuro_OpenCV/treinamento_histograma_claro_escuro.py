@@ -75,7 +75,7 @@ svm.setTermCriteria((cv.TERM_CRITERIA_MAX_ITER, 100, 1e-6))
 methods = {
     "SVM": svm,
 }
-data_base_path = "../Data_Base/Data_Base_Claro_Escuro/"
+data_base_path = "../../Data_Base/Data_Base_Claro_Escuro/"
 classes = [0, 1]  # 0:classe escura #1: classe clara
 X = []
 y = []
