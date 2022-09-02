@@ -12,6 +12,7 @@ from PIL import Image
 import classification as clsf
 import image_processing
 
+
 def resquests_for_android():
     """??
 
@@ -33,7 +34,7 @@ class ScreenCamera(Screen):
 
     def __init__(self, **kw):
         super().__init__(**kw)
-        Clock.schedule_interval(self.classify_image, 2)
+        self.event = Clock.schedule_interval(self.classify_image, 2)
 
     def classify_image(self, *largs):
         """Get and classify image
@@ -41,6 +42,8 @@ class ScreenCamera(Screen):
         camera = self.ids['camera']
         texture = camera.export_as_image().texture
         im = image_processing.process_texture(texture)
+        # im.show()
+        # print(w)
         y = clsf.classifiy(im)
         valor = self.ids['valor']
         if y != None:
@@ -48,15 +51,17 @@ class ScreenCamera(Screen):
             valor.color = (1, 1, 0, 1)
         else:
             valor.color = (1, 1, 0, 0)
-        
-        
 
 
 class TelaDeConfiguracao(Screen):
-    def inverteCamera(self):
-        # self.manager.get_screen("tela_da_camera").ids.camera.index=int(not self.manager.get_screen("tela_da_camera").ids.camera.index)
-        # print(self.manager.get_screen("tela_da_camera").ids.camera.index)
-        pass
+    def camera_invert(self):
+        camera = self.manager.get_screen("screen_camera").ids["camera"]
+        camera.play = False
+        camera.index = int(not (camera.index))
+        camera.play = True
+        print("\033[92m {}\033[00m" .format(camera.index))
+        print("\033[93m {}\033[00m" .format(camera.play))
+        
 
 
 class GerenciadorDeTelas(ScreenManager):

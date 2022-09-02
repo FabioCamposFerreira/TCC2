@@ -13,14 +13,17 @@
         orientation:'vertical'
         Camera:
             id: camera
-            index: 0
+            index: 1
             resolution: (640,480)
             play: True
+            # allow_stretch: True
+            keep_ratio: True
+            allow_stretch: True
             canvas.before:
                 PushMatrix
                 Scale:
-                    x:1
-                    y:1
+                    x:2
+                    y:2
                     origin: self.center
                 Rotate:
                     angle: -90
@@ -62,11 +65,9 @@
         orientation: 'vertical'
         Button:
             text: 'Inverter Camera'
-            on_release: root.inverteCamera()
+            on_release: root.camera_invert()
         Label:
             text: 'Versão\n 0.01'
-        Label:
-            text: 'Versão'
         Button:
             text: "Voltar"
             size_hint_y: None
