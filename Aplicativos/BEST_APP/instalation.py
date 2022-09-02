@@ -44,14 +44,13 @@ def install_numpy():
 def install_buildozer():
     # Comandos parar usuários Linux
     # Instalando e confugurando buildozer
-    # Baixando e instalando
-    os.system("git clone https://github.com/kivy/buildozer.git")
-    os.system("cd buildozer")
-    os.system("sudo python3 setup.py install")
-    # Dentro da pasta do projeto, inicialize o buildozer
-    os.system("buildozer init")
-    # Edite o arquivo buildozer.spec
-    # Instalando dependências do python-for-android ??não tenho certezas??
+    # pip3 install --user --upgrade buildozer
+    # sudo apt update
+    # sudo apt install -y git zip unzip openjdk-13-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 cmake libffi-dev libssl-dev
+    # pip3 install --user --upgrade Cython==0.29.19 virtualenv  # the --user should be removed if you do this in a venv
+
+# add the following line at the end of your ~/.bashrc file
+export PATH=$PATH:~/.local/bin/
     os.system("sudo dpkg --add-architecture i386")
     os.system("sudo apt-get update")
     os.system("sudo apt-get install -y build-essential ccache git zlib1g-dev python3 python3-dev libncurses5:i386 libstdc++6:i386 zlib1g:i386 openjdk-8-jdk unzip ant ccache autoconf libtool libssl-dev")
@@ -71,6 +70,20 @@ def install_buildozer():
 
     # Testando receita p4a para skleanr vinda https://github.com/mzakharo/python-for-android/tree/sklearn2
 
+def install_buildozer_openSuse():
+    # sudo apt refresh
+    # sudo apt install -y git zip python3-pip autoconf libtool pkg-config 
+    # zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 cmake libffi-dev libssl-dev
+    # sudo zypper addrepo https://download.opensuse.org/repositories/home:ecsos/15.3/home:ecsos.repo
+    # sudo zypper refresh
+    # sudo  zypper install java-13-openjdk
+        # whant install?:y
+    # pip3 install --user --upgrade Cython==0.29.19 virtualenv  # the --user should be removed if you do this in a venv
+    
+    # Comands to run buildozer
+    
+
+    pass
 def install_matplotlib():
     os.system("python3 -m pip install -U pip")
     os.system("python3 -m pip install -U matplotlib")
