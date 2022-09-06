@@ -32,4 +32,4 @@ def open_image(arq):
     l, h = im.size
     if l < h:
         im = im.rotate(angle=90, resample=0, expand=True)
-    return im.resize((5376, 3024), resample=Image.BICUBIC)
+    return im.resize((480,360), resample=Image.BICUBIC)

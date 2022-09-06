@@ -2,6 +2,7 @@
 *.file
 *.csv
 !TODO.csv
+*.xml
 # pastas especificas do projeto
 .buildozer/
 bin/

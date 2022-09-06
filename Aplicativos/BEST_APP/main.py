@@ -1,8 +1,5 @@
 # Author: Fábio Campos
-# Código principal para rodar o aplicativo
-
-# verifica se as bibliotecas estão instaladas
-# import instalation
+# Main code to run application
 
 from kivy.app import App
 from kivy.uix.screenmanager import ScreenManager, Screen
@@ -14,13 +11,7 @@ import image_processing
 
 
 def resquests_for_android():
-    """??
-
-    Args:
-        None
-
-    Returns:
-        None
+    """Execute if running in android to request permissions
     """
     if platform == "android":
         from android.permissions import request_permissions, Permission

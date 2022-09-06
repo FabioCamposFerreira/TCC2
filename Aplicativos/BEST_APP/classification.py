@@ -1,3 +1,6 @@
+# Author: Fábio Campos Ferreira
+# 
+
 import image_processing
 import numpy as np
 import cv2 as cv

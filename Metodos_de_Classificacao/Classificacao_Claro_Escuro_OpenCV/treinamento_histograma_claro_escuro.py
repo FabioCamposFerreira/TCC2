@@ -2,7 +2,6 @@
 # recebe uma imagem pega o histograma e diz se esta claro ou escuro
 import os
 import time
-import pickle
 import image_processing
 import cv2 as cv
 import numpy as np
@@ -58,6 +57,8 @@ def trainer(X, y, method_name, method):
     st = time.time()
     X = np.matrix(X, dtype=np.float32)
     y = np.array(y)
+    print("\033[91m {}\033[00m".format(X))
+    print("\033[92m {}\033[00m".format(y))
     method.train(X, cv.ml.ROW_SAMPLE, y)
     print("| Treinamento "
           + method_name
