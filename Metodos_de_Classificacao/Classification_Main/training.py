@@ -12,8 +12,6 @@ def train(X, y, method_name, method, library):
     if library == "OpenCV":
         X = np.matrix(X, dtype=np.float32)
         y = np.array(y)
-        print("\033[91m {}\033[00m".format(X))
-        print("\033[92m {}\033[00m".format(y))
         method.train(X, cv.ml.ROW_SAMPLE, y)
         method.save(method_name+".xml")
     elif library == "scikit-learn":
@@ -21,7 +19,7 @@ def train(X, y, method_name, method, library):
 
 
 def SVM_create(library):
-    """Create and retur an OpenCV SVM classifier with the given options"""
+    """Create and return an OpenCV SVM classifier with the given options"""
     if library == "OpenCV":
         svm = cv.ml.SVM_create()
         svm.setType(cv.ml.SVM_C_SVC)

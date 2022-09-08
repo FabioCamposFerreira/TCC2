@@ -5,12 +5,12 @@ from kivy.app import App
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.clock import Clock
 from kivy.utils import platform
-from PIL import Image
 import classification as clsf
 import image_processing
+import platform
 
 
-def resquests_for_android():
+def requests_for_android():
     """Execute if running in android to request permissions
     """
     if platform == "android":
@@ -33,9 +33,7 @@ class ScreenCamera(Screen):
         camera = self.ids['camera']
         texture = camera.export_as_image().texture
         im = image_processing.process_texture(texture)
-        # im.show()
-        # print(w)
-        y = clsf.classifiy(im)
+        y = clsf.classify(im)
         valor = self.ids['valor']
         if y != None:
             valor.text = str(int(y))
@@ -50,9 +48,6 @@ class TelaDeConfiguracao(Screen):
         camera.play = False
         camera.index = int(not (camera.index))
         camera.play = True
-        print("\033[92m {}\033[00m" .format(camera.index))
-        print("\033[93m {}\033[00m" .format(camera.play))
-        
 
 
 class GerenciadorDeTelas(ScreenManager):
@@ -65,5 +60,10 @@ class Qual_o_valor(App):
 
 
 if __name__ == '__main__':
-    resquests_for_android()
+    if platform.system() == "Linux":
+        import instalation
+    elif platform.system() == "Windows":
+        # TODO
+        pass
+    requests_for_android()
     Qual_o_valor().run()

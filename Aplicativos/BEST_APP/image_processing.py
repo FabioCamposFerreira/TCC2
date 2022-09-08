@@ -2,7 +2,7 @@ from PIL import Image
 
 
 def histogram(im):
-    """Gera o hitograma da imagem
+    """Gera o histograma da imagem
 
     Args:
         im : 
@@ -32,7 +32,7 @@ def process_image(im):
     if l < h:
         im = im.rotate(angle=90, resample=0, expand=True)
     im = im.resize((720, 576), resample=Image.BICUBIC)
-    return im 
+    return im
 
 
 def process_texture(texture):

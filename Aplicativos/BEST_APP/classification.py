@@ -1,11 +1,12 @@
 # Author: Fábio Campos Ferreira
-# 
+#
 
 import image_processing
 import numpy as np
 import cv2 as cv
 
-def classifiy(im):
+
+def classify(im):
     """Extract image pattern
 
     Args:
@@ -14,12 +15,12 @@ def classifiy(im):
 
     Returns:
         y : int or None
-            The class labed or None
+            The class label or None
     """
     classifier = "SVM"
     pattern = get_pattern(im)
     pattern = np.matrix(pattern, dtype=np.float32)
-    clsf = read_object(classifier+".file")
+    clsf = read_object(classifier+".xml")
     y = clsf.predict(pattern)[1][0][0]
     # id_max = predct_proba[0].argmax()
     # analyze criteria for sure

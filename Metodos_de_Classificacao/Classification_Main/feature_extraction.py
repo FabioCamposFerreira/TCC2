@@ -4,7 +4,7 @@
 # When run as **main**, graphics and tables are generated to compare the features
 
 def histogram(im):
-    """Receivs pillow image and return histogram of the chanel H"""
+    """Receive pillow image and return histogram of the channel H"""
     return im.getchannel(channel=0).histogram(mask=None, extrema=None)
 
 

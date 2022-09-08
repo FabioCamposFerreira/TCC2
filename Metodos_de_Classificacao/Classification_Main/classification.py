@@ -4,12 +4,13 @@
 import numpy as np
 import cv2 as cv
 
+
 def labeling(X, method_name,  library):
-    """Receives feature, classifier name, library to use  and return predict class"""
+    """Receives feature, classifier name, library to use  and return list class predictions"""
     if library == "OpenCV":
         method = cv.ml_SVM.load(method_name+".xml")
         X = np.matrix(X, dtype=np.float32)
-        predict_class = int(method.predict(X)[1][0][0])
-        return predict_class
+        class_predictions = np.array(method.predict(X)[1], dtype=np.int)
+        return class_predictions
     elif library == "scikit-learn":
         pass
