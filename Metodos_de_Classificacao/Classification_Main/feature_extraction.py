@@ -4,21 +4,14 @@
 # When run as **main**, graphics and tables are generated to compare the features
 import cv2 as cv
 
-<<<<<<< HEAD
+
 def histogram(im, library_img):
     """Receive image and return histogram of the channel H"""
     if library_img == "Pillow":
         return im.getchannel(channel=0).histogram(mask=None, extrema=None)
     elif library_img == "OpenCv":
-        print("\033[93m {}\033[00m".format(cv.calcHist([im],[0],None,[256],[0,256])))
-        return  cv.calcHist([im],[0],None,[256],[0,256])
-=======
-def histogram(im):
-    """Receives pillow image and return histogram of the channel H"""
-    return im.getchannel(channel=0).histogram(mask=None, extrema=None)
->>>>>>> 9b20b85 (atualizando versão pc casa)
-
-
+        print("\033[93m {}\033[00m".format(cv.calcHist([im], [0], None, [256], [0, 256])))
+        return cv.calcHist([im], [0], None, [256], [0, 256])
 
 
 def get_features(im, feature, library_img):

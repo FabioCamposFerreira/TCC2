@@ -24,4 +24,4 @@ def open_image(arq, library_img, inverted=False):
             im = cv.rotate(im, cv.ROTATE_90_CLOCKWISE)
         if inverted == True:
             im = cv.rotate(im, cv.ROTATE_180)
-        return cv.resize(im,(480, 360),cv.INTER_CUBIC)
+        return cv.resize(im, (480, 360), cv.INTER_CUBIC)

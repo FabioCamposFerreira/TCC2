@@ -39,7 +39,6 @@ class MachineLearn:
         self.methods = {"SVM": training.SVM_create(self.library)}
         self.ml_confirm()
 
-<<<<<<< HEAD
     def run(self):
         """Train or classify"""
         print("Realizando o processamento das imagens")
@@ -66,11 +65,6 @@ class MachineLearn:
         print(line, end="\r")
         if (actual == total):
             print(end='\x1b[2K')
-=======
-    def progress_bar(self, len, position_actual):
-        """Print progress bar to accompanying processing"""
-        print("\r")
->>>>>>> 9b20b85 (atualizando versão pc casa)
 
     def ml_confirm(self):
         print("\nBiblioteca: " + "\033[91m {}\033[00m".format(self.library))
@@ -152,7 +146,6 @@ class MachineLearn:
 
 
 if __name__ == "__main__":
-<<<<<<< HEAD
     mls = []
     # Create machine learn 1 (ml)
     mls += [MachineLearn(library_index=0, library_img_index=1, feature_index=0,
@@ -161,7 +154,6 @@ if __name__ == "__main__":
     for ml in mls:
         ml.run()
         result_save.mls_saves(ml.csv_name, list(ml.methods.keys()), ml.accuracy)
-=======
     os.system("pip install -r requirements.txt")
     # Variables of Configurations
     library_index = 0
@@ -187,4 +179,3 @@ if __name__ == "__main__":
         ml.step_five()
         print(time.perf_counter(), 'segundos')
         print("Classificação Concluida!")
->>>>>>> 9b20b85 (atualizando versão pc casa)

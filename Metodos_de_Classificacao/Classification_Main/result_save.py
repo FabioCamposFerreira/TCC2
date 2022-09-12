@@ -26,11 +26,7 @@ def features_save(csv_name, images_features):
 
 
 def first_row(csv_name, methods):
-<<<<<<< HEAD
     """Create the firsts lines in csv file
-=======
-    """Create the first lines in csv file
->>>>>>> 9b20b85 (atualizando versão pc casa)
     """
     with open(csv_name, "w") as csv_file:
         row_1 = "Imagem;Classe Correta"
@@ -54,17 +50,10 @@ def read_cell(csv_name, row_pos, column_pos):
     return columns[column_pos].strip()
 
 
-<<<<<<< HEAD
 def make_sum(csv_name, row_last, column_index, rows_len, columns):
     """Create last line (sum line) in csv
     """
     if columns[column_index] == "Acertou?":
-=======
-def make_sum(csv_name, row_last, colum_index, rows_len, columns):
-    """Create last line (sum line) in csv
-    """
-    if columns[colum_index] == "Acertou?" or columns[colum_index] == "Tempo de classificação":
->>>>>>> 9b20b85 (atualizando versão pc casa)
         sum = 0
         for row_pos in range(rows_len):
             sum += float(read_cell(csv_name, row_pos+2, column_index).replace(" segundos", ""))
@@ -113,21 +102,12 @@ def construct_last_row(csv_name):
         columns = csv_file.readline().strip().split(";")
         rows_len = len(csv_file.read().split("\n"))
     row_last = ""
-<<<<<<< HEAD
     for column_index in range(len(columns)):
         row_last, column_index = make_sum(csv_name,
                                           row_last,
                                           column_index,
                                           rows_len,
                                           columns)
-=======
-    for colum_index in range(len(columns)):
-        row_last, colum_index = make_sum(csv_name,
-                                         row_last,
-                                         colum_index,
-                                         rows_len,
-                                         columns)
->>>>>>> 9b20b85 (atualizando versão pc casa)
     return row_last
 
 
