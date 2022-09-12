@@ -25,7 +25,8 @@ def SVM_create(library):
         svm.setType(cv.ml.SVM_C_SVC)
         svm.setC(1)
         svm.setKernel(cv.ml.SVM_LINEAR)
+        return svm
     elif library == "scikit-learn":
         svm = SVC(C=1.0, kernel='linear')
-
-    return svm
+        return svm
+    

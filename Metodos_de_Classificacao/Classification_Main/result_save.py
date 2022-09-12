@@ -9,8 +9,7 @@ def mls_saves(csv_name, methods, accuracy):
     """
     with open("MLS Results.csv", "+a") as csv_file:
         for method in methods:
-            print("\033[91m {}\033[00m".format(""+accuracy))
-            row = csv_name+";"+method+";"+accuracy
+            row = csv_name+";"+method+";"+str(accuracy[0])
             csv_file.write("\n"+row)
 
 

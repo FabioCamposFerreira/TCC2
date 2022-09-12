@@ -1,4 +1,0 @@
-Pillow
-scikit-learn
-opencv-python
-numpy
