@@ -1,4 +1,4 @@
-# Contains modules for classifying a new image using classifiers trained by **training.py**
+﻿# Contains modules for classifying a new image using classifiers trained by **training.py**
 # In general, the modules receive the features to classify them, returning the results.
 
 import numpy as np

@@ -39,6 +39,7 @@ class MachineLearn:
         self.methods = {"SVM": training.SVM_create(self.library)}
         self.ml_confirm()
 
+<<<<<<< HEAD
     def run(self):
         """Train or classify"""
         print("Realizando o processamento das imagens")
@@ -65,6 +66,11 @@ class MachineLearn:
         print(line, end="\r")
         if (actual == total):
             print(end='\x1b[2K')
+=======
+    def progress_bar(self, len, position_actual):
+        """Print progress bar to accompanying processing"""
+        print("\r")
+>>>>>>> 9b20b85 (atualizando versão pc casa)
 
     def ml_confirm(self):
         print("\nBiblioteca: " + "\033[91m {}\033[00m".format(self.library))
@@ -146,6 +152,7 @@ class MachineLearn:
 
 
 if __name__ == "__main__":
+<<<<<<< HEAD
     mls = []
     # Create machine learn 1 (ml)
     mls += [MachineLearn(library_index=0, library_img_index=1, feature_index=0,
@@ -154,3 +161,30 @@ if __name__ == "__main__":
     for ml in mls:
         ml.run()
         result_save.mls_saves(ml.csv_name, list(ml.methods.keys()), ml.accuracy)
+=======
+    os.system("pip install -r requirements.txt")
+    # Variables of Configurations
+    library_index = 0
+    feature_index = 0
+    todo_index = 1
+    data_base_path = "../../Data_Base/Data_Base_Claro_Escuro/"
+    csv_name = str(date.today())+" - Resultados"
+    csv_features = str(date.today())+" - Caracteristicas"
+    # Run machine learn process
+    ml = MachineLearn(library_index, feature_index, todo_index, data_base_path, csv_name, csv_features)
+    print("Realizando o processamento das imagens")
+    ml.step_one()
+    print("Extraindo as caracteristicas")
+    ml.step_two()
+    if ml.todo == "train":
+        print("Treinando os classificadores")
+        ml.step_three()
+        print("Treinameto Concluido!")
+    elif ml.todo == "labeling":
+        print("Classificando imagens não rotuladas")
+        ml.step_four()
+        print("Salvando Resultdados em "+ml.csv_name)
+        ml.step_five()
+        print(time.perf_counter(), 'segundos')
+        print("Classificação Concluida!")
+>>>>>>> 9b20b85 (atualizando versão pc casa)
