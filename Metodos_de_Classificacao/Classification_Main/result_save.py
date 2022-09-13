@@ -4,12 +4,15 @@ from sqlite3 import Row
 import numpy as np
 
 
-def mls_saves(csv_name, methods, accuracy):
+def mls_saves(ml):
     """Save accuracy of the all methods in csv of the all mls builds
     """
-    with open("MLS Results.csv", "+a") as csv_file:
-        for method in methods:
-            row = csv_name+";"+method+";"+str(accuracy[0])
+
+    with open("./results/MLS Results.csv", "+a") as csv_file:
+        for method in list(ml.methods.keys()):
+            row = ml.csv_name+";"+method+";"+"accuracy_score="+str(ml.accuracy[method])+";"\
+                + "confusion_matrix="+'"'+str(ml.confusion_matrix[method])+'"'+";"+"precision_score="+str(
+                ml.precision[method])+";"+"recall_score="+str(ml.recall[method])
             csv_file.write("\n"+row)
 
 
@@ -31,10 +34,8 @@ def first_row(csv_name, methods):
         row_1 = "Imagem;Classe Correta"
         row_2 = "-;-"
         for method in methods:
-            row_1 += ";" + method + ";"+method
-            row_2 += ";" + "Rotulo Gerado;Acertou?"
-        row_1 += ";" + method
-        row_2 += ";" + "Tempo de classificação"
+            row_1 += (";" + method)*3
+            row_2 += ";Rotulo Gerado;Acertou?;Tempo"
         csv_file.write(row_1)
         csv_file.write("\n"+row_2)
 
@@ -74,15 +75,14 @@ def make_sum(csv_name, row_last, column_index, rows_len, columns):
 def predict_line(result):
     """Construct one line for one result of the classifier
     """
-    arq = result[0]
-    class_correct = result[1]
-    class_predict = result[2]
-    time = result[3]
-    is_correct = str(int(str(class_correct) == str(class_predict)))
-    return arq + ";" + str(class_correct)\
-               + ";" + str(class_predict)\
-               + ";" + is_correct\
-               + ";" + str(time) + " segundos"
+    line = result[0]+";"+result[1]  # arq name + # class_correct
+    for r in range(len(result)):
+        if r % 3 == 2:
+            line += ";"+result[r]  # class_predict
+            line += ";"+str(int(str(result[r-1]) == str(result[r])))  # is_correct
+        elif r % 3 == 0 and r != 0:
+            line += ";"+str(result[r])+" segundos"  # time
+    return line
 
 
 def write_row(csv_name, row):

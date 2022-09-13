@@ -18,15 +18,33 @@ def train(X, y, method_name, method, library):
         pass
 
 
+def MLP_create(library, mlp_inlayers, mlp_layers, mlp_outlayers):
+    """Create and return an OpenCV KNN classifier with the given options"""
+    if library == "OpenCV":
+        mlp = cv.ml.ANN_MLP_create()
+        mlp.setLayerSizes([mlp_inlayers, mlp_layers, mlp_outlayers])
+        return mlp
+    elif library == "scikit-learn":
+        pass
+
+def KNN_create(library, k):
+    """Create and return an OpenCV KNN classifier with the given options"""
+    if library == "OpenCV":
+        knn=cv.ml.KNearest_create()
+        knn.setDefaultK(k)
+        return knn
+    elif library == "scikit-learn":
+        pass
+
+
 def SVM_create(library):
     """Create and return an OpenCV SVM classifier with the given options"""
     if library == "OpenCV":
-        svm = cv.ml.SVM_create()
+        svm=cv.ml.SVM_create()
         svm.setType(cv.ml.SVM_C_SVC)
         svm.setC(1)
         svm.setKernel(cv.ml.SVM_LINEAR)
         return svm
     elif library == "scikit-learn":
-        svm = SVC(C=1.0, kernel='linear')
+        svm=SVC(C = 1.0, kernel = 'linear')
         return svm
-    

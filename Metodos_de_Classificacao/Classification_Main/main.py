@@ -6,7 +6,7 @@ from operator import index
 import install_dev
 from datetime import date
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import accuracy_score, precision_score, confusion_matrix, recall_score
 import numpy as np
 import matplotlib.pyplot as plt
 import subprocess
@@ -20,13 +20,13 @@ import training
 
 
 class MachineLearn:
-    def __init__(self, library: str, library_img: str, feature: str, data_base_path: str):
+    def __init__(self, library: str, library_img: str, feature: str, data_base_path: str, knn_k=3, mlp_layers=10):
         self.library = library
         self.library_img = library_img
         self.feature = feature
         self.data_base_path = data_base_path
         self.data_base = os.listdir(data_base_path)
-        self.csv_name = str(
+        self.csv_name = "./results/"+str(
             date.today())+" Resultados com "+self.library+" - "+self.library_img+" - "+self.feature+".csv"
         self.csv_features = self.csv_name.replace(" Resultados com ", " Característica com ")
         self.images_processed = []  # [[class,image pillow],[class,image pillow],...]
@@ -37,24 +37,37 @@ class MachineLearn:
         self.y_train = []
         self.y_test = []
         self.imgs_test = []
-        self.accuracy = []
-        self.methods = {"SVM": training.SVM_create(self.library)}
+        self.accuracy = {}
+        self.precision = {}
+        self.confusion_matrix = {}
+        self.recall = {}
+        self.knn_k = knn_k
+        self.mlp_inlayers = 256 if self.feature == "histogram" else None
+        self.mlp_layers = mlp_layers
+        self.mlp_outlayers = len(list(dict.fromkeys([arq.split(".")[0] for arq in self.data_base])))
+        self.methods = {"SVM": training.SVM_create(self.library),
+                        "KNN": training.KNN_create(self.library, self.knn_k),
+                        "MLP": training.MLP_create(
+                            self.library, self.mlp_inlayers, self.mlp_layers, self.mlp_outlayers)}
 
-    def run(self):
+    def run(self, extract, train, classify):
         self.ml_show()
-        """Train or classify"""
-        print("Realizando o processamento das imagens")
-        self.step_one()
-        print("Extraindo as características")
-        self.step_two()
-        print("Treinando os classificadores")
-        self.step_three()
-        print("Classificando imagens não rotuladas")
-        self.step_four()
-        print("Salvando Resultados em "+self.csv_name)
-        self.step_five()
-        print(time.perf_counter(), 'segundos')
-        print("Classificação Concluída!")
+        if extract == True:
+            """Train or classify"""
+            print("Realizando o processamento das imagens")
+            self.step_one()
+            print("Extraindo as características")
+            self.step_two()
+            if train == True:
+                print("Treinando os classificadores")
+                self.step_three()
+            if classify == True:
+                print("Classificando imagens não rotuladas")
+                self.step_four()
+                print("Salvando Resultados em "+self.csv_name)
+                self.step_five()
+                print(time.perf_counter(), 'segundos')
+                print("Classificação Concluída!")
 
     def progress_bar(self, actual, total):
         """Print progress bar to accompanying processing"""
@@ -87,6 +100,7 @@ class MachineLearn:
                                           image_processing.open_image(arq=self.data_base_path+arq,
                                                                       inverted=True,
                                                                       library_img=self.library_img)])
+
         self.images_processed.sort()
 
     def step_two(self):
@@ -107,7 +121,6 @@ class MachineLearn:
 
         y = [row[0] for row in self.images_features]
         X = [row[1] for row in self.images_features]
-        print("\033[92m {}\033[00m".format(type(X[0][0])))
         self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(X, y, test_size=0.2, random_state=0)
         for method in self.methods:
             actual += 1
@@ -121,16 +134,23 @@ class MachineLearn:
         actual = 0
         img_names = [row[0] for row in self.images_processed]
         _, self.imgs_test = train_test_split(img_names, test_size=0.2, random_state=0)
+        for index in range(len(self.imgs_test)):
+            self.results.append([self.imgs_test[index]])
         for method in self.methods:
             actual += 1
             self.progress_bar(actual, total)
             start_time = time.time()
             class_predictions = classification.labeling(self.X_test, method, self.library)
             end_time = (time.time()-start_time)/len(class_predictions)
-            self.accuracy += [accuracy_score(self.y_test, class_predictions)]
+            self.accuracy[method] = accuracy_score(self.y_test, class_predictions)
+            self.precision[method] = precision_score(self.y_test, class_predictions,
+                                                     average="weighted", sample_weight=self.y_test)
+            self.confusion_matrix[method] = confusion_matrix(self.y_test, class_predictions)
+            self.recall[method] = recall_score(self.y_test, class_predictions,
+                                               average="weighted", sample_weight=self.y_test, zero_division=0)
             for index in range(len(self.imgs_test)):
-                self.results.append([self.imgs_test[index], self.y_test[index],
-                                    int(class_predictions[index]), end_time])
+                self.results[index] += [self.y_test[index],
+                                        int(class_predictions[index]), end_time]
 
     def step_five(self):
         """Save the results"""
@@ -139,17 +159,17 @@ class MachineLearn:
 
 
 if __name__ == "__main__":
+    """
+    Library: OpenCV,scikit-learn
+    Library_img: Pillow
+    Features: histogram
+    data_base_path: images have name with class "className.*". Ex.: 1.1.png
+    knn_k: any int >=1
+    """
     mls = []
-    # Create machine learn 1 (ml)
-    # Library: OpenCV,scikit-learn
-    # Library_img: OpenCV, Pillow
-    # Features: histogram
-    # data_base_path: images have name with class "className.*". Ex.: 1.1.png
-    # mls += [MachineLearn(library="OpenCV", library_img="Pillow", feature="histogram",
-                        #  data_base_path="../../Data_Base/temp/")]
-    mls += [MachineLearn(library="OpenCV", library_img="OpenCV", feature="histogram",
+    mls += [MachineLearn(library="OpenCV", library_img="Pillow", feature="histogram",
                          data_base_path="../../Data_Base/temp/")]
     # Run machine learns
     for ml in mls:
-        ml.run()
-        result_save.mls_saves(ml.csv_name, list(ml.methods.keys()), ml.accuracy)
+        ml.run(extract=True, train=True, classify=True)
+        result_save.mls_saves(ml)
