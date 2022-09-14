@@ -5,6 +5,7 @@
 from operator import index
 import install_dev
 from datetime import date
+from sklearn.preprocessing import OneHotEncoder
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, precision_score, confusion_matrix, recall_score
 import numpy as np
@@ -20,15 +21,14 @@ import training
 
 
 class MachineLearn:
-    def __init__(self, library: str, library_img: str, feature: str, data_base_path: str, knn_k=3, mlp_layers=10):
+    def __init__(self, library: str, library_img: str, feature: str, data_base_path: str, knn_k=3, mlp_layers=[10]):
+        # parameters in
         self.library = library
         self.library_img = library_img
         self.feature = feature
         self.data_base_path = data_base_path
         self.data_base = os.listdir(data_base_path)
-        self.csv_name = "./results/"+str(
-            date.today())+" Resultados com "+self.library+" - "+self.library_img+" - "+self.feature+".csv"
-        self.csv_features = self.csv_name.replace(" Resultados com ", " Característica com ")
+        # Results
         self.images_processed = []  # [[class,image pillow],[class,image pillow],...]
         self.images_features = []  # [[class,feature],[class,feature],...]
         self.results = []
@@ -41,33 +41,45 @@ class MachineLearn:
         self.precision = {}
         self.confusion_matrix = {}
         self.recall = {}
+        # Files with results
+        self.files_name = "./results/XXX_library"+library+"_library_img"+library_img+"_feature"+feature\
+            + "_database" + data_base_path.split("/")[-1]+"_knnk"+knn_k+"_mlplayers"+mlp_layers+".csv"
+        self.csv_results = self.files_name.replace("XXX", "Resultados")
+        self.csv_features = self.files_name.replace("XXX", "Características")
+        # To SVM
+        # To KNN
         self.knn_k = knn_k
+        # To MLP
         self.mlp_inlayers = 256 if self.feature == "histogram" else None
         self.mlp_layers = mlp_layers
         self.mlp_outlayers = len(list(dict.fromkeys([arq.split(".")[0] for arq in self.data_base])))
+        # Construct classifiers
         self.methods = {"SVM": training.SVM_create(self.library),
                         "KNN": training.KNN_create(self.library, self.knn_k),
-                        "MLP": training.MLP_create(
-                            self.library, self.mlp_inlayers, self.mlp_layers, self.mlp_outlayers)}
+                        "MLP": training.MLP_create(self.library, self.mlp_inlayers,
+                                                   self.mlp_layers, self.mlp_outlayers)}
 
-    def run(self, extract, train, classify):
+    def run(self, classify=True):
         self.ml_show()
-        if extract == True:
+        if os.path.exists(self.csv_features):
+            self.images_features = result_save.features_open()
+        else:
             """Train or classify"""
             print("Realizando o processamento das imagens")
             self.step_one()
             print("Extraindo as características")
             self.step_two()
-            if train == True:
-                print("Treinando os classificadores")
-                self.step_three()
-            if classify == True:
-                print("Classificando imagens não rotuladas")
-                self.step_four()
-                print("Salvando Resultados em "+self.csv_name)
-                self.step_five()
-                print(time.perf_counter(), 'segundos')
-                print("Classificação Concluída!")
+        if classify and False in [os.path.exists(self.files_name.replace("XXX", method) + ".xml")
+                                  for method in self.methods.keys()]:
+            print("Treinando os classificadores")
+            self.step_three()
+            print("Treinamento Concluído!")
+            print("Classificando imagens não rotuladas")
+            self.step_four()
+            print("Salvando Resultados em "+self.csv_results)
+            self.step_five()
+            print(time.perf_counter(), 'segundos')
+            print("Classificação Concluída!")
 
     def progress_bar(self, actual, total):
         """Print progress bar to accompanying processing"""
@@ -81,10 +93,10 @@ class MachineLearn:
         print(end='\x1b[2K')
 
     def ml_show(self):
-        print("\nBiblioteca de classificação: " + "\033[91m {}\033[00m".format(self.library))
-        print("Biblioteca de processamento de imagem: " + "\033[91m {}\033[00m".format(self.library_img))
-        print("Característica: " + "\033[91m {}\033[00m".format(self.feature))
-        print("Local das imagens: " + "\033[91m {}\033[00m".format(self.data_base_path))
+        print("\nParametros usados: " + "\033[91m {}\033[00m".format())
+        for parameter in self.files_name.replace("./results/XXX_", "").split("_"):
+            print("\t\033[91m {}\033[00m".format(parameter))
+        print("CSV com as características: " + "\033[91m {}\033[00m".format(self.csv_features))
         print("CSV com os resultados: " + "\033[91m {}\033[00m".format(self.csv_name))
 
     def step_one(self):
@@ -126,7 +138,6 @@ class MachineLearn:
             actual += 1
             self.progress_bar(actual, total)
             training.train(self.X_train, self.y_train, method, self.methods[method], self.library)
-            print("Treinamento Concluído!")
 
     def step_four(self):
         """Do labeling"""
@@ -142,6 +153,12 @@ class MachineLearn:
             start_time = time.time()
             class_predictions = classification.labeling(self.X_test, method, self.library)
             end_time = (time.time()-start_time)/len(class_predictions)
+            # invert one-hot enconding to MLP
+            if method == "MLP":
+                enc = OneHotEncoder(sparse=False, dtype=np.float32, handle_unknown="ignore")
+                _ = enc.fit_transform(np.array(self.y_test).reshape(-1, 1))
+                class_predictions = enc.inverse_transform(class_predictions)
+                class_predictions[class_predictions == None] = 0
             self.accuracy[method] = accuracy_score(self.y_test, class_predictions)
             self.precision[method] = precision_score(self.y_test, class_predictions,
                                                      average="weighted", sample_weight=self.y_test)
@@ -168,8 +185,9 @@ if __name__ == "__main__":
     """
     mls = []
     mls += [MachineLearn(library="OpenCV", library_img="Pillow", feature="histogram",
-                         data_base_path="../../Data_Base/temp/")]
+                         data_base_path="../../Data_Base/Data_Base_Cedulas/")]
     # Run machine learns
     for ml in mls:
-        ml.run(extract=True, train=True, classify=True)
+        ml.run()
         result_save.mls_saves(ml)
+# TODO: criar função para escolher os melhores parâmetros de cada classificador
