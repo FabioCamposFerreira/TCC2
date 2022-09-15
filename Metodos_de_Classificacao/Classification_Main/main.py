@@ -2,9 +2,7 @@
 # Contains step by step instructions for performing image processing, feature extraction, feature training and classification of unknown images
 # Several configuration options are presented at each step for later comparison
 
-from operator import index
 import install_dev
-from datetime import date
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, precision_score, confusion_matrix, recall_score
@@ -164,7 +162,7 @@ class MachineLearn:
             class_predictions = classification.labeling(self.X_test, method, self.parameters["library"], self.xml_name)
             end_time = (time.time()-start_time)/len(class_predictions)
             # invert one-hot enconding to MLP
-            if method == "MLP":
+            if method == "MLP" and self.parameters["library"]=="OpenCV":
                 enc = OneHotEncoder(sparse=False, dtype=np.float32, handle_unknown="ignore")
                 _ = enc.fit_transform(np.array(self.y_test).reshape(-1, 1))
                 class_predictions = enc.inverse_transform(class_predictions)
@@ -200,6 +198,8 @@ if __name__ == "__main__":
     """
     mls = []
     mls += [MachineLearn(library="OpenCV", library_img="Pillow", feature="histogram",
+                         data_base_path="../../Data_Base/Data_Base_Cedulas/")]
+    mls += [MachineLearn(library="scikit-learn", library_img="Pillow", feature="histogram",
                          data_base_path="../../Data_Base/Data_Base_Cedulas/")]
     # Run machine learns
     for ml in mls:

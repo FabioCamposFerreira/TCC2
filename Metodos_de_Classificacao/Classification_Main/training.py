@@ -4,6 +4,9 @@
 
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.svm import SVC
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.neural_network import MLPClassifier
+from joblib import dump
 import numpy as np
 import cv2 as cv
 
@@ -18,20 +21,22 @@ def train(X, y, method_name, method, library, xml_name):
         method.train(X, cv.ml.ROW_SAMPLE, y)
         method.save(xml_name.replace("XXX", method_name))
     elif library == "scikit-learn":
-        pass
+        method.fit(X, y)
+        dump(method, xml_name.replace("XXX", method_name).replace(".xml", ".joblib"))
 
 
-def MLP_create(library, mlp_layers):
+def MLP_create(library, mlp_layers, max_iter=300, alpha=2.5):
     """Create and return an OpenCV MLP classifier with the given options"""
     if library == "OpenCV":
         mlp = cv.ml.ANN_MLP_create()
         mlp.setLayerSizes(np.array(mlp_layers))
-        mlp.setActivationFunction(cv.ml.ANN_MLP_SIGMOID_SYM, 2.5, 1.0)
+        mlp.setActivationFunction(cv.ml.ANN_MLP_SIGMOID_SYM, alpha, 1.0)
         mlp.setTrainMethod(cv.ml.ANN_MLP_BACKPROP)
-        mlp.setTermCriteria((cv.TERM_CRITERIA_MAX_ITER + cv.TERM_CRITERIA_EPS, 300, 0.01))
+        mlp.setTermCriteria((cv.TERM_CRITERIA_MAX_ITER + cv.TERM_CRITERIA_EPS, max_iter, 0.01))
         return mlp
     elif library == "scikit-learn":
-        pass
+        mlp = MLPClassifier(hidden_layer_sizes=mlp_layers[1:-1], activation="logistic", max_iter=max_iter)
+        return mlp
 
 
 def KNN_create(library: str, k: int):
@@ -41,17 +46,18 @@ def KNN_create(library: str, k: int):
         knn.setDefaultK(k)
         return knn
     elif library == "scikit-learn":
-        pass
+        knn = KNeighborsClassifier(n_neighbors=k)
+        return knn
 
 
-def SVM_create(library):
+def SVM_create(library, C=1):
     """Create and return an OpenCV SVM classifier with the given options"""
     if library == "OpenCV":
         svm = cv.ml.SVM_create()
         svm.setType(cv.ml.SVM_C_SVC)
-        svm.setC(1)
+        svm.setC(C)
         svm.setKernel(cv.ml.SVM_LINEAR)
         return svm
     elif library == "scikit-learn":
-        svm = SVC(C=1.0, kernel='linear')
+        svm = SVC(C=C, kernel='linear')
         return svm

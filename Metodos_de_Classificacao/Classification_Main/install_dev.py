@@ -21,5 +21,6 @@ try:
     import sklearn
     import cv2
     import matplotlib
+    import joblib
 except:
     packages_install()

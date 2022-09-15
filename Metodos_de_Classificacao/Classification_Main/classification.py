@@ -1,10 +1,10 @@
 ﻿# Contains modules for classifying a new image using classifiers trained by **training.py**
 # In general, the modules receive the features to classify them, returning the results.
 
+from joblib import load
 import numpy as np
 import cv2 as cv
 import training
-
 
 def labeling(X, method_name,  library, xml_name):
     """Receives feature, classifier name, library to use  and return list class predictions"""
@@ -26,4 +26,6 @@ def labeling(X, method_name,  library, xml_name):
         class_predictions = np.array(method.predict(X)[1], dtype=np.int)
         return class_predictions
     elif library == "scikit-learn":
-        pass
+        method = load(xml_name.replace("XXX", method_name).replace(".xml", ".joblib")) 
+        class_predictions = np.array(method.predict(X), dtype=np.int)
+        return class_predictions

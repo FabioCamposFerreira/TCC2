@@ -25,7 +25,7 @@ def features_open(file_name):
         csv_file = csv.reader(csv_file, delimiter=",",)
         for row in csv_file:
             try:
-                images_features.append([int(row[0]), np.array(row[1:],dtype=np.intc).tolist()])
+                images_features.append([int(row[0]), np.array(row[1:], dtype=np.intc).tolist()])
             except ValueError:
                 pass
     return images_features
