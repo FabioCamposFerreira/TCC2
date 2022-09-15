@@ -6,15 +6,15 @@ import cv2 as cv
 import training
 
 
-def labeling(X, method_name,  library):
+def labeling(X, method_name,  library, xml_name):
     """Receives feature, classifier name, library to use  and return list class predictions"""
     if library == "OpenCV":
         if method_name == "SVM":
-            method = cv.ml_SVM.load(method_name+".xml")
+            method = cv.ml_SVM.load(xml_name.replace("XXX",method_name))
         if method_name == "MLP":
-            method = cv.ml_ANN_MLP.load(method_name+".xml")
+            method = cv.ml_ANN_MLP.load(xml_name.replace("XXX",method_name))
         elif method_name == "KNN":
-            fs = cv.FileStorage('KNN.xml', cv.FILE_STORAGE_READ)
+            fs = cv.FileStorage(xml_name.replace("XXX",method_name), cv.FILE_STORAGE_READ)
             knn_xml = fs.getNode('opencv_ml_knn')
             default_k = int(knn_xml.getNode('default_k').real())
             samples = knn_xml.getNode('samples').mat()

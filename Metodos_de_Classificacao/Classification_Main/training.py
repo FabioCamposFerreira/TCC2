@@ -8,7 +8,7 @@ import numpy as np
 import cv2 as cv
 
 
-def train(X, y, method_name, method, library):
+def train(X, y, method_name, method, library, xml_name):
     """Get features and class to train and save method"""
     if library == "OpenCV":
         X = np.matrix(X, dtype=np.float32)
@@ -16,16 +16,16 @@ def train(X, y, method_name, method, library):
         if method_name == "MLP":
             y = OneHotEncoder(sparse=False, dtype=np.float32).fit_transform(y.reshape(-1, 1))
         method.train(X, cv.ml.ROW_SAMPLE, y)
-        method.save(method_name+".xml")
+        method.save(xml_name.replace("XXX", method_name))
     elif library == "scikit-learn":
         pass
 
 
-def MLP_create(library, mlp_inlayers, mlp_layers, mlp_outlayers):
-    """Create and return an OpenCV KNN classifier with the given options"""
+def MLP_create(library, mlp_layers):
+    """Create and return an OpenCV MLP classifier with the given options"""
     if library == "OpenCV":
         mlp = cv.ml.ANN_MLP_create()
-        mlp.setLayerSizes(np.array([mlp_inlayers, mlp_layers, mlp_outlayers]))
+        mlp.setLayerSizes(np.array(mlp_layers))
         mlp.setActivationFunction(cv.ml.ANN_MLP_SIGMOID_SYM, 2.5, 1.0)
         mlp.setTrainMethod(cv.ml.ANN_MLP_BACKPROP)
         mlp.setTermCriteria((cv.TERM_CRITERIA_MAX_ITER + cv.TERM_CRITERIA_EPS, 300, 0.01))
@@ -34,7 +34,7 @@ def MLP_create(library, mlp_inlayers, mlp_layers, mlp_outlayers):
         pass
 
 
-def KNN_create(library:str, k:int):
+def KNN_create(library: str, k: int):
     """Create and return an OpenCV KNN classifier with the given options"""
     if library == "OpenCV":
         knn = cv.ml.KNearest_create()
