@@ -2,9 +2,9 @@
 # Contains step by step instructions for performing image processing, feature extraction, feature training and classification of unknown images
 # Several configuration options are presented at each step for later comparison
 
+from textwrap import indent
 import install_dev
 from sklearn.preprocessing import OneHotEncoder
-from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, precision_score, confusion_matrix, recall_score
 import numpy as np
 import matplotlib.pyplot as plt
@@ -41,22 +41,21 @@ class MachineLearn:
         self.images_processed = []  # [[class,image],[class,image],...]
         self.images_features = []  # [[class,feature],[class,feature],...]
         self.results = []
-        self.X_train = []
-        self.X_test = []
-        self.y_train = []
-        self.y_test = []
-        self.imgs_test = []
         self.accuracy = {}
         self.precision = {}
         self.confusion_matrix = {}
         self.recall = {}
         # Files with results
-        self.files_name = (
-            "./results/XXX-"
-            + ",".join(p + "=" + str(self.parameters[p]).split("/")[-2:][0] for p in self.parameters))
-        self.csv_results = self.files_name.replace("XXX", "Resultados")+".csv"
-        self.csv_features = self.files_name.replace("XXX", "Características")+".csv"
-        self.xml_name = self.files_name+".xml"
+        self.path_output = "./Output/"
+        self.path_classifiers = self.path_output+"Classifiers/"
+        self.path_features = self.path_output+"Patterns/"
+        self.path_graphics = self.path_output+"Graphics/"
+        self.path_results = self.path_output+"Results/"
+        self.files_name = ("XXX-"
+                           + ",".join(p + "=" + str(self.parameters[p]).split("/")[-2:][0] for p in self.parameters))
+        self.csv_results = self.path_results+self.files_name.replace("XXX", "Resultados")+".csv"
+        self.csv_features = self.path_features+self.files_name.replace("XXX", "Características")+".csv"
+        self.xml_name = self.path_classifiers+self.files_name+".xml"
         # Construct classifiers
         self.methods = {
             "SVM": training.SVM_create(self.parameters["library"]),
@@ -72,7 +71,6 @@ class MachineLearn:
         hyphen_quantity = bar_len-hash_quantity
         line = "[{}] {}%".format("#"*hash_quantity+"-"*hyphen_quantity, int(actual/total*100))
         print(line, end="\r")
-        print(end='\x1b[2K')
 
     def show(self):
         print("\nParametros usados: ")
@@ -89,18 +87,13 @@ class MachineLearn:
         for arq in self.data_base:
             actual += 1
             self.progress_bar(actual, total)
-            self.images_processed.append(
-                [arq, image_processing.open_image(
-                    self.parameters["data_base_path"]
-                    + arq, self.parameters["library_img"])
-                 ])
-            self.images_processed.append(
-                [arq+" (Inverted)",
-                 image_processing.open_image(
-                     self.parameters["data_base_path"]+arq,
-                     self.parameters["library_img"],
-                     inverted=True)
-                 ])
+            self.images_processed.append([arq, image_processing.open_image(self.parameters["data_base_path"]
+                                                                           + arq, self.parameters["library_img"])])
+            self.images_processed.append([arq+" (Inverted)",
+                                          image_processing.open_image(
+                                              self.parameters["data_base_path"]+arq,
+                                              self.parameters["library_img"],
+                                              inverted=True)])
 
     def setup_feature(self):
         """Do feature extraction"""
@@ -116,76 +109,65 @@ class MachineLearn:
                 actual += 1
                 self.progress_bar(actual, total)
                 self.images_features.append(
-                    [
-                        int(img[0].split(".")[0]),
-                        feature_extraction.get_features(
-                            img[1],
-                            self.parameters["feature"],
-                            self.parameters["library_img"]
-                        )
-                    ]
-                )
+                    [int(img[0].split(".")[0]),
+                     feature_extraction.get_features(
+                        img[1],
+                        self.parameters["feature"],
+                        self.parameters["library_img"])])
             result_save.features_save(self.csv_features, self.images_features)
 
-    def setup_train(self):
+    def setup_train(self, X, y):
         """Do training"""
-        print("Treinando os classificadores")
         total = len(self.methods)
         actual = 0
-        y = [row[0] for row in self.images_features]
-        X = [row[1] for row in self.images_features]
-        self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(X, y, test_size=0.2, random_state=0)
         for method in self.methods:
             actual += 1
-            self.progress_bar(actual, total)
             training.train(
-                self.X_train, self.y_train, method, self.methods[method],
+                X, y, method, self.methods[method],
                 self.parameters["library"],
                 self.xml_name)
-        print("Treinamento Concluído!")
 
-    def setup_label(self):
-        """Do labeling"""
-        if len(self.images_features) == 0:
-            self.setup_feature()
-        self.setup_train()
-        print("Classificando imagens não rotuladas")
-        total = len(self.methods)
-        actual = 0
-        _, self.imgs_test = train_test_split(self.data_base, test_size=0.2, random_state=0)
-        for index in range(len(self.imgs_test)):
-            self.results.append([self.imgs_test[index]])
+    def labeling(self, X: str, y_correct: int, y_full: list, img_name:str):
+        """Do labeling and update results"""
+        result = [img_name,y_correct]
         for method in self.methods:
-            actual += 1
-            self.progress_bar(actual, total)
             start_time = time.time()
-            class_predictions = classification.labeling(self.X_test, method, self.parameters["library"], self.xml_name)
-            end_time = (time.time()-start_time)/len(class_predictions)
-            # invert one-hot enconding to MLP
-            if method == "MLP" and self.parameters["library"]=="OpenCV":
-                enc = OneHotEncoder(sparse=False, dtype=np.float32, handle_unknown="ignore")
-                _ = enc.fit_transform(np.array(self.y_test).reshape(-1, 1))
-                class_predictions = enc.inverse_transform(class_predictions)
-                class_predictions[class_predictions == None] = 0
-                class_predictions = np.squeeze(class_predictions).tolist()
-            self.accuracy[method] = accuracy_score(self.y_test, class_predictions)
-            self.precision[method] = precision_score(
-                self.y_test, class_predictions,
-                average="weighted", sample_weight=self.y_test)
-            self.confusion_matrix[method] = confusion_matrix(self.y_test, class_predictions)
-            self.recall[method] = recall_score(
-                self.y_test, class_predictions,
-                average="weighted", sample_weight=self.y_test, zero_division=0)
-            for index in range(len(self.imgs_test)):
-                self.results[index] += [self.y_test[index], int(class_predictions[index]), end_time]
-        print("Classificação Concluída!")
-        self.setup_save()
+            y_predict = classification.labeling(X, y_full, method, self.parameters["library"], self.xml_name)
+            result += [int(y_predict), time.time()-start_time]
+        self.results.append(result)
+
+    def setup_metrics(self):
+        """Generate metrics of the result classification"""
+        results = np.array(self.results)
+        index = 0
+        for method in self.methods:
+            self.accuracy[method] = accuracy_score(results[:, 0+(3*index)], results[:, 1+(3*index)])
+            self.precision[method] = precision_score(results[:, 0+(3*index)], results[:, 1+(3*index)],
+                                                     average="weighted", sample_weight=self.y_correct[method])
+            self.confusion_matrix[method] = confusion_matrix(results[:, 0+(3*index)], results[:, 1+(3*index)])
+            self.recall[method] = recall_score(results[:, 0+(3*index)], results[:, 1+(3*index)], average="weighted",
+                                               sample_weight=self.y_correct[method], zero_division=0)
+            index += 1
 
     def setup_save(self):
         """Save the results fo the labeling"""
         print("Salvando Resultados em "+self.csv_results)
-        self.results = np.array(self.results)
-        result_save.save(self.csv_results, self.methods, self.results)
+        result_save.save(self.csv_results, self.methods,  np.array(self.results))
+
+    def run(self):
+        """Do the train and classification of the database using cross validation leve-one-out"""
+        self.setup_feature()
+        y = [row[0] for row in self.images_features]
+        X = [row[1] for row in self.images_features]
+        features_len = len(self.images_features)
+        print("Realizando o treinamento e classificação usando cross validation leve-one-out")
+        for index in range(features_len):
+            self.progress_bar(index, features_len)
+            self.setup_train(X[:index]+X[index+1:], y[:index]+y[index+1:])
+            self.labeling(X[index], y[index], y,self.images_processed[index][0])
+        print(end='\x1b[2K')  # clear progress bar
+        self.setup_save()
+        self.setup_metrics()
 
 
 if __name__ == "__main__":
@@ -203,7 +185,7 @@ if __name__ == "__main__":
                          data_base_path="../../Data_Base/Data_Base_Cedulas/")]
     # Run machine learns
     for ml in mls:
-        ml.setup_label()
-        result_save.mls_saves(ml)
+        ml.run()
+        result_save.mls_saves(ml, ml.path_output+"MLS Results.csv")
     print(time.perf_counter(), 'segundos')
 # TODO: criar função para escolher os melhores parâmetros de cada classificador
