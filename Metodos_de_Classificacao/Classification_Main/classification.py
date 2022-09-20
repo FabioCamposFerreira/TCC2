@@ -35,5 +35,5 @@ def labeling(X: list, y_full: list, method_name: str,  library: str, xml_name: s
         return y_predict
     elif library == "scikit-learn":
         method = load(xml_name.replace("XXX", method_name).replace(".xml", ".joblib"))
-        y_predict = np.array(method.predict(X), dtype=np.int)
+        y_predict = np.array(method.predict([X]), dtype=np.int)
         return y_predict

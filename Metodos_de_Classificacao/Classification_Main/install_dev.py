@@ -22,5 +22,7 @@ try:
     import cv2
     import matplotlib
     import joblib
+    import scipy
+    import bokeh
 except:
     packages_install()

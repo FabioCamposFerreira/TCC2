@@ -38,8 +38,8 @@ class MachineLearn:
                 + [len(list(dict.fromkeys([arq.split(".")[0] for arq in self.data_base])))])
         }
         # Results
-        self.images_processed = []  # [[class,image],[class,image],...]
-        self.images_features = []  # [[class,feature],[class,feature],...]
+        self.images_processed = []  # [[name,image],[name,image],...]
+        self.images_features = []  # [[name,feature],[name,feature],...]
         self.results = []
         self.accuracy = {}
         self.precision = {}
@@ -49,10 +49,18 @@ class MachineLearn:
         self.path_output = "./Output/"
         self.path_classifiers = self.path_output+"Classifiers/"
         self.path_features = self.path_output+"Patterns/"
-        self.path_graphics = self.path_output+"Graphics/"
+        self.path_graphics = (
+            self.path_output
+            + "Graphics/"
+            + "XXX,"
+            + ",".join(
+                ["data_base_path"+"="+"".join(self.parameters["data_base_path"].split("/")[-2:]),
+                 "library_img"+"="+self.parameters["library_img"],
+                 "feature"+"="+self.parameters["feature"]]))
         self.path_results = self.path_output+"Results/"
-        self.files_name = ("XXX-"
-                           + ",".join(p + "=" + str(self.parameters[p]).split("/")[-2:][0] for p in self.parameters))
+        self.files_name = (
+            "XXX-"
+            + ",".join(p + "=" + str(self.parameters[p]).split("/")[-2:][0] for p in self.parameters))
         self.csv_results = self.path_results+self.files_name.replace("XXX", "Resultados")+".csv"
         self.csv_features = self.path_features+self.files_name.replace("XXX", "Características")+".csv"
         self.xml_name = self.path_classifiers+self.files_name+".xml"
@@ -73,8 +81,9 @@ class MachineLearn:
         print(line, end="\r")
 
     def show(self):
+        """Show the classifications parameters"""
         print("\nParametros usados: ")
-        for parameter in self.files_name.replace("./results/XXX-", "").split("-"):
+        for parameter in self.files_name.replace("./results/XXX-", "").split(","):
             print("\t\033[91m {}\033[00m".format(parameter))
         print("CSV com as características: " + "\033[91m {}\033[00m".format(self.csv_features))
         print("CSV com os resultados: " + "\033[91m {}\033[00m".format(self.csv_results))
@@ -87,13 +96,17 @@ class MachineLearn:
         for arq in self.data_base:
             actual += 1
             self.progress_bar(actual, total)
-            self.images_processed.append([arq, image_processing.open_image(self.parameters["data_base_path"]
-                                                                           + arq, self.parameters["library_img"])])
-            self.images_processed.append([arq+" (Inverted)",
-                                          image_processing.open_image(
-                                              self.parameters["data_base_path"]+arq,
-                                              self.parameters["library_img"],
-                                              inverted=True)])
+            self.images_processed.append(
+                [arq, image_processing.open_image(
+                    self.parameters["data_base_path"]
+                    + arq, self.parameters["library_img"])])
+            self.images_processed.append(
+                [arq+" (Inverted)",
+                 image_processing.open_image(
+                     self.parameters["data_base_path"]+arq,
+                     self.parameters["library_img"],
+                     inverted=True)])
+        print(end='\x1b[2K')  # clear progress bar
 
     def setup_feature(self):
         """Do feature extraction"""
@@ -109,27 +122,26 @@ class MachineLearn:
                 actual += 1
                 self.progress_bar(actual, total)
                 self.images_features.append(
-                    [int(img[0].split(".")[0]),
-                     feature_extraction.get_features(
+                    [img[0], feature_extraction.get_features(
                         img[1],
                         self.parameters["feature"],
                         self.parameters["library_img"])])
+            print(end='\x1b[2K')  # clear progress bar
             result_save.features_save(self.csv_features, self.images_features)
+            print("Salvando gráficos em "+self.path_graphics)
+        result_save.graphics_generate(self.path_graphics, self.images_features)
 
     def setup_train(self, X, y):
         """Do training"""
-        total = len(self.methods)
-        actual = 0
         for method in self.methods:
-            actual += 1
             training.train(
                 X, y, method, self.methods[method],
                 self.parameters["library"],
                 self.xml_name)
 
-    def labeling(self, X: str, y_correct: int, y_full: list, img_name:str):
+    def labeling(self, X: str, y_correct: int, y_full: list, img_name: str):
         """Do labeling and update results"""
-        result = [img_name,y_correct]
+        result = [img_name, y_correct]
         for method in self.methods:
             start_time = time.time()
             y_predict = classification.labeling(X, y_full, method, self.parameters["library"], self.xml_name)
@@ -139,15 +151,18 @@ class MachineLearn:
     def setup_metrics(self):
         """Generate metrics of the result classification"""
         results = np.array(self.results)
-        index = 0
-        for method in self.methods:
-            self.accuracy[method] = accuracy_score(results[:, 0+(3*index)], results[:, 1+(3*index)])
-            self.precision[method] = precision_score(results[:, 0+(3*index)], results[:, 1+(3*index)],
-                                                     average="weighted", sample_weight=self.y_correct[method])
-            self.confusion_matrix[method] = confusion_matrix(results[:, 0+(3*index)], results[:, 1+(3*index)])
-            self.recall[method] = recall_score(results[:, 0+(3*index)], results[:, 1+(3*index)], average="weighted",
-                                               sample_weight=self.y_correct[method], zero_division=0)
-            index += 1
+        classes_correct = results[:, 1]
+        classes_correct = np.array(classes_correct, dtype=int)
+        results = results[:, 2:]  # remove image name and class correct
+        results = np.array(results, dtype=float)
+        results = np.array(results, dtype=int)
+        for index, method in enumerate(self.methods):
+            self.accuracy[method] = accuracy_score(classes_correct, results[:, (2*index)])
+            self.precision[method] = precision_score(classes_correct, results[:, (2*index)],
+                                                     average="weighted", sample_weight=classes_correct)
+            self.confusion_matrix[method] = confusion_matrix(classes_correct, results[:, (2*index)])
+            self.recall[method] = recall_score(classes_correct, results[:, (2*index)], average="weighted",
+                                               sample_weight=classes_correct, zero_division=0)
 
     def setup_save(self):
         """Save the results fo the labeling"""
@@ -156,15 +171,16 @@ class MachineLearn:
 
     def run(self):
         """Do the train and classification of the database using cross validation leve-one-out"""
+        self.show()
         self.setup_feature()
-        y = [row[0] for row in self.images_features]
+        y = [int(row[0].split(".")[0]) for row in self.images_features]
         X = [row[1] for row in self.images_features]
         features_len = len(self.images_features)
         print("Realizando o treinamento e classificação usando cross validation leve-one-out")
         for index in range(features_len):
             self.progress_bar(index, features_len)
             self.setup_train(X[:index]+X[index+1:], y[:index]+y[index+1:])
-            self.labeling(X[index], y[index], y,self.images_processed[index][0])
+            self.labeling(X[index], y[index], y, self.images_features[index][0])
         print(end='\x1b[2K')  # clear progress bar
         self.setup_save()
         self.setup_metrics()
