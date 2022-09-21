@@ -3,6 +3,8 @@
 *.csv
 !TODO.csv
 *.xml
+*.html
+*.pdf
 # pastas especificas do projeto
 .buildozer/
 bin/

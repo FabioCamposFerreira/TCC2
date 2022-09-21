@@ -129,7 +129,7 @@ class MachineLearn:
             print(end='\x1b[2K')  # clear progress bar
             result_save.features_save(self.csv_features, self.images_features)
             print("Salvando gráficos em "+self.path_graphics)
-        result_save.graphics_generate(self.path_graphics, self.images_features)
+        result_save.graphics_save(self.path_graphics, self.images_features)
 
     def setup_train(self, X, y):
         """Do training"""
