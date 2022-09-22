@@ -4,6 +4,18 @@
 from array import array
 from PIL import Image
 import cv2 as cv
+import subprocess
+
+
+def progress_bar(actual, total):
+    """Print progress bar to accompanying processing"""
+    line_width = int(subprocess.check_output("tput cols", shell=True))
+    line_structure = "[] 100%"
+    bar_len = (line_width-len(line_structure))
+    hash_quantity = int(actual/total*bar_len)
+    hyphen_quantity = bar_len-hash_quantity
+    line = "[{}] {}%".format("#"*hash_quantity+"-"*hyphen_quantity, int(actual/total*100))
+    print(line, end="\r")
 
 
 def open_image(arq, library_img, inverted=False):
@@ -16,7 +28,7 @@ def open_image(arq, library_img, inverted=False):
             im = im.rotate(angle=90, resample=0, expand=True)
         if inverted == True:
             im = im.rotate(angle=180, resample=0, expand=True)
-        return im.resize((854,480), resample=Image.BICUBIC)
+        return im.resize((854, 480), resample=Image.BICUBIC)
     elif library_img == "OpenCV":
         # TODO: its not working, conversion bug color
         im = cv.cvtColor(cv.imread(arq), cv.COLOR_RGB2HSV_FULL)
@@ -25,4 +37,4 @@ def open_image(arq, library_img, inverted=False):
             im = cv.rotate(im, cv.ROTATE_90_CLOCKWISE)
         if inverted == True:
             im = cv.rotate(im, cv.ROTATE_180)
-        return cv.resize(im, (854,480), cv.INTER_CUBIC)
+        return cv.resize(im, (854, 480), cv.INTER_CUBIC)

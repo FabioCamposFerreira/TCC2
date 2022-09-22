@@ -8,7 +8,6 @@ from sklearn.preprocessing import OneHotEncoder
 from sklearn.metrics import accuracy_score, precision_score, confusion_matrix, recall_score
 import numpy as np
 import matplotlib.pyplot as plt
-import subprocess
 import time
 import os
 import feature_extraction
@@ -70,16 +69,6 @@ class MachineLearn:
             "KNN": training.KNN_create(self.parameters["library"], self.parameters["knn_k"]),
             "MLP": training.MLP_create(self.parameters["library"], self.parameters["mlp_layers"])}
 
-    def progress_bar(self, actual, total):
-        """Print progress bar to accompanying processing"""
-        line_width = int(subprocess.check_output("tput cols", shell=True))
-        line_structure = "[] 100%"
-        bar_len = (line_width-len(line_structure))
-        hash_quantity = int(actual/total*bar_len)
-        hyphen_quantity = bar_len-hash_quantity
-        line = "[{}] {}%".format("#"*hash_quantity+"-"*hyphen_quantity, int(actual/total*100))
-        print(line, end="\r")
-
     def show(self):
         """Show the classifications parameters"""
         print("\nParametros usados: ")
@@ -95,7 +84,7 @@ class MachineLearn:
         actual = 0
         for arq in self.data_base:
             actual += 1
-            self.progress_bar(actual, total)
+            image_processing.progress_bar(actual, total)
             self.images_processed.append(
                 [arq, image_processing.open_image(
                     self.parameters["data_base_path"]
@@ -120,7 +109,7 @@ class MachineLearn:
             actual = 0
             for img in self.images_processed:
                 actual += 1
-                self.progress_bar(actual, total)
+                image_processing.progress_bar(actual, total)
                 self.images_features.append(
                     [img[0], feature_extraction.get_features(
                         img[1],
@@ -178,7 +167,7 @@ class MachineLearn:
         features_len = len(self.images_features)
         print("Realizando o treinamento e classificação usando cross validation leve-one-out")
         for index in range(features_len):
-            self.progress_bar(index, features_len)
+            image_processing.progress_bar(index, features_len)
             self.setup_train(X[:index]+X[index+1:], y[:index]+y[index+1:])
             self.labeling(X[index], y[index], y, self.images_features[index][0])
         print(end='\x1b[2K')  # clear progress bar
