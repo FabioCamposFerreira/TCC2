@@ -4,6 +4,7 @@ from matplotlib.backends.backend_pdf import PdfPages
 from bokeh.palettes import Dark2_5 as palette
 from scipy import stats
 import matplotlib.pyplot as plt
+import matplotlib.colors as mcolors
 import bokeh.plotting as bokeh
 import pandas as pd
 import numpy as np
@@ -11,6 +12,7 @@ import itertools
 import csv
 import os
 import image_processing
+import math
 
 
 def mls_saves(ml, csv_name: str):
@@ -51,19 +53,39 @@ def graphics_interactive(curves: list, labels: list, file_path: str):
     bokeh.save(f)
 
 
-def graphics_splom(classes: set, labels: list[str], features: np.array, files_name: str):
-    """Generate grafic splom from features"""
+def graphics_splom(labels: list[str], features: np.array, file_path: str):
+    """Generate graphic splom from features"""
+    pdf_path = file_path.replace("XXX", "Splom")+".pdf"
     df = pd.DataFrame(data=features)
-    pd.plotting.scatter_matrix(df, c = labels, marker = 'o', figsize=(9,9))
-    plt.savefig(files_name.replace("XXX", "Splom")+".pdf")
+    column_packs = np.array_split(np.array(df.columns[1:]), math.ceil(len(df.columns[1:])/10))
+    total = len(column_packs)
+    labels = [int(l) for l in labels]
+    with PdfPages(pdf_path) as pdf:
+        print("Gerando gráfico "+pdf_path)
+        labels_set = set(labels)
+        colors = list(mcolors.TABLEAU_COLORS.values())[: len(labels_set)]
+        labels_color = np.array(labels, dtype=object)
+        for index, l_s in enumerate(labels_set):
+            labels_color[labels_color == l_s] = colors[index]
+        for i, pack in enumerate(column_packs):
+            image_processing.progress_bar(i, total)
+            plt.rcParams["figure.subplot.right"] = 0.8
+            pd.plotting.scatter_matrix(df[pack], color=labels_color, alpha=.7, figsize=[8, 8])
+            handles = [plt.plot([], [], ls="", color=c, alpha=.7,marker=".")[0] for c in colors]
+            plt.legend(handles, list(dict.fromkeys(labels)), loc=(1.02, 0))
+            pdf.savefig(bbox_inches='tight')
+            plt.clf()
+            plt.close()
+            break
+        print(end='\x1b[2K')  # clear progress bar
 
 
 def graphics_box2(classes: set, labels: list[str], features: np.ndarray, file_path: str):
     """Construct and save box chart to every class separate by feature"""
     pdf_path = file_path.replace("XXX", "BoxClassByFeatures")+".pdf"
-    print("Construindo "+pdf_path)
     features_len = len(features[0])
     with PdfPages(pdf_path) as pdf:
+        print("Construindo "+pdf_path)
         for index in range(features_len):
             image_processing.progress_bar(index, features_len)
             plt.clf()
@@ -74,6 +96,7 @@ def graphics_box2(classes: set, labels: list[str], features: np.ndarray, file_pa
             plt.boxplot(page_graphic)
             plt.ylabel("Característica "+str(index))
             pdf.savefig(bbox_inches='tight')
+        print(end='\x1b[2K')  # clear progress bar
 
 
 def graphics_box1(classes: set, labels: list[str], features: np.ndarray, file_path: str):
@@ -117,7 +140,7 @@ def graphics_save(files_name: str, images_features: list):
     # graphics_lines(classes, labels, features, files_name)
     # graphics_box1(classes, labels, features, files_name)
     # graphics_box2(classes, labels, features, files_name)
-    graphics_splom(classes, labels, features, files_name)
+    graphics_splom(labels, features, files_name)
 
 
 def features_save(csv_name: str, images_features: list):
