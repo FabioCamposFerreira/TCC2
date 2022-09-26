@@ -20,9 +20,11 @@ def mls_saves(ml, csv_name: str):
     """
     with open(csv_name, "+a") as csv_file:
         for method in list(ml.methods.keys()):
-            row = ('"'+ml.files_name+'"'+";"+method+";"+"accuracy_score="+str(ml.accuracy[method])+";"
-                   + '"confusion_matrix='+str(ml.confusion_matrix[method])
-                   + '";precision_score ='+str(ml.precision[method])+";"+"recall_score="+str(ml.recall[method]))
+            row = ('"' + ml.files_name.replace("XXX", "Resultados") + '"' + ";" + method + ";" + "accuracy_score="
+                   + str(ml.accuracy[method]) + ";" + '"confusion_matrix=' + str(ml.confusion_matrix[method])
+                   + '";precision_score =' + str(ml.precision[method]) + ";" + "recall_score=" + str(ml.recall[method])
+                   + ";"
+                   + "meansquare_error=" + str(ml.meansquare_error[method]))
             csv_file.write("\n"+row)
 
 
@@ -71,12 +73,11 @@ def graphics_splom(labels: list[str], features: np.array, file_path: str):
             image_processing.progress_bar(i, total)
             plt.rcParams["figure.subplot.right"] = 0.8
             pd.plotting.scatter_matrix(df[pack], color=labels_color, alpha=.7, figsize=[8, 8])
-            handles = [plt.plot([], [], ls="", color=c, alpha=.7,marker=".")[0] for c in colors]
+            handles = [plt.plot([], [], ls="", color=c, alpha=.7, marker=".")[0] for c in colors]
             plt.legend(handles, list(dict.fromkeys(labels)), loc=(1.02, 0))
             pdf.savefig(bbox_inches='tight')
             plt.clf()
             plt.close()
-            break
         print(end='\x1b[2K')  # clear progress bar
 
 
@@ -137,9 +138,9 @@ def graphics_save(files_name: str, images_features: list):
         features.append(item[1])
     features = np.array(features)
     classes = set(labels)
-    # graphics_lines(classes, labels, features, files_name)
-    # graphics_box1(classes, labels, features, files_name)
-    # graphics_box2(classes, labels, features, files_name)
+    graphics_lines(classes, labels, features, files_name)
+    graphics_box1(classes, labels, features, files_name)
+    graphics_box2(classes, labels, features, files_name)
     graphics_splom(labels, features, files_name)
 
 

@@ -25,7 +25,7 @@ def train(X, y, method_name, method, library, xml_name):
         dump(method, xml_name.replace("XXX", method_name).replace(".xml", ".joblib"))
 
 
-def MLP_create(library, mlp_layers, max_iter=300, alpha=2.5):
+def MLP_create(library, mlp_layers, alpha=2.5,betha):
     """Create and return an OpenCV MLP classifier with the given options"""
     if library == "OpenCV":
         mlp = cv.ml.ANN_MLP_create()

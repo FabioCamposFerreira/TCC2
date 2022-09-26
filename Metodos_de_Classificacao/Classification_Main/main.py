@@ -2,10 +2,11 @@
 # Contains step by step instructions for performing image processing, feature extraction, feature training and classification of unknown images
 # Several configuration options are presented at each step for later comparison
 
+from math import gamma
 from textwrap import indent
 import install_dev
 from sklearn.preprocessing import OneHotEncoder
-from sklearn.metrics import accuracy_score, precision_score, confusion_matrix, recall_score
+from sklearn.metrics import accuracy_score, precision_score, confusion_matrix, recall_score, mean_squared_error
 import numpy as np
 import matplotlib.pyplot as plt
 import time
@@ -15,6 +16,7 @@ import image_processing
 import classification
 import result_save
 import training
+import random
 
 
 class MachineLearn:
@@ -44,6 +46,7 @@ class MachineLearn:
         self.precision = {}
         self.confusion_matrix = {}
         self.recall = {}
+        self.meansquare_error = {}
         # Files with results
         self.path_output = "./Output/"
         self.path_classifiers = self.path_output+"Classifiers/"
@@ -64,10 +67,9 @@ class MachineLearn:
         self.csv_features = self.path_features+self.files_name.replace("XXX", "Características")+".csv"
         self.xml_name = self.path_classifiers+self.files_name+".xml"
         # Construct classifiers
-        self.methods = {
-            "SVM": training.SVM_create(self.parameters["library"]),
-            "KNN": training.KNN_create(self.parameters["library"], self.parameters["knn_k"]),
-            "MLP": training.MLP_create(self.parameters["library"], self.parameters["mlp_layers"])}
+        self.methods = {"SVM": training.SVM_create(self.parameters["library"]),
+                        "KNN": training.KNN_create(self.parameters["library"], self.parameters["knn_k"]),
+                        "MLP": training.MLP_create(self.parameters["library"], self.parameters["mlp_layers"])}
 
     def show(self):
         """Show the classifications parameters"""
@@ -118,7 +120,7 @@ class MachineLearn:
             print(end='\x1b[2K')  # clear progress bar
             result_save.features_save(self.csv_features, self.images_features)
             print("Salvando gráficos em "+self.path_graphics)
-        result_save.graphics_save(self.path_graphics, self.images_features)
+            result_save.graphics_save(self.path_graphics, self.images_features)
 
     def setup_train(self, X, y):
         """Do training"""
@@ -152,11 +154,25 @@ class MachineLearn:
             self.confusion_matrix[method] = confusion_matrix(classes_correct, results[:, (2*index)])
             self.recall[method] = recall_score(classes_correct, results[:, (2*index)], average="weighted",
                                                sample_weight=classes_correct, zero_division=0)
+            self.meansquare_error[method] = mean_squared_error(classes_correct, results[:, (2 * index)],
+                                                               sample_weight=classes_correct)
 
     def setup_save(self):
         """Save the results fo the labeling"""
         print("Salvando Resultados em "+self.csv_results)
         result_save.save(self.csv_results, self.methods,  np.array(self.results))
+
+    def optimization():
+        """Optimize all classifiers with your parameters range"""
+        grid_svc = {
+            "C": np.linspace(0.1, 1000, num=10, dtype=float),
+            "gamma": np.linspace(0.1, 100, num=10, dtype=float),
+            "kernel": ["linear", "poly", "rbf", "sigmoid", "chi2", "inter"],
+            "degree": np.linspace(1, 10, num=10, dtype=int)}
+        grid_knn = {"k": np.linspace(1, 100, num=10, dtype=int)}
+        grid_mlp = {"layers": [int(random.random()*300) for x in range(10)],"alpha":,"beta":
+
+                    }
 
     def run(self):
         """Do the train and classification of the database using cross validation leve-one-out"""
@@ -186,11 +202,13 @@ if __name__ == "__main__":
     mls = []
     mls += [MachineLearn(library="OpenCV", library_img="Pillow", feature="histogram",
                          data_base_path="../../Data_Base/Data_Base_Cedulas/")]
-    mls += [MachineLearn(library="scikit-learn", library_img="Pillow", feature="histogram",
-                         data_base_path="../../Data_Base/Data_Base_Cedulas/")]
+    # mls += [MachineLearn(library="scikit-learn", library_img="Pillow", feature="histogram",
+    #                      data_base_path="../../Data_Base/Data_Base_Cedulas/")]
     # Run machine learns
     for ml in mls:
+        # ml.optimization()
         ml.run()
         result_save.mls_saves(ml, ml.path_output+"MLS Results.csv")
     print(time.perf_counter(), 'segundos')
+
 # TODO: criar função para escolher os melhores parâmetros de cada classificador
