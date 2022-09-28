@@ -4,18 +4,6 @@
 from array import array
 from PIL import Image
 import cv2 as cv
-import subprocess
-
-
-def progress_bar(actual, total):
-    """Print progress bar to accompanying processing"""
-    line_width = int(subprocess.check_output("tput cols", shell=True))
-    line_structure = "[] 100%"
-    bar_len = (line_width-len(line_structure))
-    hash_quantity = int(actual/total*bar_len)
-    hyphen_quantity = bar_len-hash_quantity
-    line = "[{}] {}%".format("#"*hash_quantity+"-"*hyphen_quantity, int(actual/total*100))
-    print(line, end="\r")
 
 
 def open_image(arq, library_img, inverted=False):

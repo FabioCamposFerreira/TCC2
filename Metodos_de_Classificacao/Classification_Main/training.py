@@ -25,17 +25,18 @@ def train(X, y, method_name, method, library, xml_name):
         dump(method, xml_name.replace("XXX", method_name).replace(".xml", ".joblib"))
 
 
-def MLP_create(library, mlp_layers, alpha=2.5,betha):
+def MLP_create(mlp_layers: list, library="OpenCV", activation="sigmoid_sym", alpha=2.5, beta=1):
     """Create and return an OpenCV MLP classifier with the given options"""
     if library == "OpenCV":
+        opencv_activations = {"identity": 0, "sigmoid_sym": 1, "gaussian": 2, "relu": 3, "leakyrelu": 4}
         mlp = cv.ml.ANN_MLP_create()
         mlp.setLayerSizes(np.array(mlp_layers))
-        mlp.setActivationFunction(cv.ml.ANN_MLP_SIGMOID_SYM, alpha, 1.0)
+        mlp.setActivationFunction(opencv_activations[activation], alpha, beta)
         mlp.setTrainMethod(cv.ml.ANN_MLP_BACKPROP)
-        mlp.setTermCriteria((cv.TERM_CRITERIA_MAX_ITER + cv.TERM_CRITERIA_EPS, max_iter, 0.01))
+        mlp.setTermCriteria((cv.TERM_CRITERIA_MAX_ITER + cv.TERM_CRITERIA_EPS, 300, 0.01))
         return mlp
     elif library == "scikit-learn":
-        mlp = MLPClassifier(hidden_layer_sizes=mlp_layers[1:-1], activation="logistic", max_iter=max_iter)
+        mlp = MLPClassifier(hidden_layer_sizes=mlp_layers[1:-1], activation="logistic", max_iter=300)
         return mlp
 
 
@@ -50,13 +51,16 @@ def KNN_create(library: str, k: int):
         return knn
 
 
-def SVM_create(library, C=1):
+def SVM_create(library="OpenCV", C=1, kernel="linear", gamma=1, degree=5):
     """Create and return an OpenCV SVM classifier with the given options"""
     if library == "OpenCV":
+        opencv_kernels = {"linear": 0, "poly": 1, "rbf": 2, "sigmoid": 3, "chi2": 4, "inter": 5}
         svm = cv.ml.SVM_create()
         svm.setType(cv.ml.SVM_C_SVC)
+        svm.setKernel(opencv_kernels[kernel])
         svm.setC(C)
-        svm.setKernel(cv.ml.SVM_LINEAR)
+        svm.setGamma(gamma)
+        svm.setDegree(degree)
         return svm
     elif library == "scikit-learn":
         svm = SVC(C=C, kernel='linear')
