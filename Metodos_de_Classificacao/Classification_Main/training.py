@@ -11,7 +11,7 @@ import numpy as np
 import cv2 as cv
 
 
-def train(X, y, method_name, method, library, xml_name):
+def train(X, y, method_name, method, library, xml_name, file_save: bool):
     """Get features and class to train and save method"""
     if library == "OpenCV":
         X = np.matrix(X, dtype=np.float32)
@@ -19,10 +19,13 @@ def train(X, y, method_name, method, library, xml_name):
         if method_name == "MLP":
             y = OneHotEncoder(sparse=False, dtype=np.float32).fit_transform(y.reshape(-1, 1))
         method.train(X, cv.ml.ROW_SAMPLE, y)
-        method.save(xml_name.replace("XXX", method_name))
+        if file_save:
+            method.save(xml_name.replace("XXX", method_name))
     elif library == "scikit-learn":
         method.fit(X, y)
-        dump(method, xml_name.replace("XXX", method_name).replace(".xml", ".joblib"))
+        if file_save:
+            dump(method, xml_name.replace("XXX", method_name).replace(".xml", ".joblib"))
+    return method
 
 
 def MLP_create(mlp_layers: list, library="OpenCV", activation="sigmoid_sym", alpha=2.5, beta=1):

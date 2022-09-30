@@ -25,12 +25,11 @@ def optimization_graph(points: dict, file_path: str):
         keys are x, y and labels
     """
     source = bokeh.ColumnDataSource(points)
-    f = bokeh.figure()
-    f.circle("x", "y", source=source,  size=10)
-    labels = LabelSet(x='x', y='y', text='label', x_offset=5, y_offset=5, source=source)
-    f.add_layout(labels)
+    TOOLTIPS=[("index", "$index"),("(x,y)", "($x, $y)"),("label", "@labels"),]
+    f = bokeh.figure(sizing_mode="stretch_both", output_backend="svg", tooltips=TOOLTIPS)
+    f.circle("x", "y", source=source,  size=10, color="red")
     bokeh.output_file(file_path+'.html')
-
+    bokeh.save(f)
 
 def mls_saves(ml, csv_name: str):
     """Save accuracy of the all methods in csv of the all mls builds
@@ -66,8 +65,6 @@ def graphics_interactive(curves: list, labels: list, file_path: str):
         f.line(range(len(curve)), curve,  color=color, legend_label=label, line_width=2)
     f.legend.location = "top_right"
     f.legend.click_policy = "hide"
-    # f.output_backend = "svg"
-    # f.sizing_mode = "stretch_both"
     bokeh.output_file(file_path+".html")
     bokeh.save(f)
 

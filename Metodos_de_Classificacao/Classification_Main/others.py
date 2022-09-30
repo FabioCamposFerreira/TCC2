@@ -5,10 +5,11 @@ import time
 
 
 class ProgressBar:
-    def __init__(self, total: float):
+    def __init__(self, text: str, total: float):
         self.total = total
         self.time_before = time.time()
         self.line = ""
+        self.text = text
         self.time_delta = 0
         self.percentage_before = 0
         self.percentage_now = 0
@@ -34,7 +35,7 @@ class ProgressBar:
         self.time_delta = time_now - self.time_before
         self.time_before = time_now
 
-    def make_line(self, text: str):
+    def make_line(self):
         """Construct line"""
         line_width = int(subprocess.check_output("tput cols", shell=True))
         try:
@@ -44,26 +45,24 @@ class ProgressBar:
         except ZeroDivisionError:
             minutes = 0
             seconds = 0
-        self.line = text+" [*] {}% {} min {} s".format(int(self.percentage_now), minutes, seconds)
+        self.line = self.text+" [*] {}% {} min {} s".format(int(self.percentage_now), minutes, seconds)
         bar_len = (line_width-len(self.line))
         hash_quantity = int(self.percentage_now*bar_len/100)
         hyphen_quantity = bar_len-hash_quantity
         self.line = self.line.replace("*", "#"*hash_quantity+"-"*hyphen_quantity)
 
-    def print(self, text: str, actual: float, line=0):
+    def print(self, actual: float, line=0):
         """Print line
 
         Parameters
         ----------
-        text : str
-            _description_
         actual : float
             _description_
         line : int, optional
             -1 print in acima , 0 print in line actual, 1 print in line below , by default 0
         """
         self.update(actual)
-        self.make_line(text)
+        self.make_line()
         self.enable_print()
         if line == -1:
             self.line_up()
@@ -88,6 +87,7 @@ class ProgressBar:
 
     def end(self):
         """Always call after loop with progress_bar()"""
+        self.print(self.total)
         self.enable_print()
         # print(end='\x1b[2K') # clear line
         print()
