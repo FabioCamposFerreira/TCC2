@@ -41,10 +41,23 @@ class ProgressBar:
         try:
             time_left = int(self.time_delta/self.percentage_delta*(100-self.percentage_now))
             minutes = int(time_left/60)
+            hours = int(minutes/60)
+            minutes = minutes - hours*60
             seconds = int(time_left - minutes*60)
+            if seconds > 30:
+                seconds = 60
+            elif seconds < 30:
+                seconds = 30
         except ZeroDivisionError:
+            hours = 0
             minutes = 0
             seconds = 0
+        time = ""
+        if hours == 0:
+            time += " {} h".format(hours)
+        if minutes == 0:
+            time += " {} min".format(minutes)
+        time += " {} s".format(seconds)
         self.line = self.text+" [*] {}% {} min {} s".format(int(self.percentage_now), minutes, seconds)
         bar_len = (line_width-len(self.line))
         hash_quantity = int(self.percentage_now*bar_len/100)

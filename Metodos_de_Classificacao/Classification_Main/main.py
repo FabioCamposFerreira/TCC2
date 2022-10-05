@@ -41,6 +41,8 @@ class MachineLearn:
         # Results
         self.images_processed = []  # [[name,image],[name,image],...]
         self.images_features = []  # [[name,feature],[name,feature],...]
+        self.y = []
+        self.X = []
         self.results = []
         self.accuracy = {}
         self.precision = {}
@@ -125,6 +127,8 @@ class MachineLearn:
             result_save.features_save(self.csv_features, self.images_features)
             print("Salvando gráficos em "+self.path_graphics)
             result_save.graphics_save(self.path_graphics, self.images_features)
+        self.y = [int(row[0].split(".")[0]) for row in self.images_features]
+        self.X = [row[1] for row in self.images_features]
 
     def setup_train(self, X: list[float], y: list[int], file_save: True):
         """Do training and save classifiers in files"""
@@ -178,7 +182,7 @@ class MachineLearn:
 
     def validation_parallel(self,  X: list[list[float]], y: list[int], features_len: int):
         """Run multiples self.validation in parallel"""
-        progress_bar = others.ProgressBar("Fazendo validação cruzada",features_len)
+        progress_bar = others.ProgressBar("Fazendo validação cruzada", features_len)
         processes = []
         results = Manager().list()
         for index in range(features_len):
@@ -199,19 +203,16 @@ class MachineLearn:
             progress_bar.print(index)
             results.append(self.validation(X, y, index))
         progress_bar.end()
-        self.results = list(results)
+        return list(results)
 
-    def cross_validation(self):
+    def cross_validation(self, X, y, features_len):
         """Make cross validation one-leave-out to each method"""
-        y = [int(row[0].split(".")[0]) for row in self.images_features]
-        X = [row[1] for row in self.images_features]
-        features_len = len(self.images_features)
         print("Realizando o treinamento e classificação usando cross validation leve-one-out")
-        self.validation_parallel(X,y,features_len)
-        # self.validation_serial(X, y, features_len)
+        # self.validation_parallel(X, y, features_len)
+        return self.validation_serial(X, y, features_len)
 
     def parameters_combination(self, keys: list[str], grid: dict, parameters: dict, method: str,
-                               progress_bar: others.ProgressBar, actual: int, results: list):
+                               progress_bar: others.ProgressBar, actual: int, results: list, process_parallel: Process):
         """Recursive function that make cross validation to each combination parameters in grid"""
         try:
             for parameter in grid[keys[0]]:
@@ -233,7 +234,7 @@ class MachineLearn:
                                                            activation=parameters["activation"],
                                                            alpha=parameters["alpha"],
                                                            beta=parameters["beta"])}
-            self.cross_validation()
+            process_parallel.append(Process(target=self.cross_validation, args=(self.X, self.y, len(self.images_features))))
             self.setup_metrics()
             results['x'].append(self.accuracy[method])
             results['y'].append(self.precision[method])
@@ -250,8 +251,12 @@ class MachineLearn:
             total *= len(grid[key])
         print("\n")  # to progress bar not bug
         progress_bar = others.ProgressBar("Otimizando "+method, total)
+        process_parallel = None
         self.parameters_combination(keys=list(grid.keys()), grid=grid, parameters={}, method=method,
-                                    progress_bar=progress_bar, actual=0, results=results)
+                                    progress_bar=progress_bar, actual=0, results=results, process_parallel)
+        for p in process_parallel:
+            p.join()
+
         progress_bar.end()
         result_save.optimization_graph(results, self.path_graphics.replace("XXX", "".join((method, "_otimização"))))
 
@@ -288,14 +293,16 @@ class MachineLearn:
                         "beta": np.linspace(first_beta, 100, num=quantity_beta, dtype=float)}
 
             self.method_optimization(grid_mlp, "MLP")
-        # TODO: save results inf graph accuracy by precision score interactive
-        # TODO:Reset self.methods
+        self.__init__(self.parameters["library"],           # Reset machine learn
+                      self.parameters["library_img"],
+                      self.parameters["feature"],
+                      self.parameters["data_base_path"])
 
     def run(self):
         """Do the train and classification of the database using cross validation leve-one-out"""
         self.show()
         self.setup_feature()
-        self.cross_validation()
+        self.results.append(self.cross_validation(self.X, self.y, len(self.images_features)))
         self.setup_save()
         self.setup_metrics()
 
@@ -317,13 +324,12 @@ if __name__ == "__main__":
     # Run machine learns
     for ml in mls:
         if 1:  # otimization
-            ml.optimization(
-                method="MLP", activation=["sigmoid_sym", "gaussian", "relu", "leakyrelu"],
-                quantity_layers=1, quantity_insidelayers=1, range_layer=10, quantity_alpha=1, first_alpha=2.5,
-                quantity_beta=1, first_beta=1e-2)
-            ml.optimization(method="SVM", quantity_C=1, first_C=0.1, quantity_gamma=1, first_gamma=0.1,
+            # ml.optimization(method="MLP", activation=["sigmoid_sym", "gaussian", "relu", "leakyrelu"],
+            #                 quantity_layers=1, quantity_insidelayers=1, range_layer=10, quantity_alpha=1,
+            #                 first_alpha=2.5, quantity_beta=1, first_beta=1e-2)
+            ml.optimization(method="SVM", quantity_C=10, first_C=0.1, quantity_gamma=10, first_gamma=0.1,
                             quantity_degree=1, first_degree=1)
-            ml.optimization(method="KNN", quantity_k=5, first_k=1, last_k=10)
+            # ml.optimization(method="KNN", quantity_k=5, first_k=1, last_k=10)
         else:
             ml.run()
             result_save.mls_saves(ml, ml.path_output+"MLS Results.csv")
