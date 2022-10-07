@@ -2,9 +2,7 @@
 # Contains step by step instructions for performing image processing, feature extraction, feature training and classification of unknown images
 # Several configuration options are presented at each step for later comparison
 
-from matplotlib.pyplot import pause
 from sklearn.metrics import accuracy_score, precision_score, confusion_matrix, recall_score, mean_squared_error
-from typing import Type
 import numpy as np
 import install_dev
 import time
@@ -182,7 +180,7 @@ class MachineLearn:
 
     def validation_parallel(self,  X: list[list[float]], y: list[int], features_len: int):
         """Run multiples self.validation in parallel"""
-        progress_bar = others.ProgressBar("Fazendo validação cruzada", features_len)
+        progress_bar = others.ProgressBar("Fazendo validação cruzada", features_len, 0)
         processes = []
         results = Manager().list()
         for index in range(features_len):
@@ -197,29 +195,43 @@ class MachineLearn:
 
     def validation_serial(self,  X: list[list[float]], y: list[int], features_len: int):
         """Run multiples self.validation in serial"""
-        progress_bar = others.ProgressBar("Fazendo validação cruzada", features_len)
+        progress_bar = others.ProgressBar("Fazendo validação cruzada", features_len, 0)
         results = []
         for index in range(features_len):
             progress_bar.print(index)
             results.append(self.validation(X, y, index))
         progress_bar.end()
-        return list(results)
+        self.results = list(results)
 
-    def cross_validation(self, X, y, features_len):
+    def cross_validation(self, X, y, features_len, parallel: bool = True):
         """Make cross validation one-leave-out to each method"""
-        print("Realizando o treinamento e classificação usando cross validation leve-one-out")
-        # self.validation_parallel(X, y, features_len)
-        return self.validation_serial(X, y, features_len)
+        if 0:
+            print("Realizando o treinamento e classificação usando cross validation leve-one-out")
+        if parallel == True:
+            self.validation_parallel(X, y, features_len)
+        else:
+            self.validation_serial(X, y, features_len)
+
+    def cross_validation_parallel(self, X, y, features_len, method, parameters, results_xylabel):
+        """Call self.cross validation to run in parallel form"""
+        self.cross_validation(X, y, features_len, False)
+        self.setup_metrics()
+        results_xylabel['x'] += [self.accuracy[method]]
+        results_xylabel['y'] += [self.precision[method]]
+        results_xylabel['labels'] += [str(parameters)]
 
     def parameters_combination(self, keys: list[str], grid: dict, parameters: dict, method: str,
-                               progress_bar: others.ProgressBar, actual: int, results: list, process_parallel: Process):
+                               progress_bar: others.ProgressBar, actual: int, results_xylabel: list,
+                               process_parallel: Process = None) -> int:
         """Recursive function that make cross validation to each combination parameters in grid"""
         try:
             for parameter in grid[keys[0]]:
                 parameters[keys[0]] = parameter
-                actual = self.parameters_combination(keys[1:], grid, parameters, method, progress_bar, actual, results)
+                actual = self.parameters_combination(keys[1:], grid, parameters, method, progress_bar, actual,
+                                                     results_xylabel, process_parallel)
         except IndexError:
-            progress_bar.print(actual, line=-1)
+            if process_parallel == None:
+                progress_bar.print(actual, line=-1)
             if method == "SVM":
                 self.methods = {"SVM": training.SVM_create(self.parameters["library"],
                                                            C=parameters["C"],
@@ -234,42 +246,51 @@ class MachineLearn:
                                                            activation=parameters["activation"],
                                                            alpha=parameters["alpha"],
                                                            beta=parameters["beta"])}
-            process_parallel.append(Process(target=self.cross_validation, args=(self.X, self.y, len(self.images_features))))
-            self.setup_metrics()
-            results['x'].append(self.accuracy[method])
-            results['y'].append(self.precision[method])
-            results['labels'].append(str(parameters))
+            if process_parallel != None:
+                p = Process(target=self.cross_validation_parallel, args=(self.X, self.y, len(self.images_features),
+                                                                         method, parameters, results_xylabel))
+                process_parallel.append(p)
+                p.start()
+            else:
+                self.cross_validation_parallel(self.X, self.y, len(self.images_features), method, parameters,
+                                               results_xylabel)
             return actual+1
         return actual
 
-    def method_optimization(self, grid: dict, method: str):
+    def method_optimization(self, grid: dict, method: str, parallel: bool = True):
         """Optimize method and save results in graphic"""
-        results = {"x": [], "y": [], "labels": []}
+        results_xylabel = Manager().dict({"x": [], "y": [], "labels": []})
         print("Otimizando {}: ".format(method)+str(grid).replace("{", "").replace("}", ""))
         total = 1
         for key in grid.keys():
             total *= len(grid[key])
         print("\n")  # to progress bar not bug
-        progress_bar = others.ProgressBar("Otimizando "+method, total)
-        process_parallel = None
-        self.parameters_combination(keys=list(grid.keys()), grid=grid, parameters={}, method=method,
-                                    progress_bar=progress_bar, actual=0, results=results, process_parallel)
-        for p in process_parallel:
-            p.join()
-
+        progress_bar = others.ProgressBar("Otimizando "+method, total, -1)
+        if parallel == True:
+            process_parallel = []
+            self.parameters_combination(keys=list(grid.keys()),
+                                        grid=grid, parameters={},
+                                        method=method, progress_bar=None, actual=0, results_xylabel=results_xylabel,
+                                        process_parallel=process_parallel)
+            for index, p in enumerate(process_parallel):
+                progress_bar.print(index)
+                p.join()
         progress_bar.end()
-        result_save.optimization_graph(results, self.path_graphics.replace("XXX", "".join((method, "_otimização"))))
+        result_save.optimization_graph(dict(results_xylabel),
+                                       self.path_graphics.replace("XXX", "".join((method, "_otimização"))))
 
-    def optimization(self, method: str, quantity_C=10, first_C=0.1, quantity_gamma=10, first_gamma=0.1,
-                     quantity_degree=10, first_degree=1, quantity_k=100, first_k=1, last_k=100,
-                     activation=["identity", "sigmoid_sym", "gaussian", "relu", "leakyrelu"],
-                     quantity_layers=10, quantity_insidelayers=1, range_layer=10, quantity_alpha=10, first_alpha=1e-6,
-                     quantity_beta=10, first_beta=1e-2):
+    def optimization(
+            self, method: str, svm_kernels=["linear", "poly", "rbf", "sigmoid", "chi2", "inter"],
+            quantity_C=10, first_C=0.1, quantity_gamma=10, first_gamma=0.1, quantity_degree=10, first_degree=1,
+            quantity_k=100, first_k=1, last_k=100,
+            activation=["identity", "sigmoid_sym", "gaussian", "relu", "leakyrelu"],
+            quantity_layers=10, quantity_insidelayers=1, range_layer=10, quantity_alpha=10, first_alpha=1e-6,
+            quantity_beta=10, first_beta=1e-2):
         """Optimize classifier selected with your parameters range"""
         self.setup_feature()
         print("Começando processo de otimização...")
         if method == "SVM":
-            grid_svc = {"kernel": ["linear", "poly", "rbf", "sigmoid", "chi2", "inter"],
+            grid_svc = {"kernel": svm_kernels,
                         "gamma": np.linspace(first_gamma, 100, num=quantity_gamma, dtype=float),
                         "C": np.linspace(first_C, 1000, num=quantity_C, dtype=float),
                         "degree": np.linspace(first_degree, 10, num=quantity_degree, dtype=int)}
@@ -280,6 +301,7 @@ class MachineLearn:
         elif method == "MLP":
             layers = []
             for _ in range(quantity_layers):
+
                 layer_inside = [self.parameters["mlp_layers"][0],
                                 [int(random.random() * range_layer) for _ in range(quantity_insidelayers)],
                                 self.parameters["mlp_layers"][-1]]
@@ -302,7 +324,7 @@ class MachineLearn:
         """Do the train and classification of the database using cross validation leve-one-out"""
         self.show()
         self.setup_feature()
-        self.results.append(self.cross_validation(self.X, self.y, len(self.images_features)))
+        self.results.append(self.cross_validation(self.X, self.y, len(self.images_features), False))
         self.setup_save()
         self.setup_metrics()
 
@@ -327,8 +349,9 @@ if __name__ == "__main__":
             # ml.optimization(method="MLP", activation=["sigmoid_sym", "gaussian", "relu", "leakyrelu"],
             #                 quantity_layers=1, quantity_insidelayers=1, range_layer=10, quantity_alpha=1,
             #                 first_alpha=2.5, quantity_beta=1, first_beta=1e-2)
-            ml.optimization(method="SVM", quantity_C=10, first_C=0.1, quantity_gamma=10, first_gamma=0.1,
-                            quantity_degree=1, first_degree=1)
+            ml.optimization(method="SVM", svm_kernels=["linear", "poly", "rbf", "sigmoid", "chi2", "inter"],
+                            quantity_C=1, first_C=0.1, quantity_gamma=1, first_gamma=0.1, quantity_degree=1,
+                            first_degree=1)
             # ml.optimization(method="KNN", quantity_k=5, first_k=1, last_k=10)
         else:
             ml.run()

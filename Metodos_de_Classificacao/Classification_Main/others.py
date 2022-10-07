@@ -5,10 +5,11 @@ import time
 
 
 class ProgressBar:
-    def __init__(self, text: str, total: float):
+    def __init__(self, text: str, total: float, line_position: int):
         self.total = total
         self.time_before = time.time()
         self.line = ""
+        self.line_position = line_position
         self.text = text
         self.time_delta = 0
         self.percentage_before = 0
@@ -64,7 +65,7 @@ class ProgressBar:
         hyphen_quantity = bar_len-hash_quantity
         self.line = self.line.replace("*", "#"*hash_quantity+"-"*hyphen_quantity)
 
-    def print(self, actual: float, line=0):
+    def print(self, actual: float):
         """Print line
 
         Parameters
@@ -76,19 +77,19 @@ class ProgressBar:
         """
         self.update(actual)
         self.make_line()
-        self.enable_print()
-        if line == -1:
+        # self.enable_print()
+        if self.line_position == -1:
             self.line_up()
             self.line_up()
             print(self.line, end="\r")
             self.line_down()
-        elif line == 0:
+        elif self.line_position == 0:
             print(self.line, end="\r")
-        elif line == 1:
+        elif self.line_position == 1:
             self.line_down()
             print(self.line, end="\r")
             self.line_up()
-        self.block_print()
+        # self.block_print()
 
     def block_print(self):
         """Not run prints"""
@@ -101,6 +102,6 @@ class ProgressBar:
     def end(self):
         """Always call after loop with progress_bar()"""
         self.print(self.total)
-        self.enable_print()
+        # self.enable_print()
         # print(end='\x1b[2K') # clear line
         print()
