@@ -1,7 +1,10 @@
-# Author: Fábio Campos Ferreira
-# Contains step by step instructions for performing image processing, feature extraction, feature training and classification of unknown images
-# Several configuration options are presented at each step for later comparison
-
+"""
+main.py
+====================================
+Author: Fábio Campos Ferreira
+Contains step by step instructions for performing image processing, feature extraction, feature training and classification of unknown images
+Several configuration options are presented at each step for later comparison
+"""
 from sklearn.metrics import accuracy_score, precision_score, confusion_matrix, recall_score, mean_squared_error
 import numpy as np
 import install_dev
@@ -329,33 +332,31 @@ class MachineLearn:
         self.setup_metrics()
 
 
+def mls_optimate(mls):
+    """Run code to generate optimization graphic"""
+    for ml in mls:
+        # ml.optimization(method="MLP", activation=["sigmoid_sym", "gaussian", "relu", "leakyrelu"],
+        #                 quantity_layers=1, quantity_insidelayers=1, range_layer=10, quantity_alpha=1,
+        #                 first_alpha=2.5, quantity_beta=1, first_beta=1e-2)
+        ml.optimization(method="SVM", svm_kernels=["linear", "poly", "rbf", "sigmoid", "chi2", "inter"],
+                        quantity_C=1, first_C=0.1, quantity_gamma=1, first_gamma=0.1, quantity_degree=1,
+                        first_degree=1)
+        # ml.optimization(method="KNN", quantity_k=5, first_k=1, last_k=10)
+
+
+def mls_start(mls):
+    """Run code to generate results to each ml"""
+    for ml in mls:
+        ml.run()
+        result_save.mls_saves(ml, ml.path_output+"MLS Results.csv")
+
+
 if __name__ == "__main__":
-    """
-    Library: OpenCV,scikit-learn
-    Library_img: Pillow
-    Features: histogram
-    data_base_path: images have name with class "className.*". Ex.: 1.1.png
-    knn_k: any int >=1
-    """
     mls = []
     mls += [MachineLearn(library="OpenCV", library_img="Pillow", feature="histogram",
                          data_base_path="../../Data_Base/Data_Base_Cedulas/")]
     if 0:
         mls += [MachineLearn(library="scikit-learn", library_img="Pillow", feature="histogram",
                              data_base_path="../../Data_Base/Data_Base_Cedulas/")]
-    # Run machine learns
-    for ml in mls:
-        if 1:  # otimization
-            # ml.optimization(method="MLP", activation=["sigmoid_sym", "gaussian", "relu", "leakyrelu"],
-            #                 quantity_layers=1, quantity_insidelayers=1, range_layer=10, quantity_alpha=1,
-            #                 first_alpha=2.5, quantity_beta=1, first_beta=1e-2)
-            ml.optimization(method="SVM", svm_kernels=["linear", "poly", "rbf", "sigmoid", "chi2", "inter"],
-                            quantity_C=1, first_C=0.1, quantity_gamma=1, first_gamma=0.1, quantity_degree=1,
-                            first_degree=1)
-            # ml.optimization(method="KNN", quantity_k=5, first_k=1, last_k=10)
-        else:
-            ml.run()
-            result_save.mls_saves(ml, ml.path_output+"MLS Results.csv")
+    mls_optimate(mls)
     print(time.perf_counter(), 'segundos')
-
-# TODO: criar função para escolher os melhores parâmetros de cada classificador

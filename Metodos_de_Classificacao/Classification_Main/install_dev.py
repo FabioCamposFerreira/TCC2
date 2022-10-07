@@ -24,5 +24,6 @@ try:
     import joblib
     import scipy
     import bokeh
+
 except:
     packages_install()

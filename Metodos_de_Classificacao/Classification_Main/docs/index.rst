@@ -3,15 +3,19 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to main's documentation!
+Welcome to Classification's documentation!
 ================================
-
-.. automodule:: main
-    :members:
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :caption: 
+   main
+   image_processing
+   feature_extraction
+   training
+   classification
+   others
+   
 
 
 
