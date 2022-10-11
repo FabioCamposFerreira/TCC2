@@ -5,6 +5,7 @@ Author: Fábio Campos Ferreira
 Contains step by step instructions for performing image processing, feature extraction, feature training and classification of unknown images
 Several configuration options are presented at each step for later comparison
 """
+from pyexpat import features
 from sklearn.metrics import accuracy_score, precision_score, confusion_matrix, recall_score, mean_squared_error
 import numpy as np
 import install_dev
@@ -24,6 +25,8 @@ class MachineLearn:
     def __init__(self, library: str, library_img: str, feature: str, data_base_path: str, knn_k=3, mlp_layers=[10]):
         self.data_base = os.listdir(data_base_path)
         self.data_base.sort()
+        if feature == "histogram" or feature == "histogram_filter":
+            layer_first = 256
         self.parameters = {
             # Global
             "data_base_path": data_base_path,
@@ -35,7 +38,7 @@ class MachineLearn:
             "knn_k": knn_k,
             # To MLP
             "mlp_layers": (  # [fist layer]+[middle layers]+[last layers]
-                [256 if feature == "histogram" else None]
+                [layer_first]
                 + mlp_layers
                 + [len(list(dict.fromkeys([arq.split(".")[0] for arq in self.data_base])))])
         }
@@ -89,11 +92,11 @@ class MachineLearn:
     def setup_images(self):
         """Do image processing"""
         print("Realizando o processamento das imagens")
-        total = len(self.data_base)
         actual = 0
+        progress_bar = others.ProgressBar("Processando imagens ",len(self.data_base),0)
         for arq in self.data_base:
             actual += 1
-            image_processing.progress_bar(actual, total)
+            progress_bar.print(actual)
             self.images_processed.append(
                 [arq, image_processing.open_image(
                     self.parameters["data_base_path"]
@@ -104,7 +107,7 @@ class MachineLearn:
                      self.parameters["data_base_path"]+arq,
                      self.parameters["library_img"],
                      inverted=True)])
-        print(end='\x1b[2K')  # clear progress bar
+        progress_bar.end()
 
     def setup_feature(self):
         """Do feature extraction"""
@@ -114,20 +117,20 @@ class MachineLearn:
             self.images_features = []
             self.setup_images()
             print("Extraindo as características")
-            total = len(self.images_processed)
             actual = 0
+            progress_bar = others.ProgressBar("Extraindo "+self.parameters["feature"], len(self.images_processed),0)
             for img in self.images_processed:
                 actual += 1
-                image_processing.progress_bar(actual, total)
+                progress_bar.print(actual)
                 self.images_features.append(
                     [img[0], feature_extraction.get_features(
                         img[1],
                         self.parameters["feature"],
                         self.parameters["library_img"])])
-            print(end='\x1b[2K')  # clear progress bar
+            progress_bar.end()
             result_save.features_save(self.csv_features, self.images_features)
             print("Salvando gráficos em "+self.path_graphics)
-            result_save.graphics_save(self.path_graphics, self.images_features)
+        result_save.graphics_save(self.path_graphics, self.images_features)
         self.y = [int(row[0].split(".")[0]) for row in self.images_features]
         self.X = [row[1] for row in self.images_features]
 
@@ -335,13 +338,13 @@ class MachineLearn:
 def mls_optimate(mls):
     """Run code to generate optimization graphic"""
     for ml in mls:
-        # ml.optimization(method="MLP", activation=["sigmoid_sym", "gaussian", "relu", "leakyrelu"],
-        #                 quantity_layers=1, quantity_insidelayers=1, range_layer=10, quantity_alpha=1,
-        #                 first_alpha=2.5, quantity_beta=1, first_beta=1e-2)
+        ml.optimization(method="MLP", activation=["sigmoid_sym", "gaussian", "relu", "leakyrelu"],
+                        quantity_layers=1, quantity_insidelayers=1, range_layer=10, quantity_alpha=1,
+                        first_alpha=2.5, quantity_beta=1, first_beta=1e-2)
         ml.optimization(method="SVM", svm_kernels=["linear", "poly", "rbf", "sigmoid", "chi2", "inter"],
                         quantity_C=1, first_C=0.1, quantity_gamma=1, first_gamma=0.1, quantity_degree=1,
                         first_degree=1)
-        # ml.optimization(method="KNN", quantity_k=5, first_k=1, last_k=10)
+        ml.optimization(method="KNN", quantity_k=5, first_k=1, last_k=10)
 
 
 def mls_start(mls):
@@ -353,10 +356,11 @@ def mls_start(mls):
 
 if __name__ == "__main__":
     mls = []
-    mls += [MachineLearn(library="OpenCV", library_img="Pillow", feature="histogram",
+    mls += [MachineLearn(library="OpenCV", library_img="Pillow", feature="histogram_filter",
                          data_base_path="../../Data_Base/Data_Base_Cedulas/")]
     if 0:
         mls += [MachineLearn(library="scikit-learn", library_img="Pillow", feature="histogram",
                              data_base_path="../../Data_Base/Data_Base_Cedulas/")]
-    mls_optimate(mls)
+    # mls_optimate(mls)
+    mls_start(mls)
     print(time.perf_counter(), 'segundos')
