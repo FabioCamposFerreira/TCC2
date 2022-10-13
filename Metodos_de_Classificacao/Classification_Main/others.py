@@ -1,7 +1,24 @@
-import sys
 import os
 import subprocess
+import sys
 import time
+
+
+class TimeConversion():
+    def __init__(self, seconds) -> None:
+        self.minutes = int(seconds/60)
+        self.hours = int(self.minutes/60)
+        self.minutes = self.minutes - self.hours*60
+        self.seconds = int(seconds - self.minutes*60)
+        self.time_formatted = ""
+        if self.hours == 0:
+            self.time_formatted += " {} h".format(self.hours)
+        if self.minutes == 0:
+            self.time_formatted += " {} min".format(self.minutes)
+        self.time_formatted += " {} s".format(seconds)
+
+    def __repr__(self):
+        return self.time_formatted
 
 
 class ProgressBar:
@@ -40,26 +57,10 @@ class ProgressBar:
         """Construct line"""
         line_width = int(subprocess.check_output("tput cols", shell=True))
         try:
-            time_left = int(self.time_delta/self.percentage_delta*(100-self.percentage_now))
-            minutes = int(time_left/60)
-            hours = int(minutes/60)
-            minutes = minutes - hours*60
-            seconds = int(time_left - minutes*60)
-            if seconds > 30:
-                seconds = 60
-            elif seconds < 30:
-                seconds = 30
+            time_formated = TimeConversion(int(self.time_delta / self.percentage_delta*(100-self.percentage_now)))
         except ZeroDivisionError:
-            hours = 0
-            minutes = 0
-            seconds = 0
-        time = ""
-        if hours == 0:
-            time += " {} h".format(hours)
-        if minutes == 0:
-            time += " {} min".format(minutes)
-        time += " {} s".format(seconds)
-        self.line = self.text+" [*] {}% {} min {} s".format(int(self.percentage_now), minutes, seconds)
+            time_formated = "0 s"
+        self.line = self.text+" [*] {}% {}".format(int(self.percentage_now), time_formated)
         bar_len = (line_width-len(self.line))
         hash_quantity = int(self.percentage_now*bar_len/100)
         hyphen_quantity = bar_len-hash_quantity

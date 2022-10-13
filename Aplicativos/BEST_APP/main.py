@@ -40,6 +40,8 @@ class ScreenCamera(Screen):
             valor.color = (1, 1, 0, 1)
         else:
             valor.color = (1, 1, 0, 0)
+        print("classificou...")
+        exit()
 
 
 class TelaDeConfiguracao(Screen):

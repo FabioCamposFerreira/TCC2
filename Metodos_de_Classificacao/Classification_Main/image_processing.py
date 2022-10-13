@@ -1,8 +1,8 @@
 # Author: Fábio Campos Ferreira
 # Contain modules for image processing
 # In general, the modules open the images from the database, process the images, the result is sent to be used by the modules of feature_extraction.py
-from PIL import Image
 import cv2 as cv
+from PIL import Image
 
 
 def open_image(arq, library_img, inverted=False):

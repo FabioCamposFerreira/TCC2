@@ -23,7 +23,7 @@ def histogram_filter(im, library_img: str):
         im = np.vstack(im)
         im = im[(im[:, 1] > 255-255*saturation_tolerance) & (im[:, 2] > 255/2-255/2*value_tolerance) &
                 (im[:, 2] < 255/2+255/2*value_tolerance)]
-        return np.histogram(im[:, 0], bins=range(256))[0]
+        return np.histogram(im[:, 0], bins=range(256+1))[0]
 
 
 def normalize(list_):
@@ -31,7 +31,9 @@ def normalize(list_):
     x_max = max(list_)
     x_min = min(list_)
     difference = x_max-x_min
-    return [(x-x_min)/(difference) if difference else 0 for x in list_]
+    if not difference:
+        raise Exception("Extract feature is a string of zeros")
+    return [(x-x_min)/(difference) for x in list_]
 
 
 def get_features(im, feature, library_img):

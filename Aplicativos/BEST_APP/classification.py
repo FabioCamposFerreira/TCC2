@@ -1,10 +1,13 @@
 # Author: Fábio Campos Ferreira
 #
 
-import image_processing
+import csv
+import time
+
 import numpy as np
 import cv2 as cv
 
+import image_processing
 
 def classify(im):
     """Extract image pattern
@@ -19,6 +22,11 @@ def classify(im):
     """
     classifier = "SVM"
     pattern = get_pattern(im)
+    with open("".join(("Pattern",str(time.time()),".csv")), "w") as f:
+        writer = csv.writer(f)
+        writer.writerow("Características")
+        writer.writerow(pattern)
+
     pattern = np.matrix(pattern, dtype=np.float32)
     clsf = read_object(classifier+".xml")
     y = clsf.predict(pattern)[1][0][0]

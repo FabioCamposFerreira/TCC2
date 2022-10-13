@@ -1,3 +1,5 @@
+import time
+
 from PIL import Image
 
 
@@ -32,6 +34,7 @@ def process_image(im):
     if l < h:
         im = im.rotate(angle=90, resample=0, expand=True)
     im = im.resize((720, 576), resample=Image.BICUBIC)
+    im.convert("RGB").save("".join(("Imagem Processada",str(time.time()),".png")))
     return im
 
 
@@ -46,4 +49,5 @@ def process_texture(texture):
     """
 
     im = Image.frombytes('RGBA', texture.size, texture.pixels)
+    im.convert("RGB").save("".join(("Imagem Capturada",str(time.time()),".png")))
     return process_image(im)

@@ -5,20 +5,22 @@ Author: Fábio Campos Ferreira
 Contains step by step instructions for performing image processing, feature extraction, feature training and classification of unknown images
 Several configuration options are presented at each step for later comparison
 """
-from pyexpat import features
-from sklearn.metrics import accuracy_score, precision_score, confusion_matrix, recall_score, mean_squared_error
-import numpy as np
-import install_dev
-import time
 import os
+import random
+import time
+from multiprocessing import Manager, Process
+
+import numpy as np
+from sklearn.metrics import (accuracy_score, confusion_matrix,
+                             mean_squared_error, precision_score, recall_score)
+
+import classification
 import feature_extraction
 import image_processing
-from multiprocessing import Process, Manager
-import classification
+import install_dev
+import others
 import result_save
 import training
-import random
-import others
 
 
 class MachineLearn:
@@ -93,7 +95,7 @@ class MachineLearn:
         """Do image processing"""
         print("Realizando o processamento das imagens")
         actual = 0
-        progress_bar = others.ProgressBar("Processando imagens ",len(self.data_base),0)
+        progress_bar = others.ProgressBar("Processando imagens ", len(self.data_base), 0)
         for arq in self.data_base:
             actual += 1
             progress_bar.print(actual)
@@ -118,15 +120,18 @@ class MachineLearn:
             self.setup_images()
             print("Extraindo as características")
             actual = 0
-            progress_bar = others.ProgressBar("Extraindo "+self.parameters["feature"], len(self.images_processed),0)
+            progress_bar = others.ProgressBar("Extraindo "+self.parameters["feature"], len(self.images_processed), 0)
             for img in self.images_processed:
                 actual += 1
                 progress_bar.print(actual)
-                self.images_features.append(
-                    [img[0], feature_extraction.get_features(
-                        img[1],
-                        self.parameters["feature"],
-                        self.parameters["library_img"])])
+                try:
+                    self.images_features.append(
+                        [img[0], feature_extraction.get_features(
+                            img[1],
+                            self.parameters["feature"],
+                            self.parameters["library_img"])])
+                except:
+                    pass
             progress_bar.end()
             result_save.features_save(self.csv_features, self.images_features)
             print("Salvando gráficos em "+self.path_graphics)
@@ -363,4 +368,4 @@ if __name__ == "__main__":
                              data_base_path="../../Data_Base/Data_Base_Cedulas/")]
     # mls_optimate(mls)
     mls_start(mls)
-    print(time.perf_counter(), 'segundos')
+    print("".join(("Tempo de execução:",str(others.TimeConversion(time.perf_counter())))))
