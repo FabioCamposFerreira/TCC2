@@ -11,7 +11,7 @@ import training
 def labeling(X: list, y_full: list, method_name: str,  library: str, xml_name: str, method) -> int:
     """Receives feature, classifier name, library to use  and return list class predictions"""
     if library == "OpenCV":
-        if method == None:
+        if method == []:
             if method_name == "SVM":
                 method = cv.ml_SVM.load(xml_name.replace("XXX", method_name))
             if method_name == "MLP":

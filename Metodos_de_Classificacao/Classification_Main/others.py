@@ -11,11 +11,11 @@ class TimeConversion():
         self.minutes = self.minutes - self.hours*60
         self.seconds = int(seconds - self.minutes*60)
         self.time_formatted = ""
-        if self.hours == 0:
+        if self.hours != 0:
             self.time_formatted += " {} h".format(self.hours)
-        if self.minutes == 0:
+        if self.minutes != 0:
             self.time_formatted += " {} min".format(self.minutes)
-        self.time_formatted += " {} s".format(seconds)
+        self.time_formatted += " {} s".format(self.seconds)
 
     def __repr__(self):
         return self.time_formatted

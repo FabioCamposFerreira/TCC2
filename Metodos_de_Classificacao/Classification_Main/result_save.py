@@ -64,7 +64,7 @@ def features_open(file_name):
 
 def add_hue_bar(f:bokeh.figure):
     """Add in graphic from bokeh bar with hue spectrum"""
-    x = list(range(256))
+    x = [r/10 for r in range(256)]
     y = [-1 for _ in range(256)]
     hsv = [np.uint8([[[hue, 255, int(255/2)]]]) for hue in range(256)]
     rgb = [cv.cvtColor(hsv_one, cv.COLOR_HSV2RGB_FULL)[0][0] for hsv_one in hsv]

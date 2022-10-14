@@ -2,12 +2,11 @@
 #
 
 import csv
-import time
 
 import numpy as np
 import cv2 as cv
 
-import image_processing
+import feature_extraction
 
 def classify(im):
     """Extract image pattern
@@ -21,11 +20,11 @@ def classify(im):
             The class label or None
     """
     classifier = "SVM"
-    pattern = get_pattern(im)
-    with open("".join(("Pattern",str(time.time()),".csv")), "w") as f:
-        writer = csv.writer(f)
-        writer.writerow("Características")
-        writer.writerow(pattern)
+    pattern = feature_extraction.get_pattern(im)
+    # with open("".join(("Pattern", ".csv")), "w") as f:
+    #     writer = csv.writer(f)
+    #     writer.writerow("Características")
+    #     writer.writerow(pattern)
 
     pattern = np.matrix(pattern, dtype=np.float32)
     clsf = read_object(classifier+".xml")
@@ -37,20 +36,6 @@ def classify(im):
     # else:
     #     y = None
     return y
-
-
-def get_pattern(im):
-    """Extract image pattern
-
-    Args:
-        im: 
-            pillow Image
-
-    Returns:
-        : list
-            The patterns
-    """
-    return image_processing.histogram(im)
 
 
 def read_object(arq):

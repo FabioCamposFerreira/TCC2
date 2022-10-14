@@ -29,6 +29,8 @@ class MachineLearn:
         self.data_base.sort()
         if feature == "histogram" or feature == "histogram_filter":
             layer_first = 256
+        elif "_".join(feature.split("_")[0:2]) == "histogram_reduce":
+            layer_first = int(feature.split("_")[-1])
         self.parameters = {
             # Global
             "data_base_path": data_base_path,
@@ -135,7 +137,7 @@ class MachineLearn:
             progress_bar.end()
             result_save.features_save(self.csv_features, self.images_features)
             print("Salvando gráficos em "+self.path_graphics)
-        result_save.graphics_save(self.path_graphics, self.images_features)
+            result_save.graphics_save(self.path_graphics, self.images_features)
         self.y = [int(row[0].split(".")[0]) for row in self.images_features]
         self.X = [row[1] for row in self.images_features]
 
@@ -148,8 +150,10 @@ class MachineLearn:
                                                 self.xml_name, file_save)
         return classifier
 
-    def labeling(self, X: str, y_correct: int, y_full: list, img_name: str, classifier):
+    def labeling(self, X: str, y_correct: int, y_full: list, img_name: str, classifier: dict = {}):
         """Do labeling and update results"""
+        if classifier == {}:
+            classifier = dict.fromkeys(self.methods.keys(), [])
         result = [img_name, y_correct]
         for method in self.methods:
             start_time = time.time()
@@ -181,9 +185,10 @@ class MachineLearn:
         print("Salvando Resultados em "+self.csv_results)
         result_save.save(self.csv_results, self.methods,  np.array(self.results))
 
-    def validation(self, X: list[list[float]], y: list[int], index: int, results: dict = None):
+    def validation(self, X: list[list[float]], y: list[int], index: int,
+                   results: dict = None, classifier_save: bool = False):
         """Train and classify data to one validation in cross validation"""
-        classifier = self.setup_train(X[:index]+X[index+1:], y[:index]+y[index+1:], file_save=False)
+        classifier = self.setup_train(X[:index]+X[index+1:], y[:index]+y[index+1:], file_save=classifier_save)
         if results == None:
             return self.labeling(X[index], y[index], y, self.images_features[index][0], classifier=classifier)
         else:
@@ -195,7 +200,7 @@ class MachineLearn:
         processes = []
         results = Manager().list()
         for index in range(features_len):
-            p = Process(target=self.validation, args=(X, y, index, results))
+            p = Process(target=self.validation, args=(X, y, index, results, False))
             processes.append(p)
             p.start()
         for index, process in enumerate(processes):  # waiting finish all process
@@ -210,7 +215,7 @@ class MachineLearn:
         results = []
         for index in range(features_len):
             progress_bar.print(index)
-            results.append(self.validation(X, y, index))
+            results.append(self.validation(X, y, index, classifier_save=True))
         progress_bar.end()
         self.results = list(results)
 
@@ -331,6 +336,16 @@ class MachineLearn:
                       self.parameters["feature"],
                       self.parameters["data_base_path"])
 
+    def labeling_only(self):
+        """Da labeling of the database with train classifier """
+        self.show()
+        self.setup_feature()
+        for index in range(len(self.images_features)):
+            self.results.append(self.labeling(self.X[index], self.y[index],
+                                self.y, self.images_features[index][0]))
+        self.setup_save()
+        self.setup_metrics()
+
     def run(self):
         """Do the train and classification of the database using cross validation leve-one-out"""
         self.show()
@@ -359,13 +374,20 @@ def mls_start(mls):
         result_save.mls_saves(ml, ml.path_output+"MLS Results.csv")
 
 
+def mls_labeling_only(mls):
+    """Run code to generate results to each ml"""
+    for ml in mls:
+        ml.labeling_only()
+        result_save.mls_saves(ml, ml.path_output+"MLS Results.csv")
+
+
 if __name__ == "__main__":
     mls = []
-    mls += [MachineLearn(library="OpenCV", library_img="Pillow", feature="histogram_filter",
+    mls += [MachineLearn(library="OpenCV", library_img="Pillow", feature="histogram_reduce_10",
                          data_base_path="../../Data_Base/Data_Base_Cedulas/")]
-    if 0:
-        mls += [MachineLearn(library="scikit-learn", library_img="Pillow", feature="histogram",
-                             data_base_path="../../Data_Base/Data_Base_Cedulas/")]
+    # mls += [MachineLearn(library="scikit-learn", library_img="Pillow", feature="histogram",
+    #                          data_base_path="../../Data_Base/Data_Base_Cedulas/")]
     # mls_optimate(mls)
     mls_start(mls)
-    print("".join(("Tempo de execução:",str(others.TimeConversion(time.perf_counter())))))
+    # mls_labeling_only(mls)
+    print("".join(("Tempo de execução:", str(others.TimeConversion(time.perf_counter())))))
