@@ -16,10 +16,12 @@ def requests_for_android():
     if platform == "android":
         from android.permissions import request_permissions, Permission
         request_permissions([Permission.CAMERA])
+        request_permissions([Permission.WRITE_EXTERNAL_STORAGE])
         from android.permissions import check_permission
         while (not check_permission(Permission.CAMERA)):
             print("Esperando autorização da camera")
-
+        while (not check_permission(Permission.WRITE_EXTERNAL_STORAGE)):
+            print("Esperando autorização da escrever")
 
 class ScreenCamera(Screen):
 
@@ -60,9 +62,9 @@ class Qual_o_valor(App):
 
 
 if __name__ == '__main__':
-    if platform.system() == "Linux":
+    if platform == "linux":
         import instalation
-    elif platform.system() == "Windows":
+    elif platform == "Windows":
         # TODO
         pass
     requests_for_android()

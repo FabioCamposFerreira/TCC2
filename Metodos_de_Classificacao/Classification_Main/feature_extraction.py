@@ -56,4 +56,4 @@ def get_features(im, feature, library_img):
         features = histogram_filter(im, library_img)
     elif "_".join(feature.split("_")[0:2]) == "histogram_reduce":
         features = histogram_reduce(im, library_img, int(feature.split("_")[-1]))
-    return features
+    return normalize(features)

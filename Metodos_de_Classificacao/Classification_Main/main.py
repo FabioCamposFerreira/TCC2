@@ -383,7 +383,7 @@ def mls_labeling_only(mls):
 
 if __name__ == "__main__":
     mls = []
-    mls += [MachineLearn(library="OpenCV", library_img="Pillow", feature="histogram_reduce_10",
+    mls += [MachineLearn(library="OpenCV", library_img="Pillow", feature="histogram",
                          data_base_path="../../Data_Base/Data_Base_Cedulas/")]
     # mls += [MachineLearn(library="scikit-learn", library_img="Pillow", feature="histogram",
     #                          data_base_path="../../Data_Base/Data_Base_Cedulas/")]

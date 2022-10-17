@@ -5,8 +5,10 @@ import csv
 
 import numpy as np
 import cv2 as cv
+from kivy.utils import platform
 
 import feature_extraction
+
 
 def classify(im):
     """Extract image pattern
@@ -21,11 +23,11 @@ def classify(im):
     """
     classifier = "SVM"
     pattern = feature_extraction.get_pattern(im)
-    # with open("".join(("Pattern", ".csv")), "w") as f:
-    #     writer = csv.writer(f)
-    #     writer.writerow("Características")
-    #     writer.writerow(pattern)
-
+    if platform == "android":
+        with open("".join(("/storage/emulated/0/Download/Pattern", ".csv")), "w") as f:
+            writer = csv.writer(f)
+            writer.writerow("Características")
+            writer.writerow(pattern)
     pattern = np.matrix(pattern, dtype=np.float32)
     clsf = read_object(classifier+".xml")
     y = clsf.predict(pattern)[1][0][0]

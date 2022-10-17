@@ -6,6 +6,7 @@
 *.html
 *.pdf
 # pastas especificas do projeto
+!Metodos_de_Classificacao/Classification_Main/docs
 .buildozer/
 bin/
 .idea/

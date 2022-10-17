@@ -173,9 +173,10 @@ def graphics_save(files_name: str, images_features: list):
     images_name = np.array(images_features, dtype=object)[:,0]
     classes = set(labels)
     graphics_lines(classes, labels, features, files_name,images_name)
-    # graphics_box1(classes, labels, features, files_name)
-    # graphics_box2(classes, labels, features, files_name)
-    # graphics_splom(labels, features, files_name)
+    if len(images_features[0][1])<=10:
+        graphics_box1(classes, labels, features, files_name)
+        graphics_box2(classes, labels, features, files_name)
+        graphics_splom(labels, features, files_name)
 
 
 def features_save(csv_name: str, images_features: list):
