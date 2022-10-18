@@ -384,7 +384,7 @@ def mls_labeling_only(mls):
 if __name__ == "__main__":
     mls = []
     mls += [MachineLearn(library="OpenCV", library_img="Pillow", feature="histogram",
-                         data_base_path="../../Data_Base/Data_Base_Cedulas/")]
+                         data_base_path="../../Data_Base/Data_Base_Cedulas/", knn_k=1)]
     # mls += [MachineLearn(library="scikit-learn", library_img="Pillow", feature="histogram",
     #                          data_base_path="../../Data_Base/Data_Base_Cedulas/")]
     # mls_optimate(mls)

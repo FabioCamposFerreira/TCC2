@@ -1,13 +1,16 @@
 # Author: Fábio Campos
 # Main code to run application
 
+from plyer import tts
 from kivy.app import App
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.clock import Clock
 from kivy.utils import platform
-import classification as clsf
+
+
 import image_processing
 import platform
+import classification as clsf
 
 
 def requests_for_android():
@@ -22,6 +25,7 @@ def requests_for_android():
             print("Esperando autorização da camera")
         while (not check_permission(Permission.WRITE_EXTERNAL_STORAGE)):
             print("Esperando autorização da escrever")
+
 
 class ScreenCamera(Screen):
 
@@ -40,6 +44,9 @@ class ScreenCamera(Screen):
         if y != None:
             valor.text = str(int(y))
             valor.color = (1, 1, 0, 1)
+            print(str(platform))
+            if platform == "android":
+                tts.speak("".join((str(int(y))," reais")))
         else:
             valor.color = (1, 1, 0, 0)
 

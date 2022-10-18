@@ -5,7 +5,6 @@
 import cv2 as cv
 import numpy as np
 
-
 def histogram_reduce(im, library_img, n_features:int):
     """Recude 256 histogram features to n_features"""
     if library_img == "Pillow":
@@ -44,7 +43,7 @@ def normalize(list_):
     difference = x_max-x_min
     if not difference:
         raise Exception("Extract feature is a string of zeros")
-    return [(x-x_min)/(difference) for x in list_]
+    return [(x-x_min)/(difference)*100 for x in list_]
 
 
 def get_features(im, feature, library_img):
@@ -56,4 +55,4 @@ def get_features(im, feature, library_img):
         features = histogram_filter(im, library_img)
     elif "_".join(feature.split("_")[0:2]) == "histogram_reduce":
         features = histogram_reduce(im, library_img, int(feature.split("_")[-1]))
-    return normalize(features)
+    return (features)
