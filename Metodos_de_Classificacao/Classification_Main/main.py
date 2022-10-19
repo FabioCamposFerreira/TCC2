@@ -26,7 +26,7 @@ import training
 class MachineLearn:
     def __init__(self, library: str, library_img: str, feature: str, data_base_path: str, knn_k=3, mlp_layers=[10]):
         self.data_base = os.listdir(data_base_path)
-        self.data_base.sort()
+        self.data_base.sort(key=others.images_sort)
         if feature == "histogram" or feature == "histogram_filter":
             layer_first = 256
         elif "_".join(feature.split("_")[0:2]) == "histogram_reduce":
@@ -188,7 +188,14 @@ class MachineLearn:
     def validation(self, X: list[list[float]], y: list[int], index: int,
                    results: dict = None, classifier_save: bool = False):
         """Train and classify data to one validation in cross validation"""
-        classifier = self.setup_train(X[:index]+X[index+1:], y[:index]+y[index+1:], file_save=classifier_save)
+        # To Remove inverted feature: jump next feature or previous above features
+        if index % 2 == 0:
+            pause = index
+            restart = index+2
+        else:
+            pause = index-1
+            restart = index+1
+        classifier = self.setup_train(X[:pause]+X[restart:], y[:pause]+y[restart:], file_save=classifier_save)
         if results == None:
             return self.labeling(X[index], y[index], y, self.images_features[index][0], classifier=classifier)
         else:
@@ -359,10 +366,10 @@ def mls_optimate(mls):
     """Run code to generate optimization graphic"""
     for ml in mls:
         ml.optimization(method="MLP", activation=["sigmoid_sym", "gaussian", "relu", "leakyrelu"],
-                        quantity_layers=1, quantity_insidelayers=1, range_layer=10, quantity_alpha=1,
-                        first_alpha=2.5, quantity_beta=1, first_beta=1e-2)
+                        quantity_layers=3, quantity_insidelayers=1, range_layer=100, quantity_alpha=3,
+                        first_alpha=2.5, quantity_beta=3, first_beta=1e-2)
         ml.optimization(method="SVM", svm_kernels=["linear", "poly", "rbf", "sigmoid", "chi2", "inter"],
-                        quantity_C=1, first_C=0.1, quantity_gamma=1, first_gamma=0.1, quantity_degree=1,
+                        quantity_C=5, first_C=0.1, quantity_gamma=3, first_gamma=0.1, quantity_degree=3,
                         first_degree=1)
         ml.optimization(method="KNN", quantity_k=5, first_k=1, last_k=10)
 
@@ -387,7 +394,7 @@ if __name__ == "__main__":
                          data_base_path="../../Data_Base/Data_Base_Cedulas/", knn_k=1)]
     # mls += [MachineLearn(library="scikit-learn", library_img="Pillow", feature="histogram",
     #                          data_base_path="../../Data_Base/Data_Base_Cedulas/")]
-    # mls_optimate(mls)
-    mls_start(mls)
+    mls_optimate(mls)
+    # mls_start(mls)
     # mls_labeling_only(mls)
     print("".join(("Tempo de execução:", str(others.TimeConversion(time.perf_counter())))))

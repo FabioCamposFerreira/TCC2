@@ -6,10 +6,10 @@
 *.html
 *.pdf
 # pastas especificas do projeto
-!Metodos_de_Classificacao/Classification_Main/docs
 .buildozer/
 bin/
 .idea/
+!/home/suporte/Documents/TCC2/Metodos_de_Classificacao/Classification_Main/docs/_build/html/
 
 # Created by https://www.toptal.com/developers/gitignore/api/python
 # Edit at https://www.toptal.com/developers/gitignore?templates=python
