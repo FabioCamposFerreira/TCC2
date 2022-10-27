@@ -3,15 +3,23 @@ import subprocess
 import sys
 import time
 
-def images_sort(e:str):
+
+def images_sort(e: str):
     return float(".".join(e.split(".")[0:2]))
+
 
 class TimeConversion():
     def __init__(self, seconds) -> None:
         self.minutes = int(seconds/60)
         self.hours = int(self.minutes/60)
         self.minutes = self.minutes - self.hours*60
-        self.seconds = int(seconds - self.minutes*60)
+        self.seconds = int(seconds - self.minutes*60 - self.hours*60)
+        if self.seconds > 30:
+            self.seconds = 60
+        elif self.seconds <= 10:
+            self.seconds = 10
+        elif self.seconds < 30:
+            self.seconds = 30
         self.time_formatted = ""
         if self.hours != 0:
             self.time_formatted += " {} h".format(self.hours)

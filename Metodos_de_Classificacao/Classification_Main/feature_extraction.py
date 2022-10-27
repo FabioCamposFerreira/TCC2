@@ -54,7 +54,7 @@ def histogram_reduce(im, im_name: str, library_img, n_features: int):
 def histogram(im, im_name: str, library_img):
     """Receive image and return histogram of the channel H"""
     if library_img == "Pillow":
-        return [[im_name,normalize(im.getchannel(channel=0).histogram(mask=None, extrema=None))]]
+        return [[im_name, normalize(im.getchannel(channel=0).histogram(mask=None, extrema=None))]]
     elif library_img == "OpenCV":
         return [[im_name, normalize(np.squeeze(cv.calcHist([im], [0], None, [256], [0, 256])).tolist())]]
 
@@ -84,14 +84,14 @@ def normalize(list_):
 def get_features(im, im_name, feature, library_img,):
     """Extract image features
     """
-    if feature == "histogram":
+    if feature.split("_")[0] == "histogram":
         features = histogram(im, im_name, library_img)
-    elif feature == "histogram_filter":
+    elif feature.split("_")[0:2] == "histogram_filter":
         features = histogram_filter(im, im_name, library_img)
     elif "_".join(feature.split("_")[0:2]) == "histogram_reduce":
         features = histogram_reduce(im, im_name, library_img, int(feature.split("_")[-1]))
-    elif feature == "image_patches":
+    elif feature.split("_")[0:2] == "image_patches":
         features = image_patches(im, im_name, library_img)
-    elif feature == "image_contours":
+    elif feature.split("_")[0:2] == "image_contours":
         features = image_contours(im, im_name, library_img)
     return features

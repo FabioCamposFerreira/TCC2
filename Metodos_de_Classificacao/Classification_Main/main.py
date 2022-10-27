@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+# encoding: utf-8
 """
 main.py
 ====================================
@@ -9,34 +11,34 @@ import os
 import random
 import time
 from multiprocessing import Manager, Process
+from typing import List
 
 import numpy as np
 from sklearn.metrics import (accuracy_score, confusion_matrix,
                              mean_squared_error, precision_score, recall_score)
 
-import classification
-import feature_extraction
-import image_processing
 import install_dev
+import constants
+import image_processing
+import feature_extraction
+import training
+import classification
 import others
 import result_save
-import training
 
 
 class MachineLearn:
-    def __init__(self, library: str, library_img: str, feature: str, data_base_path: str, knn_k=3, mlp_layers=[10],
-                 methods_selected=["SVM"], svm_kernel="inter", svm_c=1, svm_gamma=1, svm_degree=1):
+    def __init__(self, method_library: str, library_img: str, img_processing: List[str],
+                 feature: str, data_base_path: str, method_parameters: List[dict], methods_selected: List[str]):
         self.data_base = os.listdir(data_base_path)
         self.data_base.sort(key=others.images_sort)
-        if feature == "histogram" or feature == "histogram_filter":
-            layer_first = 256
-        elif "_".join(feature.split("_")[0:2]) == "histogram_reduce":
-            layer_first = int(feature.split("_")[-1])
+        layer_first = int(feature.split("_")[-1])
         self.parameters = {
             # Global
             "data_base_path": data_base_path,
-            "library": library,
+            "method_library": method_library,
             "library_img": library_img,
+            "img_processing": img_processing,
             "feature": feature,
         }
         # Results
@@ -72,15 +74,20 @@ class MachineLearn:
         # Construct classifiers
         self.methods = {}
         if "SVM" in methods_selected:
-            self.methods["SVM"] = training.SVM_create(library=self.parameters["library"],
-                                                      C=svm_c, kernel=svm_kernel, gamma=svm_gamma, degree=svm_degree)
+            self.methods["SVM"] = training.SVM_create(library=self.parameters["method_library"],
+                                                      C=method_parameters["svm_c"],
+                                                      kernel=method_parameters["svm_kernel"],
+                                                      gamma=method_parameters["svm_gamma"],
+                                                      degree=method_parameters["svm_degree"])
         if "KNN" in methods_selected:
-            self.methods["KNN"] = training.KNN_create(library=self.parameters["library"],
-                                                      k=knn_k)
+            self.methods["KNN"] = training.KNN_create(library=self.parameters["method_library"],
+                                                      k=method_parameters["knn_k"])
         if "MLP" in methods_selected:
-            mlp_layers = ([layer_first] + mlp_layers +
-                          [len(list(dict.fromkeys([arq.split(".")[0] for arq in self.data_base])))])
-            self.methods["MLP"] = training.MLP_create(library=self.parameters["library"], mlp_layers=mlp_layers)
+            self.mlp_layers = ([layer_first] + method_parameters["mlp_layers"] +
+                               [len(list(dict.fromkeys([arq.split(".")[0] for arq in self.data_base])))])
+            self.methods["MLP"] = training.MLP_create(
+                library=self.parameters["method_library"],
+                mlp_layers=self.mlp_layers)
 
     def show(self):
         """Show the classifications parameters"""
@@ -98,12 +105,15 @@ class MachineLearn:
         for arq in self.data_base:
             actual += 1
             progress_bar.print(actual)
-            self.images_processed.append([arq, image_processing.open_image(self.parameters["data_base_path"]
-                                                                           + arq, self.parameters["library_img"])])
+            self.images_processed.append(
+                [arq, image_processing.img_process(self.parameters["data_base_path"] + arq,
+                                                   self.parameters["library_img"],
+                                                   self.parameters["img_processing"])])
             self.images_processed.append([arq+" (Inverted)",
-                                          image_processing.open_image(self.parameters["data_base_path"]+arq,
-                                                                      self.parameters["library_img"],
-                                                                      inverted=True)])
+                                          image_processing.img_process(self.parameters["data_base_path"]+arq,
+                                                                       self.parameters["library_img"],
+                                                                       self.parameters["img_processing"],
+                                                                       inverted=True)])
         progress_bar.end()
 
     def setup_feature(self):
@@ -137,7 +147,7 @@ class MachineLearn:
         classifier = {}
         for method in self.methods:
             classifier[method] = training.train(X, y, method, self.methods[method],
-                                                self.parameters["library"],
+                                                self.parameters["method_library"],
                                                 self.xml_name, file_save)
         return classifier
 
@@ -148,7 +158,7 @@ class MachineLearn:
         result = [img_name, y_correct]
         for method in self.methods:
             start_time = time.time()
-            y_predict = classification.labeling(X, y_full, method, self.parameters["library"],
+            y_predict = classification.labeling(X, y_full, method, self.parameters["method_library"],
                                                 self.xml_name, classifier[method])
             result += [int(y_predict), time.time()-start_time]
         return result
@@ -245,17 +255,17 @@ class MachineLearn:
                                                      results_xylabel, process_parallel)
         except IndexError:
             if process_parallel == None:
-                progress_bar.print(actual, line=-1)
+                progress_bar.print(actual)
             if method == "SVM":
-                self.methods = {"SVM": training.SVM_create(self.parameters["library"],
+                self.methods = {"SVM": training.SVM_create(self.parameters["method_library"],
                                                            C=parameters["C"],
                                                            kernel=parameters["kernel"],
                                                            gamma=parameters["gamma"],
                                                            degree=parameters["degree"])}
             elif method == "KNN":
-                self.methods = {"KNN": training.KNN_create(self.parameters["library"], k=parameters["k"])}
+                self.methods = {"KNN": training.KNN_create(self.parameters["method_library"], k=parameters["k"])}
             elif method == "MLP":
-                self.methods = {"MLP": training.MLP_create(library=self.parameters["library"],
+                self.methods = {"MLP": training.MLP_create(library=self.parameters["method_library"],
                                                            mlp_layers=parameters["layers"],
                                                            activation=parameters["activation"],
                                                            alpha=parameters["alpha"],
@@ -290,6 +300,11 @@ class MachineLearn:
                 progress_bar.print(index)
                 print("")
                 p.join()
+        else:
+            self.parameters_combination(keys=list(grid.keys()),
+                                        grid=grid, parameters={},
+                                        method=method, progress_bar=progress_bar, actual=0,
+                                        results_xylabel=results_xylabel)
         result_save.optimization_graph(dict(results_xylabel),
                                        self.path_graphics.replace("XXX", "".join((method, "_otimização"))))
 
@@ -308,17 +323,17 @@ class MachineLearn:
                         "gamma": np.linspace(first_gamma, 100, num=quantity_gamma, dtype=float),
                         "C": np.linspace(first_C, 1000, num=quantity_C, dtype=float),
                         "degree": np.linspace(first_degree, 10, num=quantity_degree, dtype=int)}
-            self.method_optimization(grid_svc, "SVM")
+            self.method_optimization(grid_svc, "SVM", False)
         elif method == "KNN":
             grid_knn = {"k": np.linspace(first_k, last_k, num=quantity_k, dtype=int)}
-            self.method_optimization(grid_knn, "KNN")
+            self.method_optimization(grid_knn, "KNN", False)
         elif method == "MLP":
             layers = []
             for _ in range(quantity_layers):
 
-                layer_inside = [self.parameters["mlp_layers"][0],
+                layer_inside = [self.mlp_layers[0],
                                 [int(random.random() * range_layer) for _ in range(quantity_insidelayers)],
-                                self.parameters["mlp_layers"][-1]]
+                                self.mlp_layers[-1]]
                 if layer_inside[1] == 0:
                     layer_inside[1] = 2
                 layer_inside = np.hstack(layer_inside).tolist()
@@ -328,11 +343,17 @@ class MachineLearn:
                         "alpha": np.linspace(first_alpha, 100, num=quantity_alpha, dtype=float),
                         "beta": np.linspace(first_beta, 100, num=quantity_beta, dtype=float)}
 
-            self.method_optimization(grid_mlp, "MLP")
-        self.__init__(self.parameters["library"],           # Reset machine learn
+            self.method_optimization(grid_mlp, "MLP", False)
+        self.__init__(self.parameters["method_library"],           # Reset machine learn
                       self.parameters["library_img"],
+                      self.parameters["img_processing"],
                       self.parameters["feature"],
-                      self.parameters["data_base_path"])
+                      self.parameters["data_base_path"],
+                      constants.methods_parameters(knn_k=3, mlp_layers=[10],
+                                                   svm_c=1, svm_kernel=constants.svm_kernel(inter=True),
+                                                   svm_gamma=1, svm_degree=1),
+                      constants.methods_selected(SVM=True, KNN=True, MLP=True)
+                      )
 
     def labeling_only(self):
         """Da labeling of the database with train classifier """
@@ -356,13 +377,13 @@ class MachineLearn:
 def mls_optimate(mls):
     """Run code to generate optimization graphic"""
     for ml in mls:
-        ml.optimization(method="MLP", activation=["sigmoid_sym", "gaussian", "relu", "leakyrelu"],
-                        quantity_layers=1, quantity_insidelayers=1, range_layer=100, quantity_alpha=2,
-                        first_alpha=2.5, quantity_beta=2, first_beta=1e-2)
+        ml.optimization(method="KNN", quantity_k=5, first_k=1, last_k=10)
         ml.optimization(method="SVM", svm_kernels=["linear", "poly", "rbf", "sigmoid", "chi2", "inter"],
                         quantity_C=3, first_C=0.1, quantity_gamma=2, first_gamma=0.1, quantity_degree=2,
                         first_degree=1)
-        ml.optimization(method="KNN", quantity_k=5, first_k=1, last_k=10)
+        ml.optimization(method="MLP", activation=["sigmoid_sym", "gaussian", "relu", "leakyrelu"],
+                        quantity_layers=1, quantity_insidelayers=1, range_layer=100, quantity_alpha=2,
+                        first_alpha=2.5, quantity_beta=2, first_beta=1e-2)
 
 
 def mls_start(mls):
@@ -379,16 +400,46 @@ def mls_labeling_only(mls):
         result_save.mls_saves(ml, ml.path_output+"MLS Results.csv")
 
 
-if __name__ == "__main__":
+def mls_construct(todos: List[str],
+                  method_libraries: List[str],
+                  img_libraries: List[str],
+                  img_processing: List[List[str]],
+                  features: List[str],
+                  data_base_paths: List[str],
+                  methods_parameters: List[dict],
+                  methods_selected_s: List[List[str]]):
+    """Get user interface answers to make and run mls"""
     mls = []
-    mls += [
-        MachineLearn(
-            library="OpenCV", library_img="Pillow", feature="histogram",
-            data_base_path="../../Data_Base/Data_Base_Cedulas/", knn_k=1, methods_selected=["SVM", "KNN"],
-            svm_kernel="inter", svm_c=1, svm_gamma=1, svm_degree=1)]
-    # mls += [MachineLearn(library="scikit-learn", library_img="Pillow", feature="histogram",
-    #                          data_base_path="../../Data_Base/Data_Base_Cedulas/")]
-    # mls_optimate(mls)
-    mls_start(mls)
-    # mls_labeling_only(mls)
+    for method_library in method_libraries:
+        for img_library in img_libraries:
+            for processing in img_processing:
+                for feature in features:
+                    for data_base_path in data_base_paths:
+                        for method_parameters in methods_parameters:
+                            for methods_selected in methods_selected_s:
+                                mls += [MachineLearn(method_library, img_library, processing, feature,
+                                                     data_base_path, method_parameters, methods_selected)]
+
+    if "optimate" in todos:
+        mls_optimate(mls)
+    if "start" in todos:
+        mls_start(mls)
+    if "labeling_only" in todos:
+        mls_labeling_only(mls)
+
+
+if __name__ == "__main__":
+    # User Interface
+    todos = constants.todos(start=True, optimate=False)
+    method_libraries = constants.methods_libraries(OpenCV=True)
+    img_libraries = constants.img_libraries(OpenCV=True)
+    img_processing = constants.img_processing(get_H=True, HSV=True, filter_blur=True)
+    features = constants.features(histogram_256=True)
+    data_base_paths = constants.data_base_paths(Data_Base_Cedulas=True, temp=False)
+    methods_parameters = constants.methods_parameters(knn_k=3, mlp_layers=[10],
+                                                      svm_c=1, svm_kernel=constants.svm_kernel(inter=True),
+                                                      svm_gamma=1, svm_degree=1)
+    methods_selected = constants.methods_selected(SVM=True, KNN=True, MLP=True)
+    mls_construct(todos, method_libraries, img_libraries, img_processing, features,
+                  data_base_paths, methods_parameters, methods_selected)
     print("".join(("Tempo de execução:", str(others.TimeConversion(time.perf_counter())))))

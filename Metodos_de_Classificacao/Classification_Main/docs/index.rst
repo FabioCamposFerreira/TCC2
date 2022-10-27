@@ -15,6 +15,7 @@ Welcome to Classification's documentation!
    training
    classification
    others
+   constants
    
 
 

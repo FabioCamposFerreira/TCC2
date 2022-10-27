@@ -75,8 +75,9 @@ def add_hue_bar(f:bokeh.figure):
 
 def graphics_interactive(curves: list, labels: list, file_path: str):
     """Save in file html graph interactive with many curves"""
+    TOOLTIPS = [("label", "$legend_label"),("(x,y)", "($x, $y)")]
     colors = itertools.cycle(palette)
-    f = bokeh.figure(sizing_mode="stretch_both",tools="pan,wheel_zoom,box_zoom,reset,hover,save", output_backend="svg")
+    f = bokeh.figure(sizing_mode="stretch_both",tools="pan,wheel_zoom,box_zoom,reset,hover,save", output_backend="svg",tooltips=TOOLTIPS)
     for color, curve, label in zip(colors, curves, labels):
         f.line(range(len(curve)), curve,  color=color, legend_label=label, line_width=2)
     f.legend.location = "top_right"
