@@ -14,27 +14,27 @@ def processing(im, library_img: str, img_processing: List[str]):
     if library_img == "Pillow":
         if "HSV" in img_processing:
             im = im.convert(mode="HSV")
-        elif "get_H" in img_processing:
+        if "get_H" in img_processing:
             im = im.getchannel(0)
-        elif "filter_blur" in img_processing:
+        if "filter_blur" in img_processing:
             im = im.filter(ImageFilter.BLUR)
-        elif "filter_contour" in img_processing:
+        if "filter_contour" in img_processing:
             im = im.filter(ImageFilter.CONTOUR)
-        elif "filter_detail" in img_processing:
+        if "filter_detail" in img_processing:
             im = im.filter(ImageFilter.DETAIL)
-        elif "filter_edgeEnhance" in img_processing:
+        if "filter_edgeEnhance" in img_processing:
             im = im.filter(ImageFilter.EDGE_ENHANCE)
-        elif "filter_edgeEnhanceMore" in img_processing:
+        if "filter_edgeEnhanceMore" in img_processing:
             im = im.filter(ImageFilter.EDGE_ENHANCE_MORE)
-        elif "filter_emboss" in img_processing:
+        if "filter_emboss" in img_processing:
             im = im.filter(ImageFilter.EMBOSS)
-        elif "filter_findEdges" in img_processing:
+        if "filter_findEdges" in img_processing:
             im = im.filter(ImageFilter.FIND_EDGES)
-        elif "filter_sharpen" in img_processing:
+        if "filter_sharpen" in img_processing:
             im = im.filter(ImageFilter.SHARPEN)
-        elif "filter_smooth" in img_processing:
+        if "filter_smooth" in img_processing:
             im = im.filter(ImageFilter.SMOOTH)
-        elif "filter_smoothMore" in img_processing:
+        if "filter_smoothMore" in img_processing:
             im = im.filter(ImageFilter.SMOOTH_MORE)
     if library_img == "OpenCV":
         if "HSV" in img_processing:
@@ -44,12 +44,12 @@ def processing(im, library_img: str, img_processing: List[str]):
         if "filter_blur" in img_processing:
             im = cv.blur(im, (5, 5))
         if "filter_median_blur" in img_processing:
-            im = cv.medianBlur(img, 5)
+            im = cv.medianBlur(im, 5)
         if "filter_gaussian_blur" in img_processing:
             im = cv.GaussianBlur(im, (5, 5), 0)
         if "filter_bilateral_filter" in img_processing:
-            im = cv.bilateralFilter(img, 9, 75, 75)
-        return im
+            im = cv.bilateralFilter(im, 9, 75, 75)
+    return im
 
 
 def open_image(arq, library_img, inverted=False):

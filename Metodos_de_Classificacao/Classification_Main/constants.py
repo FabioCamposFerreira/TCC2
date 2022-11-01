@@ -60,3 +60,5 @@ def methods_selected(SVM=0, KNN=0, MLP=0):
     return [[key for key in l if l[key] == 1]]
 
 RESOLUTION = (854, 480)
+SATURATION_TOLERANCE = 0.8
+VALUE_TOLERANCE = 0.9

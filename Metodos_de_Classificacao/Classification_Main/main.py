@@ -29,7 +29,7 @@ import result_save
 
 class MachineLearn:
     def __init__(self, method_library: str, library_img: str, img_processing: List[str],
-                 feature: str, data_base_path: str, method_parameters: List[dict], methods_selected: List[str]):
+                 feature: str, data_base_path: str, method_parameters: dict, methods_selected: List[str]):
         self.data_base = os.listdir(data_base_path)
         self.data_base.sort(key=others.images_sort)
         layer_first = int(feature.split("_")[-1])
@@ -39,7 +39,7 @@ class MachineLearn:
             "method_library": method_library,
             "library_img": library_img,
             "img_processing": img_processing,
-            "feature": feature,
+            "feature": "_".join(feature.split("_")[:-1]),
         }
         # Results
         self.images_processed = []  # [[name,image],[name,image],...]
@@ -151,7 +151,7 @@ class MachineLearn:
                                                 self.xml_name, file_save)
         return classifier
 
-    def labeling(self, X: str, y_correct: int, y_full: list, img_name: str, classifier: dict = {}):
+    def labeling(self, X: List[int], y_correct: int, y_full: list, img_name: str, classifier: dict = {}):
         """Do labeling and update results"""
         if classifier == {}:
             classifier = dict.fromkeys(self.methods.keys(), [])
@@ -430,11 +430,12 @@ def mls_construct(todos: List[str],
 
 if __name__ == "__main__":
     # User Interface
+    start_time = time.time()
     todos = constants.todos(start=True, optimate=False)
     method_libraries = constants.methods_libraries(OpenCV=True)
     img_libraries = constants.img_libraries(OpenCV=True)
-    img_processing = constants.img_processing(get_H=True, HSV=True, filter_blur=True)
-    features = constants.features(histogram_256=True)
+    img_processing = constants.img_processing(get_H=False, HSV=True, filter_blur=False)
+    features = constants.features(histogram_256=False, histogram_filter_256=True)
     data_base_paths = constants.data_base_paths(Data_Base_Cedulas=True, temp=False)
     methods_parameters = constants.methods_parameters(knn_k=3, mlp_layers=[10],
                                                       svm_c=1, svm_kernel=constants.svm_kernel(inter=True),
@@ -442,4 +443,4 @@ if __name__ == "__main__":
     methods_selected = constants.methods_selected(SVM=True, KNN=True, MLP=True)
     mls_construct(todos, method_libraries, img_libraries, img_processing, features,
                   data_base_paths, methods_parameters, methods_selected)
-    print("".join(("Tempo de execução:", str(others.TimeConversion(time.perf_counter())))))
+    print("".join(("Tempo de execução:", str(others.TimeConversion(time.time()-start_time)))))

@@ -12,7 +12,7 @@ import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from bokeh.models import LabelSet
+from bokeh.models import LabelSet, HoverTool
 from bokeh.palettes import Dark2_5 as palette
 from matplotlib.backends.backend_pdf import PdfPages
 from scipy import stats
@@ -62,24 +62,26 @@ def features_open(file_name):
                 pass
     return images_features
 
-def add_hue_bar(f:bokeh.figure):
+
+def add_hue_bar(f: bokeh.figure):
     """Add in graphic from bokeh bar with hue spectrum"""
     x = [r for r in range(256)]
     y = [-1 for _ in range(256)]
     hsv = [np.uint8([[[hue, 255, int(255/2)]]]) for hue in range(256)]
     rgb = [cv.cvtColor(hsv_one, cv.COLOR_HSV2RGB_FULL)[0][0] for hsv_one in hsv]
     hex_ = ['#%02x%02x%02x' % tuple(rgb_one.tolist()) for rgb_one in rgb]
-    f.square(x,y,size=20,color=hex_)
+    f.square(x, y, size=20, color=hex_)
     return f
 
 
 def graphics_interactive(curves: list, labels: list, file_path: str):
     """Save in file html graph interactive with many curves"""
-    TOOLTIPS = [("label", "$legend_label"),("(x,y)", "($x, $y)")]
     colors = itertools.cycle(palette)
-    f = bokeh.figure(sizing_mode="stretch_both",tools="pan,wheel_zoom,box_zoom,reset,hover,save", output_backend="svg",tooltips=TOOLTIPS)
-    for color, curve, label in zip(colors, curves, labels):
-        f.line(range(len(curve)), curve,  color=color, legend_label=label, line_width=2)
+    x = range(len(curves[0]))
+    f = bokeh.figure(sizing_mode="stretch_both", tools="pan,wheel_zoom,box_zoom,reset,save", output_backend="svg")
+    for curve,label, color in zip(curves,labels, colors):
+        l = f.line(x, curve,  line_color=color, legend_label=label, line_width=2)
+        f.add_tools(HoverTool(renderers=[l], tooltips=[('Name', label), ]))
     f.legend.location = "top_right"
     f.legend.click_policy = "hide"
     f = add_hue_bar(f)
@@ -87,7 +89,7 @@ def graphics_interactive(curves: list, labels: list, file_path: str):
     bokeh.save(f)
 
 
-def graphics_splom(labels: list[str], features: np.array, file_path: str):
+def graphics_splom(labels: List[str], features: np.ndarray, file_path: str):
     """Generate graphic splom from features"""
     pdf_path = file_path.replace("XXX", "Splom")+".pdf"
     df = pd.DataFrame(data=features)
@@ -100,7 +102,7 @@ def graphics_splom(labels: list[str], features: np.array, file_path: str):
         labels_color = np.array(labels, dtype=object)
         for index, l_s in enumerate(labels_set):
             labels_color[labels_color == l_s] = colors[index]
-        progress_bar = others.ProgressBar("",len(column_packs),0)
+        progress_bar = others.ProgressBar("", len(column_packs), 0)
         for i, pack in enumerate(column_packs):
             progress_bar.print(i)
             plt.rcParams["figure.subplot.right"] = 0.8
@@ -119,7 +121,7 @@ def graphics_box2(classes: set, labels: list[str], features: np.ndarray, file_pa
     features_len = len(features[0])
     with PdfPages(pdf_path) as pdf:
         print("Construindo "+pdf_path)
-        progress_bar = others.ProgressBar("", features_len,0) 
+        progress_bar = others.ProgressBar("", features_len, 0)
         for index in range(features_len):
             progress_bar.print(index)
             plt.clf()
@@ -154,7 +156,7 @@ def graphics_lines(classes: set, labels: List[str],  features: list[list[int]], 
             elif key == "median":
                 curves[key].append(np.median(features[positions], axis=0))
             elif key == "mode":
-                curves[key].append(stats.mode(features[positions], axis=0,keepdims=True)[0][0])
+                curves[key].append(stats.mode(features[positions], axis=0, keepdims=True)[0][0])
             elif key == "Sandard Deviation":
                 curves[key].append(np.std(features[positions], axis=0))
             legends[key].append("Nota de "+str(c))
@@ -171,11 +173,11 @@ def graphics_save(files_name: str, images_features: list):
         labels = np.append(labels, item[0].split(".")[0])
         features.append(item[1])
     features = np.array(features)
-    images_name = np.array(images_features, dtype=object)[:,0]
+    images_name = np.array(images_features, dtype=object)[:, 0]
     classes = set(labels)
-    if len(images_features[0][1])<=500:
-        graphics_lines(classes, labels, features, files_name,images_name)
-    if len(images_features[0][1])<=10:
+    if len(images_features[0][1]) <= 500:
+        graphics_lines(classes, labels, features, files_name, images_name)
+    if len(images_features[0][1]) <= 10:
         graphics_box1(classes, labels, features, files_name)
         graphics_box2(classes, labels, features, files_name)
         graphics_splom(labels, features, files_name)

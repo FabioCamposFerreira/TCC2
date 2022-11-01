@@ -2,9 +2,13 @@
 # Contains modules for extracting features from the images processed by the **image_processing.py** modules
 # In general, the modules receive the images processed by the **feature_extraction.py** modules, extracted and treated features with their identification labels, are the input to the **training.py** modules
 # When run as **main**, graphics and tables are generated to compare the features
-import cv2 as cv
-import numpy as np
+from typing import List
+
 from PIL import Image
+import numpy as np
+import cv2 as cv
+
+import constants
 
 
 def image_contours(im, im_name: str, library_img):
@@ -62,13 +66,12 @@ def histogram(im, im_name: str, library_img):
 def histogram_filter(im, im_name: str, library_img: str):
     """Receive image and return histogram of the channel H excruing pixels with low saturation and value in extrems"""
     if library_img == "Pillow":
-        saturation_tolerance = 0.5
-        value_tolerance = 0.3
         im = np.array(im)
         im = np.vstack(im)
-        im = im[(im[:, 1] > 255-255*saturation_tolerance) & (im[:, 2] > 255/2-255/2*value_tolerance) &
-                (im[:, 2] < 255/2+255/2*value_tolerance)]
-        return [[im_name, normalize(np.histogram(im[:, 0], bins=range(256+1))[0])]]
+    im = im[(im[:, :, 1] > 255 - 255 * constants.SATURATION_TOLERANCE)
+            & (im[:, :, 2] > 255 / 2 - 255 / 2 * constants.VALUE_TOLERANCE)
+            & (im[:, :, 2] < 255 / 2 + 255 / 2 * constants.VALUE_TOLERANCE)]
+    return [[im_name,np.histogram(im[:, 0], bins=range(256+1))[0]]]
 
 
 def normalize(list_):
@@ -81,17 +84,17 @@ def normalize(list_):
     return [(x-x_min)/(difference)*100 for x in list_]
 
 
-def get_features(im, im_name, feature, library_img,):
+def get_features(im, im_name, feature, library_img):
     """Extract image features
     """
-    if feature.split("_")[0] == "histogram":
+    if feature == "histogram":
         features = histogram(im, im_name, library_img)
-    elif feature.split("_")[0:2] == "histogram_filter":
+    elif feature == "histogram_filter":
         features = histogram_filter(im, im_name, library_img)
-    elif "_".join(feature.split("_")[0:2]) == "histogram_reduce":
+    elif feature == "histogram_reduce":
         features = histogram_reduce(im, im_name, library_img, int(feature.split("_")[-1]))
-    elif feature.split("_")[0:2] == "image_patches":
+    elif feature == "image_patches":
         features = image_patches(im, im_name, library_img)
-    elif feature.split("_")[0:2] == "image_contours":
+    elif feature == "image_contours":
         features = image_contours(im, im_name, library_img)
     return features
