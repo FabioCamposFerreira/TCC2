@@ -32,7 +32,7 @@ class MachineLearn:
                  feature: str, data_base_path: str, method_parameters: dict, methods_selected: List[str]):
         self.data_base = os.listdir(data_base_path)
         self.data_base.sort(key=others.images_sort)
-        layer_first = int(feature.split("_")[-1])
+        self.layer_first = int(feature.split("_")[-1])
         self.parameters = {
             # Global
             "data_base_path": data_base_path,
@@ -83,7 +83,7 @@ class MachineLearn:
             self.methods["KNN"] = training.KNN_create(library=self.parameters["method_library"],
                                                       k=method_parameters["knn_k"])
         if "MLP" in methods_selected:
-            self.mlp_layers = ([layer_first] + method_parameters["mlp_layers"] +
+            self.mlp_layers = ([self.layer_first] + method_parameters["mlp_layers"] +
                                [len(list(dict.fromkeys([arq.split(".")[0] for arq in self.data_base])))])
             self.methods["MLP"] = training.MLP_create(
                 library=self.parameters["method_library"],
@@ -130,9 +130,11 @@ class MachineLearn:
                 actual += 1
                 progress_bar.print(actual)
                 try:
-                    self.images_features += feature_extraction.get_features(img[1], img[0],
+                    self.images_features += feature_extraction.get_features(img[1],
+                                                                            img[0],
                                                                             self.parameters["feature"],
-                                                                            self.parameters["library_img"])
+                                                                            self.parameters["library_img"],
+                                                                            self.mlp_layers[0])
                 except:
                     pass
             progress_bar.end()
@@ -240,9 +242,9 @@ class MachineLearn:
         """Call self.cross validation to run in parallel form"""
         self.cross_validation(X, y, features_len, False)
         self.setup_metrics()
-        results_xylabel['x'] += [self.accuracy[method]]
-        results_xylabel['y'] += [self.precision[method]]
-        results_xylabel['labels'] += [str(parameters)]
+        results_xylabel['accuracy'] += [self.accuracy[method]]
+        for key in parameters.keys():
+            results_xylabel[key] += [parameters[key]]
 
     def parameters_combination(self, keys: list[str], grid: dict, parameters: dict, method: str,
                                progress_bar: others.ProgressBar, actual: int, results_xylabel: list,
@@ -283,7 +285,10 @@ class MachineLearn:
 
     def method_optimization(self, grid: dict, method: str, parallel: bool = True):
         """Optimize method and save results in graphic"""
-        results_xylabel = Manager().dict({"x": [], "y": [], "labels": []})
+        manager_dict = {"accuracy": []}
+        for key in grid.keys():
+            manager_dict[key] = []
+        results_xylabel = Manager().dict(manager_dict)
         print("Otimizando {}: ".format(method)+str(grid).replace("{", "").replace("}", ""))
         total = 1
         for key in grid.keys():
@@ -347,7 +352,7 @@ class MachineLearn:
         self.__init__(self.parameters["method_library"],           # Reset machine learn
                       self.parameters["library_img"],
                       self.parameters["img_processing"],
-                      self.parameters["feature"],
+                      "_".join((self.parameters["feature"], str(self.layer_first))),
                       self.parameters["data_base_path"],
                       constants.methods_parameters(knn_k=3, mlp_layers=[10],
                                                    svm_c=1, svm_kernel=constants.svm_kernel(inter=True),
@@ -377,13 +382,13 @@ class MachineLearn:
 def mls_optimate(mls):
     """Run code to generate optimization graphic"""
     for ml in mls:
-        ml.optimization(method="KNN", quantity_k=5, first_k=1, last_k=10)
-        ml.optimization(method="SVM", svm_kernels=["linear", "poly", "rbf", "sigmoid", "chi2", "inter"],
-                        quantity_C=3, first_C=0.1, quantity_gamma=2, first_gamma=0.1, quantity_degree=2,
-                        first_degree=1)
         ml.optimization(method="MLP", activation=["sigmoid_sym", "gaussian", "relu", "leakyrelu"],
-                        quantity_layers=1, quantity_insidelayers=1, range_layer=100, quantity_alpha=2,
+                        quantity_layers=5, quantity_insidelayers=2, range_layer=256, quantity_alpha=2,
                         first_alpha=2.5, quantity_beta=2, first_beta=1e-2)
+        ml.optimization(method="KNN", quantity_k=10, first_k=1, last_k=10)
+        ml.optimization(method="SVM", svm_kernels=["linear", "poly", "rbf", "sigmoid", "chi2", "inter"],
+                        quantity_C=10, first_C=0.1, quantity_gamma=5, first_gamma=0.1, quantity_degree=10,
+                        first_degree=1)
 
 
 def mls_start(mls):
@@ -431,16 +436,19 @@ def mls_construct(todos: List[str],
 if __name__ == "__main__":
     # User Interface
     start_time = time.time()
-    todos = constants.todos(start=True, optimate=False)
+    todos = constants.todos(start=False, optimate=True)
     method_libraries = constants.methods_libraries(OpenCV=True)
     img_libraries = constants.img_libraries(OpenCV=True)
-    img_processing = constants.img_processing(get_H=False, HSV=True, filter_blur=False)
-    features = constants.features(histogram_256=False, histogram_filter_256=True)
+    img_processing = constants.img_processing(HSV=True, get_H=True, filter_blur=False)
+    features = constants.features(histogram_256=[False, 256],
+                                  histogram_filter_256=[False, 256],
+                                  histogram_reduce_XXX=[True, 10],
+                                  image_patches_XXX=[False, 25*25])
     data_base_paths = constants.data_base_paths(Data_Base_Cedulas=True, temp=False)
     methods_parameters = constants.methods_parameters(knn_k=3, mlp_layers=[10],
                                                       svm_c=1, svm_kernel=constants.svm_kernel(inter=True),
                                                       svm_gamma=1, svm_degree=1)
-    methods_selected = constants.methods_selected(SVM=True, KNN=True, MLP=True)
+    methods_selected = constants.methods_selected(SVM=False, KNN=False, MLP=True)
     mls_construct(todos, method_libraries, img_libraries, img_processing, features,
                   data_base_paths, methods_parameters, methods_selected)
     print("".join(("Tempo de execução:", str(others.TimeConversion(time.time()-start_time)))))

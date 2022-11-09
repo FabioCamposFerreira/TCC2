@@ -6,7 +6,6 @@ Contain constants and options to use, The functions with return the select param
 from typing import List
 
 
-
 def todos(start=0,  optimate=0,  labeling_only=0):
     l = locals()
     return [key for key in l if l[key] == 1]
@@ -27,10 +26,13 @@ def img_processing(HSV=0, get_H=0, filter_blur=0):
     return [[key for key in l if l[key] == 1]]
 
 
-def features(histogram_256=0, histogram_filter_256=0, image_patches_XXX=0, image_contours_XXX=0,
-             histogram_reduce_10=0):
+def features(histogram_256=[0, None],
+             histogram_filter_256=[0, None],
+             image_patches_XXX=[0, 0],
+             image_contours_XXX=[0, 0],
+             histogram_reduce_XXX=[0, 0]):
     l = locals()
-    return [key for key in l if l[key] == 1]
+    return [key.replace("XXX",str(l[key][1])) for key in l if l[key][0] == 1]
 
 
 def data_base_paths(temp=0, Data_Base_Cedulas=0):
@@ -58,6 +60,7 @@ def methods_parameters(knn_k: int, mlp_layers: List[int], svm_kernel: svm_kernel
 def methods_selected(SVM=0, KNN=0, MLP=0):
     l = locals()
     return [[key for key in l if l[key] == 1]]
+
 
 RESOLUTION = (854, 480)
 SATURATION_TOLERANCE = 0.8

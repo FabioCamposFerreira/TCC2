@@ -9,6 +9,7 @@ import numpy as np
 import cv2 as cv
 
 import constants
+import image_processing
 
 
 def image_contours(im, im_name: str, library_img):
@@ -25,18 +26,23 @@ def image_contours(im, im_name: str, library_img):
         return returns
 
 
-def image_patches(im, im_name: str, library_img):
+def image_patches(im, im_name: str, library_img, patches_len: int):
     """Split image  in paths of 256 pixels"""
+    patches = []
+    step = int(patches_len**(1/2))
+    left, upper, right, lower = 0, 0, step, step
+    count = 0
     if library_img == "Pillow":
-        patches = []
-        im = im.getchannel(channel=1)
         l, h = im.size
-        step = 25
-        left, upper, right, lower = 0, 0, step, step
+    if library_img == "OpenCV":
+        h, l = im.shape[:2]
         count = 0
         while right < l:
             while lower < h:
-                a = im.crop((left, upper, right, lower))
+                if library_img == "Pillow":
+                    a = im.crop((left, upper, right, lower))
+                if library_img == "OpenCV":
+                    a = im[upper:lower, left:right]
                 patches.append([im_name+str(count), np.hstack(np.array(a))])
                 count += 1
                 left, upper, right, lower = left, upper+step, right, lower+step
@@ -46,13 +52,12 @@ def image_patches(im, im_name: str, library_img):
 
 def histogram_reduce(im, im_name: str, library_img, n_features: int):
     """Recude 256 histogram features to n_features"""
-    if library_img == "Pillow":
-        hist = im.getchannel(channel=0).histogram(mask=None, extrema=None)
+    hist = histogram(im, im_name, library_img)[0][1]
     step = int(256/n_features)
     new_hist = []
     for index in range(n_features):
         new_hist += [sum(hist[step*index:(step*index)+step])]
-    return [im_name, normalize(new_hist)]
+    return [[im_name, normalize(new_hist)]]
 
 
 def histogram(im, im_name: str, library_img):
@@ -71,7 +76,7 @@ def histogram_filter(im, im_name: str, library_img: str):
     im = im[(im[:, :, 1] > 255 - 255 * constants.SATURATION_TOLERANCE)
             & (im[:, :, 2] > 255 / 2 - 255 / 2 * constants.VALUE_TOLERANCE)
             & (im[:, :, 2] < 255 / 2 + 255 / 2 * constants.VALUE_TOLERANCE)]
-    return [[im_name,np.histogram(im[:, 0], bins=range(256+1))[0]]]
+    return [[im_name, np.histogram(im[:, 0], bins=range(256+1))[0]]]
 
 
 def normalize(list_):
@@ -84,17 +89,18 @@ def normalize(list_):
     return [(x-x_min)/(difference)*100 for x in list_]
 
 
-def get_features(im, im_name, feature, library_img):
+def get_features(im, im_name, feature, library_img, n_features=10):
     """Extract image features
     """
+    features = []
     if feature == "histogram":
         features = histogram(im, im_name, library_img)
     elif feature == "histogram_filter":
         features = histogram_filter(im, im_name, library_img)
     elif feature == "histogram_reduce":
-        features = histogram_reduce(im, im_name, library_img, int(feature.split("_")[-1]))
+        features = histogram_reduce(im, im_name, library_img, n_features)
     elif feature == "image_patches":
-        features = image_patches(im, im_name, library_img)
+        features = image_patches(im, im_name, library_img, n_features)
     elif feature == "image_contours":
         features = image_contours(im, im_name, library_img)
     return features

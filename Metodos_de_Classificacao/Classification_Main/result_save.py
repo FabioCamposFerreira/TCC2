@@ -12,10 +12,13 @@ import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from bokeh.models import LabelSet, HoverTool
+from bokeh.models import LabelSet, HoverTool, CustomJS, Dropdown
 from bokeh.palettes import Dark2_5 as palette
+from bokeh.layouts import column, row
+from bokeh.transform import factor_cmap
 from matplotlib.backends.backend_pdf import PdfPages
 from scipy import stats
+import pandas as pd
 
 import others
 
@@ -26,15 +29,51 @@ def optimization_graph(points: dict, file_path: str):
     Parameters
     ----------
     points : dict
-        keys are x, y and labels
+        keys are accuracy and parameters
     """
+    menu = []
+    labels = ""
+    points["x"] = points["accuracy"]
+    points["y"] = points["accuracy"]
+    key_strings = ""
+    for key in points.keys():
+        if type(points[key][0]) != str:
+            if key != "x" and key != "y":
+                menu += [(key, key)]
+        else:
+            key_strings = key
+        labels += "".join((",", key, ":@", key))
+    source = pd.DataFrame.from_dict(points)
+    try:
+        index_cmap = factor_cmap(key_strings, palette=palette, factors=sorted(source[key_strings].unique()))
+    except:
+        index_cmap = "red"
     source = bokeh.ColumnDataSource(points)
-    TOOLTIPS = [("index", "$index"), ("(x,y)", "($x, $y)"), ("label", "@labels"), ]
+    TOOLTIPS = [("(x,y)", "($x, $y)"), ("label", labels)]
     f = bokeh.figure(sizing_mode="stretch_both", output_backend="svg", tools="pan,wheel_zoom,box_zoom,reset,hover,save",
                      tooltips=TOOLTIPS)
-    f.circle("x", "y", source=source,  size=10, color="red")
+    f.circle("x", "y", source=source, legend_field="kernel", size=10, color=index_cmap)
+    f.legend.click_policy = "hide"
+    f.add_layout(f.legend[0], 'right')
+    f.xaxis.axis_label = "accuracy"
+    f.yaxis.axis_label = "accuracy"
+    dropdown_x = Dropdown(label="Select X", button_type="warning", menu=menu)
+    dropdown_y = Dropdown(label="Select Y", button_type="warning", menu=menu)
+    dropdown_x.js_on_event("menu_item_click", CustomJS(args=dict(source=source, x_label=f.xaxis[0]), code="""
+    const new_data = Object.assign({}, source.data)
+    new_data.x = source.data[this.item]
+    source.data = new_data
+    console.log(x_label.axis_label)
+    x_label.axis_label = this.item
+    """))
+    dropdown_y.js_on_event("menu_item_click", CustomJS(args=dict(source=source, y_label=f.yaxis[0]), code="""
+    const new_data = Object.assign({}, source.data)
+    new_data.y = source.data[this.item]
+    source.data = new_data
+    y_label.axis_label = this.item
+    """))
     bokeh.output_file(file_path+'.html')
-    bokeh.save(f)
+    bokeh.save(column(row(dropdown_x, dropdown_y, sizing_mode="scale_width"), f, sizing_mode="stretch_both"))
 
 
 def mls_saves(ml, csv_name: str):
@@ -57,17 +96,17 @@ def features_open(file_name):
         csv_file = csv.reader(csv_file, delimiter=",",)
         for row in csv_file:
             try:
-                images_features.append([row[0], np.array(row[1:], dtype=float).tolist()])
+                images_features.append([row[0], np.array(row[1:], dtype=float)])
             except ValueError:
                 pass
     return images_features
 
 
-def add_hue_bar(f: bokeh.figure):
+def add_hue_bar(f: bokeh.Figure, length: int):
     """Add in graphic from bokeh bar with hue spectrum"""
-    x = [r for r in range(256)]
-    y = [-1 for _ in range(256)]
-    hsv = [np.uint8([[[hue, 255, int(255/2)]]]) for hue in range(256)]
+    x = [r for r in range(length)]
+    y = [-1 for _ in range(length)]
+    hsv = [np.uint8([[[hue, 255, int(255/2)]]]) for hue in range(0, 256, int(256/length))]
     rgb = [cv.cvtColor(hsv_one, cv.COLOR_HSV2RGB_FULL)[0][0] for hsv_one in hsv]
     hex_ = ['#%02x%02x%02x' % tuple(rgb_one.tolist()) for rgb_one in rgb]
     f.square(x, y, size=20, color=hex_)
@@ -77,14 +116,15 @@ def add_hue_bar(f: bokeh.figure):
 def graphics_interactive(curves: list, labels: list, file_path: str):
     """Save in file html graph interactive with many curves"""
     colors = itertools.cycle(palette)
-    x = range(len(curves[0]))
+    length = len(curves[0])
+    x = range(length)
     f = bokeh.figure(sizing_mode="stretch_both", tools="pan,wheel_zoom,box_zoom,reset,save", output_backend="svg")
-    for curve,label, color in zip(curves,labels, colors):
+    for curve, label, color in zip(curves, labels, colors):
         l = f.line(x, curve,  line_color=color, legend_label=label, line_width=2)
         f.add_tools(HoverTool(renderers=[l], tooltips=[('Name', label), ]))
     f.legend.location = "top_right"
     f.legend.click_policy = "hide"
-    f = add_hue_bar(f)
+    f = add_hue_bar(f, length)
     bokeh.output_file(file_path+".html")
     bokeh.save(f)
 
@@ -167,20 +207,20 @@ def graphics_lines(classes: set, labels: List[str],  features: list[list[int]], 
 
 def graphics_save(files_name: str, images_features: list):
     """Save graphics of the features to compare quality of distribution"""
-    features = []
-    labels = np.array([])
-    for item in images_features:
-        labels = np.append(labels, item[0].split(".")[0])
-        features.append(item[1])
-    features = np.array(features)
-    images_name = np.array(images_features, dtype=object)[:, 0]
-    classes = set(labels)
     if len(images_features[0][1]) <= 500:
+        features = []
+        labels = np.array([])
+        for item in images_features:
+            labels = np.append(labels, item[0].split(".")[0])
+            features.append(item[1])
+        features = np.array(features)
+        images_name = np.array(images_features, dtype=object)[:, 0]
+        classes = set(labels)
         graphics_lines(classes, labels, features, files_name, images_name)
-    if len(images_features[0][1]) <= 10:
-        graphics_box1(classes, labels, features, files_name)
-        graphics_box2(classes, labels, features, files_name)
-        graphics_splom(labels, features, files_name)
+        if len(images_features[0][1]) <= 10:
+            graphics_box1(classes, labels, features, files_name)
+            graphics_box2(classes, labels, features, files_name)
+            graphics_splom(labels, features, files_name)
 
 
 def features_save(csv_name: str, images_features: list):
