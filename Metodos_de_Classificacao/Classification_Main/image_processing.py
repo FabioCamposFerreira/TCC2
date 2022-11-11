@@ -11,44 +11,45 @@ import constants
 
 def processing(im, library_img: str, img_processing: List[str]):
     """Make processing image"""
-    if library_img == "Pillow":
-        if "HSV" in img_processing:
-            im = im.convert(mode="HSV")
-        if "get_H" in img_processing:
-            im = im.getchannel(0)
-        if "filter_blur" in img_processing:
-            im = im.filter(ImageFilter.BLUR)
-        if "filter_contour" in img_processing:
-            im = im.filter(ImageFilter.CONTOUR)
-        if "filter_detail" in img_processing:
-            im = im.filter(ImageFilter.DETAIL)
-        if "filter_edgeEnhance" in img_processing:
-            im = im.filter(ImageFilter.EDGE_ENHANCE)
-        if "filter_edgeEnhanceMore" in img_processing:
-            im = im.filter(ImageFilter.EDGE_ENHANCE_MORE)
-        if "filter_emboss" in img_processing:
-            im = im.filter(ImageFilter.EMBOSS)
-        if "filter_findEdges" in img_processing:
-            im = im.filter(ImageFilter.FIND_EDGES)
-        if "filter_sharpen" in img_processing:
-            im = im.filter(ImageFilter.SHARPEN)
-        if "filter_smooth" in img_processing:
-            im = im.filter(ImageFilter.SMOOTH)
-        if "filter_smoothMore" in img_processing:
-            im = im.filter(ImageFilter.SMOOTH_MORE)
-    if library_img == "OpenCV":
-        if "HSV" in img_processing:
-            im = cv.cvtColor(im, cv.COLOR_BGR2HSV_FULL)
-        if "get_H" in img_processing:
-            im = im[:, :, 0]
-        if "filter_blur" in img_processing:
-            im = cv.blur(im, (5, 5))
-        if "filter_median_blur" in img_processing:
-            im = cv.medianBlur(im, 5)
-        if "filter_gaussian_blur" in img_processing:
-            im = cv.GaussianBlur(im, (5, 5), 0)
-        if "filter_bilateral_filter" in img_processing:
-            im = cv.bilateralFilter(im, 9, 75, 75)
+    for processing in img_processing:
+        if library_img == "Pillow":
+            if "HSV" in processing:
+                im = im.convert(mode="HSV")
+            if "get_H" in processing:
+                im = im.getchannel(0)
+            if "filter_blur" in processing:
+                im = im.filter(ImageFilter.BLUR)
+            if "filter_contour" in processing:
+                im = im.filter(ImageFilter.CONTOUR)
+            if "filter_detail" in processing:
+                im = im.filter(ImageFilter.DETAIL)
+            if "filter_edgeEnhance" in processing:
+                im = im.filter(ImageFilter.EDGE_ENHANCE)
+            if "filter_edgeEnhanceMore" in processing:
+                im = im.filter(ImageFilter.EDGE_ENHANCE_MORE)
+            if "filter_emboss" in processing:
+                im = im.filter(ImageFilter.EMBOSS)
+            if "filter_findEdges" in processing:
+                im = im.filter(ImageFilter.FIND_EDGES)
+            if "filter_sharpen" in processing:
+                im = im.filter(ImageFilter.SHARPEN)
+            if "filter_smooth" in processing:
+                im = im.filter(ImageFilter.SMOOTH)
+            if "filter_smoothMore" in processing:
+                im = im.filter(ImageFilter.SMOOTH_MORE)
+        if library_img == "OpenCV":
+            if "HSV" in processing:
+                im = cv.cvtColor(im, cv.COLOR_BGR2HSV_FULL)
+            if "get_H" in processing:
+                im = im[:, :, 0]
+            if "filter_blur" in processing:
+                im = cv.blur(im, (5, 5))
+            if "filter_median_blur" in processing:
+                im = cv.medianBlur(im, 5)
+            if "filter_gaussian_blur" in processing:
+                im = cv.GaussianBlur(im, (5, 5), 0)
+            if "filter_bilateral_filter" in processing:
+                im = cv.bilateralFilter(im, 9, 75, 75)
     return im
 
 

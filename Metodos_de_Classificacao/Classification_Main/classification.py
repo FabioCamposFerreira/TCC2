@@ -28,11 +28,19 @@ def labeling(X: list, y_full: list, method_name: str,  library: str, xml_name: s
         X = np.matrix(X, dtype=np.float32)
         y_predict = np.array(method.predict(X)[1], dtype=np.int)
         if method_name == "MLP":
+            y_mlp=0
             enc = OneHotEncoder(sparse=False, dtype=np.float32, handle_unknown="ignore")
             _ = enc.fit_transform(np.array(y_full).reshape(-1, 1))
-            y_predict = enc.inverse_transform(y_predict)
-            y_predict[y_predict == None] = 0
-            y_predict = np.squeeze(y_predict).tolist()
+            max_y=max(y_predict[0])
+            doubt = np.where(max_y==y_predict[0])
+            for index in  doubt[0]:
+                y_temp = y_predict
+                y_temp[0,doubt]=0
+                y_temp[0,index]=max_y
+                y_temp = enc.inverse_transform(y_temp)
+                y_temp[y_temp == None] = 0
+                y_mlp+=y_temp
+            y_predict = y_mlp
         return y_predict
     elif library == "scikit-learn":
         method = load(xml_name.replace("XXX", method_name).replace(".xml", ".joblib"))

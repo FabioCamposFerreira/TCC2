@@ -36,13 +36,25 @@ def optimization_graph(points: dict, file_path: str):
     points["x"] = points["accuracy"]
     points["y"] = points["accuracy"]
     key_strings = ""
-    for key in points.keys():
-        if type(points[key][0]) != str:
+    keys = points.keys()
+    # contruct click menu
+    for key in keys:
+        type_test = type(points[key][0])
+        if type_test != str and type_test != list:
             if key != "x" and key != "y":
                 menu += [(key, key)]
         else:
             key_strings = key
-        labels += "".join((",", key, ":@", key))
+        if key != "x" and key != "y":
+            labels += "".join((",", key, ":@", key))
+    # select legend id
+    if "kernel" in keys:
+        legend_id = "kernel"
+    elif "activation" in keys:
+        legend_id = "activation"
+    else:
+        legend_id = "k"
+    # construct graph
     source = pd.DataFrame.from_dict(points)
     try:
         index_cmap = factor_cmap(key_strings, palette=palette, factors=sorted(source[key_strings].unique()))
@@ -52,7 +64,7 @@ def optimization_graph(points: dict, file_path: str):
     TOOLTIPS = [("(x,y)", "($x, $y)"), ("label", labels)]
     f = bokeh.figure(sizing_mode="stretch_both", output_backend="svg", tools="pan,wheel_zoom,box_zoom,reset,hover,save",
                      tooltips=TOOLTIPS)
-    f.circle("x", "y", source=source, legend_field="kernel", size=10, color=index_cmap)
+    f.circle("x", "y", source=source, legend_field=legend_id, size=10, color=index_cmap)
     f.legend.click_policy = "hide"
     f.add_layout(f.legend[0], 'right')
     f.xaxis.axis_label = "accuracy"

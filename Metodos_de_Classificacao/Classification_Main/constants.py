@@ -32,7 +32,7 @@ def features(histogram_256=[0, None],
              image_contours_XXX=[0, 0],
              histogram_reduce_XXX=[0, 0]):
     l = locals()
-    return [key.replace("XXX",str(l[key][1])) for key in l if l[key][0] == 1]
+    return [key.replace("XXX", str(l[key][1])) for key in l if l[key][0] == 1]
 
 
 def data_base_paths(temp=0, Data_Base_Cedulas=0):
@@ -51,10 +51,10 @@ def svm_kernel(linear=0, poly=0, rbf=0, sigmoid=0, chi2=0, inter=0) -> str:
 
 
 def methods_parameters(knn_k: int, mlp_layers: List[int], svm_kernel: svm_kernel, svm_c: float, svm_gamma: float,
-                       svm_degree: float):
+                       svm_degree: float, activation: str, alpha=float, beta=float):
 
     return [{"knn_k": knn_k, "mlp_layers": mlp_layers, "svm_kernel": svm_kernel, "svm_c": svm_c, "svm_gamma": svm_gamma,
-            "svm_degree": svm_degree}]
+            "svm_degree": svm_degree, "activation": activation, "alpha": alpha, "beta": beta}]
 
 
 def methods_selected(SVM=0, KNN=0, MLP=0):
