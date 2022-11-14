@@ -173,18 +173,16 @@ class MachineLearn:
         results = np.array(self.results)
         classes_correct = results[:, 1]
         classes_correct = np.array(classes_correct, dtype=int)
+        classes_set = set(classes_correct)
         results = results[:, 2:]  # remove image name and class correct
         results = np.array(results, dtype=float)
         results = np.array(results, dtype=int)
         for index, method in enumerate(self.methods):
             self.accuracy[method] = accuracy_score(classes_correct, results[:, (2*index)])
-            self.precision[method] = precision_score(classes_correct, results[:, (2*index)],
-                                                     average="weighted", sample_weight=classes_correct, zero_division=0)
+            self.precision[method] = np.average(precision_score(classes_correct, results[:, (2*index)],zero_division=0),weights=classes_set)
             self.confusion_matrix[method] = confusion_matrix(classes_correct, results[:, (2*index)])
-            self.recall[method] = recall_score(classes_correct, results[:, (2*index)], average="weighted",
-                                               sample_weight=classes_correct, zero_division=0)
-            self.meansquare_error[method] = mean_squared_error(classes_correct, results[:, (2 * index)],
-                                                               sample_weight=classes_correct)
+            self.recall[method] = np.average(recall_score(classes_correct, results[:, (2*index)], zero_division=0),weights=classes_set)
+            self.meansquare_error[method] = np.average(mean_squared_error(classes_correct, results[:, (2 * index)]),weights=classes_set)
 
     def setup_save(self):
         """Save the results fo the labeling"""

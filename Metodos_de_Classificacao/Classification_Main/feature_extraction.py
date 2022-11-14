@@ -11,6 +11,22 @@ import cv2 as cv
 import constants
 import image_processing
 
+def color_contours(im, im_name: str, library_img):
+    """Find contours in image"""
+    curves = np.zeros((1,255), dtype=int)
+    labels = []
+    if library_img == "OpenCV":
+        contours, _ = cv.findContours(im, mode=cv.RETR_EXTERNAL, method=cv.CHAIN_APPROX_NONE)
+        if len(contours):
+            for index,contour in enumerate(contours):
+                if cv.contourArea(contour)>3e3:
+                    im_color = img_process(arq, library_img="OpenCV", img_processing=["HSV", "get_0", "gaussian"])
+                    mask = np.zeros(im.shape, dtype="uint8")
+                    cv.drawContours(mask, [contour], -1, 255, -1)
+                    im_color[mask == 0] = 0
+                    cv.imwrite(str(index)+".png",im_color)
+                    curves = np.vstack((curves,np.squeeze(normalize(cv.calcHist([im_color], [0], None, [256], [0, 256])[1:]))))
+                    labels += [str(index)]
 
 def image_contours(im, im_name: str, library_img):
     """Find contours in image"""
