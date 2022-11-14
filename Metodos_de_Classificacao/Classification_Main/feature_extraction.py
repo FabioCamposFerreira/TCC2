@@ -11,22 +11,24 @@ import cv2 as cv
 import constants
 import image_processing
 
+
 def color_contours(im, im_name: str, library_img):
     """Find contours in image"""
-    curves = np.zeros((1,255), dtype=int)
-    labels = []
+    returns = []
+    im_hue = np.array(im)
+    im = image_processing.processing(im, library_img="OpenCV", img_processing=["thresh", "morphology"])
     if library_img == "OpenCV":
         contours, _ = cv.findContours(im, mode=cv.RETR_EXTERNAL, method=cv.CHAIN_APPROX_NONE)
         if len(contours):
-            for index,contour in enumerate(contours):
-                if cv.contourArea(contour)>3e3:
-                    im_color = img_process(arq, library_img="OpenCV", img_processing=["HSV", "get_0", "gaussian"])
+            for index, contour in enumerate(contours):
+                if cv.contourArea(contour) > 3e3:
                     mask = np.zeros(im.shape, dtype="uint8")
                     cv.drawContours(mask, [contour], -1, 255, -1)
-                    im_color[mask == 0] = 0
-                    cv.imwrite(str(index)+".png",im_color)
-                    curves = np.vstack((curves,np.squeeze(normalize(cv.calcHist([im_color], [0], None, [256], [0, 256])[1:]))))
-                    labels += [str(index)]
+                    temp = np.array(im_hue)
+                    temp[mask == 0] = 0
+                    returns.append([im_name+str(index),
+                                    np.squeeze(normalize(cv.calcHist([temp], [0], None, [256], [0, 256])[1:]))])
+
 
 def image_contours(im, im_name: str, library_img):
     """Find contours in image"""
@@ -119,4 +121,6 @@ def get_features(im, im_name, feature, library_img, n_features=10):
         features = image_patches(im, im_name, library_img, n_features)
     elif feature == "image_contours":
         features = image_contours(im, im_name, library_img)
+    elif feature == "color_contours":
+        features = color_contours(im, im_name, library_img)
     return features

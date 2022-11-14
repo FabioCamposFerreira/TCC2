@@ -440,16 +440,17 @@ if __name__ == "__main__":
     todos = constants.todos(start=True, optimate=False)
     method_libraries = constants.methods_libraries(OpenCV=True)
     img_libraries = constants.img_libraries(OpenCV=True)
-    img_processing = constants.img_processing(HSV=True, get_H=True, filter_blur=False)
-    features = constants.features(histogram_256=[True, 256],
+    img_processing = constants.img_processing(HSV=True, get_H=True, filter_blur=False, filter_gaussian_blur=True)
+    features = constants.features(histogram_256=[False, 256],
                                   histogram_filter_256=[False, 256],
                                   histogram_reduce_XXX=[False, 10],
-                                  image_patches_XXX=[False, 25*25])
+                                  image_patches_XXX=[False, 25*25],
+                                  color_contours_255=[True,255])
     data_base_paths = constants.data_base_paths(Data_Base_Cedulas=True, temp=False)
     methods_parameters = constants.methods_parameters(knn_k=3, mlp_layers=[300,300,300,300,300,300],
                                                       svm_c=1, svm_kernel=constants.svm_kernel(inter=True),
                                                       svm_gamma=1, svm_degree=1,activation="sigmoid_sym",alpha=100,beta=100)
-    methods_selected = constants.methods_selected(SVM=False, KNN=False, MLP=True)
+    methods_selected = constants.methods_selected(SVM=True, KNN=True, MLP=True)
     mls_construct(todos, method_libraries, img_libraries, img_processing, features,
                   data_base_paths, methods_parameters, methods_selected)
     print("".join(("Tempo de execução:", str(others.TimeConversion(time.time()-start_time)))))

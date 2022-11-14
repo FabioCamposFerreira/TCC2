@@ -40,16 +40,25 @@ def processing(im, library_img: str, img_processing: List[str]):
         if library_img == "OpenCV":
             if "HSV" in processing:
                 im = cv.cvtColor(im, cv.COLOR_BGR2HSV_FULL)
-            if "get_H" in processing:
+            elif "get_0" in processing:
                 im = im[:, :, 0]
-            if "filter_blur" in processing:
+            elif "get_1" in processing:
+                im = im[:, :, 1]
+            elif "get_2" in processing:
+                im = im[:, :, 2]
+            elif "filter_blur" in processing:
                 im = cv.blur(im, (5, 5))
-            if "filter_median_blur" in processing:
+            elif "filter_median_blur" in processing:
                 im = cv.medianBlur(im, 5)
-            if "filter_gaussian_blur" in processing:
+            elif "filter_gaussian_blur" in processing:
                 im = cv.GaussianBlur(im, (5, 5), 0)
-            if "filter_bilateral_filter" in processing:
+            elif "filter_bilateral_filter" in processing:
                 im = cv.bilateralFilter(im, 9, 75, 75)
+            elif "thresh" in processing:
+                im = cv.threshold(im, 127, 255, 0)[1]
+            elif "filter_morphology" in processing:
+                cv.morphologyEx(src=im, op=cv.MORPH_CLOSE,
+                                kernel=cv.getStructuringElement(shape=cv.MORPH_RECT, ksize=(22, 3)), dst=im)
     return im
 
 

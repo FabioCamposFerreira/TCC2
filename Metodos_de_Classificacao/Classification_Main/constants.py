@@ -21,7 +21,7 @@ def img_libraries(OpenCV=0, Pillow=0):
     return [key for key in l if l[key] == 1]
 
 
-def img_processing(HSV=0, get_H=0, filter_blur=0):
+def img_processing(HSV=0, get_H=0, filter_blur=0, filter_gaussian_blur=0,filter_morphology=0):
     l = locals()
     return [[key for key in l if l[key] == 1]]
 
@@ -30,7 +30,8 @@ def features(histogram_256=[0, None],
              histogram_filter_256=[0, None],
              image_patches_XXX=[0, 0],
              image_contours_XXX=[0, 0],
-             histogram_reduce_XXX=[0, 0]):
+             histogram_reduce_XXX=[0, 0],
+             color_contours_255=[0,None]):
     l = locals()
     return [key.replace("XXX", str(l[key][1])) for key in l if l[key][0] == 1]
 
