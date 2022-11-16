@@ -28,7 +28,7 @@ def labeling(X: list, y_full: list, method_name: str,  library: str, xml_name: s
         X = np.matrix(X, dtype=np.float32)
         y_predict = np.array(method.predict(X)[1], dtype=np.int)
         if method_name == "MLP":
-            y_mlp=0
+            y_mlp=""
             enc = OneHotEncoder(sparse=False, dtype=np.float32, handle_unknown="ignore")
             _ = enc.fit_transform(np.array(y_full).reshape(-1, 1))
             max_y=max(y_predict[0])
@@ -39,7 +39,7 @@ def labeling(X: list, y_full: list, method_name: str,  library: str, xml_name: s
                 y_temp[0,index]=max_y
                 y_temp = enc.inverse_transform(y_temp)
                 y_temp[y_temp == None] = 0
-                y_mlp+=y_temp
+                y_mlp="9".join((y_mlp,str(y_temp[0,0])))
             y_predict = y_mlp
         return y_predict
     elif library == "scikit-learn":

@@ -138,7 +138,7 @@ class MachineLearn:
                                                                             self.parameters["feature"],
                                                                             self.parameters["library_img"],
                                                                             self.mlp_layers[0])
-                except:
+                except TypeError:
                     pass
             progress_bar.end()
             result_save.features_save(self.csv_features, self.images_features)
@@ -173,16 +173,24 @@ class MachineLearn:
         results = np.array(self.results)
         classes_correct = results[:, 1]
         classes_correct = np.array(classes_correct, dtype=int)
-        classes_set = set(classes_correct)
+        classes_set = list(set(classes_correct))
         results = results[:, 2:]  # remove image name and class correct
         results = np.array(results, dtype=float)
         results = np.array(results, dtype=int)
         for index, method in enumerate(self.methods):
+            if method == "MLP":
+                results[:, (2*index)] = [int(str(result).split("9")[1]) for result in results[:, (2*index)]]
             self.accuracy[method] = accuracy_score(classes_correct, results[:, (2*index)])
-            self.precision[method] = np.average(precision_score(classes_correct, results[:, (2*index)],zero_division=0),weights=classes_set)
+            self.precision[method] = np.average(precision_score(classes_correct,
+                                                                results[:, (2 * index)],
+                                                                average=None, zero_division=0),
+                                                weights=classes_set)
             self.confusion_matrix[method] = confusion_matrix(classes_correct, results[:, (2*index)])
-            self.recall[method] = np.average(recall_score(classes_correct, results[:, (2*index)], zero_division=0),weights=classes_set)
-            self.meansquare_error[method] = np.average(mean_squared_error(classes_correct, results[:, (2 * index)]),weights=classes_set)
+            self.recall[method] = np.average(
+                recall_score(classes_correct, results[:, (2 * index)], average=None,
+                             zero_division=0),
+                weights=classes_set)
+            self.meansquare_error[method] = mean_squared_error(classes_correct, results[:, (2 * index)])
 
     def setup_save(self):
         """Save the results fo the labeling"""
@@ -437,19 +445,20 @@ def mls_construct(todos: List[str],
 if __name__ == "__main__":
     # User Interface
     start_time = time.time()
-    todos = constants.todos(start=True, optimate=False)
+    todos = constants.todos(start=False, optimate=False,labeling_only=True)
     method_libraries = constants.methods_libraries(OpenCV=True)
     img_libraries = constants.img_libraries(OpenCV=True)
-    img_processing = constants.img_processing(HSV=True, get_H=True, filter_blur=False, filter_gaussian_blur=True)
+    img_processing = constants.img_processing(HSV=True, get_0=True, filter_blur=False, filter_gaussian_blur=True)
     features = constants.features(histogram_256=[False, 256],
                                   histogram_filter_256=[False, 256],
                                   histogram_reduce_XXX=[False, 10],
                                   image_patches_XXX=[False, 25*25],
-                                  color_contours_255=[True,255])
+                                  color_contours_255=[True, 255])
     data_base_paths = constants.data_base_paths(Data_Base_Cedulas=True, temp=False)
-    methods_parameters = constants.methods_parameters(knn_k=3, mlp_layers=[300,300,300,300,300,300],
-                                                      svm_c=1, svm_kernel=constants.svm_kernel(inter=True),
-                                                      svm_gamma=1, svm_degree=1,activation="sigmoid_sym",alpha=100,beta=100)
+    methods_parameters = constants.methods_parameters(
+        knn_k=3, mlp_layers=[10],
+        svm_c=1, svm_kernel=constants.svm_kernel(inter=True),
+        svm_gamma=1, svm_degree=1, activation="sigmoid_sym", alpha=100, beta=100)
     methods_selected = constants.methods_selected(SVM=True, KNN=True, MLP=True)
     mls_construct(todos, method_libraries, img_libraries, img_processing, features,
                   data_base_paths, methods_parameters, methods_selected)

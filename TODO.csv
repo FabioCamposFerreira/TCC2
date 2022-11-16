@@ -42,3 +42,4 @@ Priority,Type,Data Add,Status,Task,Links,"Priority (1=Today,2=Semester,3=Year,4=
 2,TCC,Out/26,❑,Agrupar caracteristicas de por sobreposição ,,
 2,TCC,Out/27,✔,Aplicar filtro  para excluir pixel com saturação baixa e luminasidade nos extremos,,
 4,TCC,Out/28,✔,Colocar o indicador de cores no grafico de histograma,,
+5,TCC,Novem/16,,Colocar time no grafico de otmização,,

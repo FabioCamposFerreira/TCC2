@@ -28,6 +28,7 @@ def color_contours(im, im_name: str, library_img):
                     temp[mask == 0] = 0
                     returns.append([im_name+str(index),
                                     np.squeeze(normalize(cv.calcHist([temp], [0], None, [256], [0, 256])[1:]))])
+    return returns
 
 
 def image_contours(im, im_name: str, library_img):

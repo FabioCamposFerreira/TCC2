@@ -21,7 +21,7 @@ def img_libraries(OpenCV=0, Pillow=0):
     return [key for key in l if l[key] == 1]
 
 
-def img_processing(HSV=0, get_H=0, filter_blur=0, filter_gaussian_blur=0,filter_morphology=0):
+def img_processing(HSV=0, get_0=0,get_1=0,get_2=0, filter_blur=0, filter_gaussian_blur=0,filter_morphology=0):
     l = locals()
     return [[key for key in l if l[key] == 1]]
 

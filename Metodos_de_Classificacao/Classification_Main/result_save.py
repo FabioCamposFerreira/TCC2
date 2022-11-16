@@ -121,7 +121,7 @@ def add_hue_bar(f: bokeh.Figure, length: int):
     hsv = [np.uint8([[[hue, 255, int(255/2)]]]) for hue in range(0, 256, int(256/length))]
     rgb = [cv.cvtColor(hsv_one, cv.COLOR_HSV2RGB_FULL)[0][0] for hsv_one in hsv]
     hex_ = ['#%02x%02x%02x' % tuple(rgb_one.tolist()) for rgb_one in rgb]
-    f.square(x, y, size=20, color=hex_)
+    f.square(x[0:length], y[0:length], size=20, color=hex_[0:length])
     return f
 
 
