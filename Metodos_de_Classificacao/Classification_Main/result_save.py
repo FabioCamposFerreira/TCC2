@@ -139,6 +139,7 @@ def graphics_interactive(curves: list, labels: list, file_path: str):
     f = add_hue_bar(f, length)
     bokeh.output_file(file_path+".html")
     bokeh.save(f)
+    
 
 
 def graphics_splom(labels: List[str], features: np.ndarray, file_path: str):
@@ -154,7 +155,7 @@ def graphics_splom(labels: List[str], features: np.ndarray, file_path: str):
         labels_color = np.array(labels, dtype=object)
         for index, l_s in enumerate(labels_set):
             labels_color[labels_color == l_s] = colors[index]
-        progress_bar = others.ProgressBar("", len(column_packs), 0)
+        progress_bar = others.ProgressBar("Criando gráfico splom",len(column_packs),0)
         for i, pack in enumerate(column_packs):
             progress_bar.print(i)
             plt.rcParams["figure.subplot.right"] = 0.8
@@ -173,7 +174,7 @@ def graphics_box2(classes: set, labels: list[str], features: np.ndarray, file_pa
     features_len = len(features[0])
     with PdfPages(pdf_path) as pdf:
         print("Construindo "+pdf_path)
-        progress_bar = others.ProgressBar("", features_len, 0)
+        progress_bar = others.ProgressBar("Criando gráfico Box2", features_len,0) 
         for index in range(features_len):
             progress_bar.print(index)
             plt.clf()

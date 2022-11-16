@@ -4,7 +4,7 @@ import os
 def packages_install():
     """Install packages to developers"""
     print("\033[90m")
-    os.system("pip install -r requirements.txt")
+    os.system("pip install -U -r requirements.txt")
     print("\033[00m")
 
 
@@ -24,6 +24,8 @@ try:
     import joblib
     import scipy
     import bokeh
+    import pandas
+    import sklearn
 
 except:
     packages_install()

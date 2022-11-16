@@ -65,7 +65,10 @@ class ProgressBar:
 
     def make_line(self):
         """Construct line"""
-        line_width = int(subprocess.check_output("tput cols", shell=True))
+        try:
+            line_width = int(subprocess.check_output("tput cols", shell=True))
+        except:
+            line_width=100
         try:
             time_formated = TimeConversion(int(self.time_delta / self.percentage_delta*(100-self.percentage_now)))
         except ZeroDivisionError:

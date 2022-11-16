@@ -7,6 +7,10 @@ Author: Fábio Campos Ferreira
 Contains step by step instructions for performing image processing, feature extraction, feature training and classification of unknown images
 Several configuration options are presented at each step for later comparison
 """
+import install_dev
+from sklearn.metrics import accuracy_score, precision_score, confusion_matrix, recall_score, mean_squared_error
+import numpy as np
+import time
 import os
 import random
 import time
@@ -56,8 +60,7 @@ class MachineLearn:
         self.path_output = "./Output/"
         self.path_classifiers = self.path_output+"Classifiers/"
         self.path_features = self.path_output+"Patterns/"
-        self.path_graphics = (
-            self.path_output
+        self.path_graphics = (self.path_output
             + "Graphics/"
             + "XXX,"
             + ",".join(
@@ -69,7 +72,7 @@ class MachineLearn:
             "XXX-"
             + ",".join(p + "=" + str(self.parameters[p]).split("/")[-2:][0] for p in self.parameters))
         self.csv_results = self.path_results+self.files_name.replace("XXX", "Resultados")+".csv"
-        self.csv_features = self.path_features+self.files_name.replace("XXX", "Características")+".csv"
+        self.csv_features = self.path_features+self.path_graphics.replace("XXX", "Características")+".csv"
         self.xml_name = self.path_classifiers+self.files_name+".xml"
         # Construct classifiers
         self.methods = {}

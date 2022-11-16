@@ -6,3 +6,5 @@ matplotlib
 joblib
 scipy
 bokeh
+pandas
+scikit-learn
