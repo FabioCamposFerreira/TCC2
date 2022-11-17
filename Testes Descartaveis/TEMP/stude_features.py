@@ -96,14 +96,23 @@ def image_contours(im, im_name: str, library_img):
     labels = []
     if library_img == "OpenCV":
         contours, _ = cv.findContours(im, mode=cv.RETR_EXTERNAL, method=cv.CHAIN_APPROX_NONE)
+        im_color_c = img_process(arq, library_img="OpenCV", img_processing=[])
+        cv.drawContours(im_color_c,contours,-1,(0,255,0),-1)
+        cv.imwrite("im_color_c.png",im_color_c)
         if len(contours):
             for index,contour in enumerate(contours):
                 if cv.contourArea(contour)>3e3:
+                    im_color_v = img_process(arq, library_img="OpenCV", img_processing=["gaussian","HSV"])
                     im_color = img_process(arq, library_img="OpenCV", img_processing=["HSV", "get_0", "gaussian"])
+                    cv.imwrite("h.png",im_color)
                     mask = np.zeros(im.shape, dtype="uint8")
                     cv.drawContours(mask, [contour], -1, 255, -1)
                     im_color[mask == 0] = 0
-                    cv.imwrite(str(index)+".png",im_color)
+                    im_color_v[mask == 0] = (0,0,0)
+                    #im_color_v[:,:,1] = 255
+                    #im_color_v[:,:,2] = 255/2
+                    #cv.imwrite(str(index)+".png",im_color)
+                    cv.imwrite(str(index)+"v.png",cv.cvtColor(im_color_v, cv.COLOR_HSV2BGR_FULL))
                     curves = np.vstack((curves,np.squeeze(normalize(cv.calcHist([im_color], [0], None, [256], [0, 256])[1:]))))
                     labels += [str(index)]
     graphics_interactive(curves[1:],labels,"temp")
@@ -227,24 +236,26 @@ def processing(im, library_img: str, img_processing: List[str]):
             elif "filter_blur" in processing:
                 im = cv.blur(im, (5, 5))
             elif "filter_median_blur" in processing:
-                im = cv.medianBlur(im, 5)
+                im = cv.medianBlur(im, 15)
             elif "filter_gaussian_blur" in processing:
-                im = cv.GaussianBlur(im, (55, 55), 0)
+                im = cv.GaussianBlur(im, (5, 5), 15)
             elif "filter_bilateral_filter" in processing:
                 im = cv.bilateralFilter(im, 9, 75, 75)
             elif "thresh" in processing:
-                im = cv.threshold(im, 127, 255, 0)[1]
+                im = cv.threshold(im, int(255*0.2), 255, 0)[1]
             elif "gaussian" in processing:
                 im = cv.GaussianBlur(im, (77, 77), 0)
             elif "sobel" in processing:
                 im = cv.Sobel(im, cv.CV_8U, 1, 0, ksize=3)
             elif "morphology" in processing:
                 cv.morphologyEx(src=im, op=cv.MORPH_CLOSE, kernel=cv.getStructuringElement(
-                    shape=cv.MORPH_RECT, ksize=(22, 3)), dst=im)
+                    shape=cv.MORPH_RECT, ksize=(10, 15)), dst=im)
             elif "median_blur" in processing:
                 im = cv.medianBlur(im, 5)
             elif "histogram_equalization" in processing:
                 im = cv.equalizeHist(im)
+            elif "canny" in processing:
+               im = cv.Canny(im,100,200)
     return im
 
 
@@ -273,20 +284,26 @@ def open_image(arq, library_img, inverted=False):
 def img_process(arq, library_img, img_processing: List[str], inverted=False):
     "Get a path if the image, process and return it as pillow/array Image"
     im = open_image(arq, library_img, inverted=False)
-    # (B, G, R) = cv.split(im)
-    # M = np.maximum(np.maximum(R, G), B)
-    # R[R < M] = 0
-    # G[G < M] = 0
-    # B[B < M] = 0
-    # im = cv.merge([B, G, R])
+    """ (B, G, R) = cv.split(im)
+    M = np.maximum(np.maximum(R, G), B)
+    R[R < M] = 0
+    G[G < M] = 0
+    B[B < M] = 0
+    im = cv.merge([B, G, R]) """
     cv.imwrite("original.png", im)
     im = processing(im, library_img, img_processing)
     return im
 
 
-arq = "/home/suporte/Documents/TCC2/Data_Base/Data_Base_Cedulas/5.11.jpg"
-im = img_process(arq, library_img="OpenCV", img_processing=["gaussian", "HSV", "get_0", "thresh", "morphology"])
-cv.imwrite("processada.png", im)
+arq = "../../Data_Base/Data_Base_Cedulas/20.8.jpg"
+im = img_process(arq, library_img="OpenCV", img_processing=["gray","histogram_equalization","filter_median_blur"])
+cv.imwrite("1.png", im)
+im = img_process(arq, library_img="OpenCV", img_processing=["gray","histogram_equalization","filter_median_blur","canny"])
+cv.imwrite("2.png", im)
+im = img_process(arq, library_img="OpenCV", img_processing=["gray","histogram_equalization","filter_median_blur","canny","morphology"])
+cv.imwrite("3.png", im)
+#im = img_process(arq, library_img="OpenCV", img_processing=["gray","histogram_equalization","gaussian","canny","thresh", "morphology"])
+#cv.imwrite("processada.png", im)
 # im = img_process(arq, library_img="OpenCV", img_processing=["gaussian","HSV","get_0","sobel","thresh","morphology"])
 # y = histogram_reduce(im, im_name="test", library_img="OpenCV",n_features=10)[0][1]
 # y = image_patches(im, im_name="test", library_img="OpenCV")[0][1]
