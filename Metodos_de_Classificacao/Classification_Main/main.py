@@ -140,8 +140,13 @@ class MachineLearn:
                                                                             img[0],
                                                                             self.parameters["feature"],
                                                                             self.parameters["library_img"],
+<<<<<<< HEAD
                                                                             self.mlp_layers[0])
                 except TypeError:
+=======
+                                                                            self.mlp_layers[0])  
+                except ValueError:
+>>>>>>> 5b91ae1 (tentando resolver color contounr)
                     pass
             progress_bar.end()
             result_save.features_save(self.csv_features, self.images_features)
@@ -150,7 +155,7 @@ class MachineLearn:
         self.y = [int(row[0].split(".")[0]) for row in self.images_features]
         self.X = [row[1] for row in self.images_features]
 
-    def setup_train(self, X: list[float], y: list[int], file_save: True):
+    def setup_train(self, X: List[float], y: List[int], file_save: True):
         """Do training and save classifiers in files"""
         classifier = {}
         for method in self.methods:
@@ -200,7 +205,7 @@ class MachineLearn:
         print("Salvando Resultados em "+self.csv_results)
         result_save.save(self.csv_results, self.methods,  np.array(self.results))
 
-    def validation(self, X: list[list[float]], y: list[int], index: int,
+    def validation(self, X: List[List[float]], y: List[int], index: int,
                    results: dict = None, classifier_save: bool = False):
         """Train and classify data to one validation in cross validation"""
         # To Remove inverted feature: jump next feature or previous above features
@@ -216,7 +221,7 @@ class MachineLearn:
         else:
             results.append(self.labeling(X[index], y[index], y, self.images_features[index][0], classifier=classifier))
 
-    def validation_parallel(self,  X: list[list[float]], y: list[int], features_len: int):
+    def validation_parallel(self,  X: List[List[float]], y: List[int], features_len: int):
         """Run multiples self.validation in parallel"""
         progress_bar = others.ProgressBar("Fazendo validação cruzada", features_len, 0)
         processes = []
@@ -231,7 +236,7 @@ class MachineLearn:
         progress_bar.end()
         self.results = list(results)
 
-    def validation_serial(self,  X: list[list[float]], y: list[int], features_len: int):
+    def validation_serial(self,  X: List[List[float]], y: List[int], features_len: int):
         """Run multiples self.validation in serial"""
         progress_bar = others.ProgressBar("Fazendo validação cruzada", features_len, 0)
         results = []
@@ -258,7 +263,7 @@ class MachineLearn:
         for key in parameters.keys():
             results_xylabel[key] += [parameters[key]]
 
-    def parameters_combination(self, keys: list[str], grid: dict, parameters: dict, method: str,
+    def parameters_combination(self, keys: List[str], grid: dict, parameters: dict, method: str,
                                progress_bar: others.ProgressBar, actual: int, results_xylabel: list,
                                process_parallel: Process = None) -> int:
         """Recursive function that make cross validation to each combination parameters in grid"""
@@ -458,10 +463,16 @@ if __name__ == "__main__":
                                   image_patches_XXX=[False, 25*25],
                                   color_contours_255=[True, 255])
     data_base_paths = constants.data_base_paths(Data_Base_Cedulas=True, temp=False)
+<<<<<<< HEAD
     methods_parameters = constants.methods_parameters(
         knn_k=3, mlp_layers=[10],
         svm_c=1, svm_kernel=constants.svm_kernel(inter=True),
         svm_gamma=1, svm_degree=1, activation="sigmoid_sym", alpha=100, beta=100)
+=======
+    methods_parameters = constants.methods_parameters(knn_k=3, mlp_layers=[10],
+                                                      svm_c=1, svm_kernel=constants.svm_kernel(inter=True),
+                                                      svm_gamma=1, svm_degree=1,activation="sigmoid_sym",alpha=100,beta=100)
+>>>>>>> 5b91ae1 (tentando resolver color contounr)
     methods_selected = constants.methods_selected(SVM=True, KNN=True, MLP=True)
     mls_construct(todos, method_libraries, img_libraries, img_processing, features,
                   data_base_paths, methods_parameters, methods_selected)

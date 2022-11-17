@@ -35,7 +35,7 @@ def image_contours(im, im_name: str, library_img):
     """Find contours in image"""
     if library_img == "Pillow":
         im = im.getchannel(channel=1)
-        contours = cv.findContours(np.array(im))
+        contours = cv.findContours(np.array(im), mode=cv.RETR_EXTERNAL, method=cv.CHAIN_APPROX_NONE)
         counts = 0
         returns = []
         for imgs in contours:
@@ -81,13 +81,15 @@ def histogram_reduce(im, im_name: str, library_img, n_features: int):
 
 def histogram(im, im_name: str, library_img):
     """Receive image and return histogram of the channel H"""
+    h = []
     if library_img == "Pillow":
-        return [[im_name, normalize(im.getchannel(channel=0).histogram(mask=None, extrema=None))]]
+        h = im.getchannel(channel=0).histogram(mask=None, extrema=None)
     elif library_img == "OpenCV":
-        return [[im_name, normalize(np.squeeze(cv.calcHist([im], [0], None, [256], [0, 256])).tolist())]]
+        h = np.squeeze(cv.calcHist([im], [0], None, [256], [0, 256])).tolist()
+    return [[im_name, normalize(h)]]
 
 
-def histogram_filter(im, im_name: str, library_img: str):
+def histogram_filter(im: np.ndarray, im_name: str, library_img: str):
     """Receive image and return histogram of the channel H excruing pixels with low saturation and value in extrems"""
     if library_img == "Pillow":
         im = np.array(im)
@@ -111,7 +113,6 @@ def normalize(list_):
 def get_features(im, im_name, feature, library_img, n_features=10):
     """Extract image features
     """
-    features = []
     if feature == "histogram":
         features = histogram(im, im_name, library_img)
     elif feature == "histogram_filter":

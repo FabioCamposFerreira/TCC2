@@ -4,12 +4,13 @@
 from typing import List
 
 import cv2 as cv
+import numpy as np
 from PIL import Image, ImageFilter
 
 import constants
 
 
-def processing(im, library_img: str, img_processing: List[str]):
+def processing(im: np.ndarray, library_img: str, img_processing: List[str]):
     """Make processing image"""
     for processing in img_processing:
         if library_img == "Pillow":

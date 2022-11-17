@@ -168,7 +168,7 @@ def graphics_splom(labels: List[str], features: np.ndarray, file_path: str):
         progress_bar.end()
 
 
-def graphics_box2(classes: set, labels: list[str], features: np.ndarray, file_path: str):
+def graphics_box2(classes: set, labels: List[str], features: np.ndarray, file_path: str):
     """Construct and save box chart to every class separate by feature"""
     pdf_path = file_path.replace("XXX", "BoxClassByFeatures")+".pdf"
     features_len = len(features[0])
@@ -188,7 +188,7 @@ def graphics_box2(classes: set, labels: list[str], features: np.ndarray, file_pa
         progress_bar.end()
 
 
-def graphics_box1(classes: set, labels: list[str], features: np.ndarray, file_path: str):
+def graphics_box1(classes: set, labels: List[str], features: np.ndarray, file_path: str):
     """Construct and save box chart to every feature separate by class"""
     _, axs = plt.subplots(len(classes), figsize=(len(features[0])/3, 10))
     for index, c in enumerate(classes):
@@ -198,7 +198,7 @@ def graphics_box1(classes: set, labels: list[str], features: np.ndarray, file_pa
     plt.savefig(file_path.replace("XXX", "BoxFeaturesByClass")+".pdf", bbox_inches='tight')
 
 
-def graphics_lines(classes: set, labels: List[str],  features: list[list[int]], file_path: str, images_name: List[str]):
+def graphics_lines(classes: set, labels: List[str],  features: List[List[int]], file_path: str, images_name: List[str]):
     legends = {"mean": [], "median": [], "mode": [], "Sandard Deviation": []}
     curves = {"mean": [], "median": [], "mode": [], "Sandard Deviation": []}
     for c in classes:
