@@ -1,15 +1,16 @@
 # Author: Fábio Campos
 # Main code to run application
 
+from PIL import Image
+import cv2 as cv
 from plyer import tts
 from kivy.app import App
-from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.clock import Clock
 from kivy.utils import platform
-
+from kivy.graphics.texture import Texture
+from kivy.uix.screenmanager import ScreenManager, Screen
 
 import image_processing
-import platform
 import classification as clsf
 
 
@@ -46,7 +47,7 @@ class ScreenCamera(Screen):
             valor.color = (1, 1, 0, 1)
             print(str(platform))
             if platform == "android":
-                tts.speak("".join((str(int(y))," reais")))
+                tts.speak("".join((str(int(y)), " reais")))
         else:
             valor.color = (1, 1, 0, 0)
 
@@ -57,6 +58,7 @@ class TelaDeConfiguracao(Screen):
         camera.play = False
         camera.index = int(not (camera.index))
         camera.play = True
+        pass
 
 
 class GerenciadorDeTelas(ScreenManager):
@@ -65,6 +67,7 @@ class GerenciadorDeTelas(ScreenManager):
 
 class Qual_o_valor(App):
     def build(self):
+
         return GerenciadorDeTelas()
 
 

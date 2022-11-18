@@ -28,16 +28,16 @@ def classify(im):
             writer = csv.writer(f)
             writer.writerow("Características")
             writer.writerow(pattern)
-    pattern = np.matrix(pattern, dtype=np.float32)
-    clsf = read_object(classifier+".xml")
-    y = clsf.predict(pattern)[1][0][0]
-    # id_max = predct_proba[0].argmax()
-    # analyze criteria for sure
-    # if predct_proba[0][id_max] > .5:
-    #     y = id_max
-    # else:
-    #     y = None
-    return y
+    if len(pattern) > 0:
+        pattern = np.matrix(pattern, dtype=np.float32)
+        clsf = read_object(classifier+".xml")
+        result = np.squeeze(clsf.predict(pattern)[1])
+        if result.shape != ():
+            y = np.bincount(list(result)).argmax()
+            if len(result == y) > len(result)/2:
+                return y
+        else:
+            return result
 
 
 def read_object(arq):

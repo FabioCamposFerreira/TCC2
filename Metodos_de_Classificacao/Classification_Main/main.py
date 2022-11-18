@@ -61,12 +61,12 @@ class MachineLearn:
         self.path_classifiers = self.path_output+"Classifiers/"
         self.path_features = self.path_output+"Patterns/"
         self.path_graphics = (self.path_output
-            + "Graphics/"
-            + "XXX,"
-            + ",".join(
-                ["data_base_path"+"="+"".join(self.parameters["data_base_path"].split("/")[-2:]),
-                 "library_img"+"="+self.parameters["library_img"],
-                 "feature"+"="+self.parameters["feature"]]))
+                              + "Graphics/"
+                              + "XXX,"
+                              + ",".join(
+                                  ["data_base_path"+"="+"".join(self.parameters["data_base_path"].split("/")[-2:]),
+                                   "library_img"+"="+self.parameters["library_img"],
+                                   "feature"+"="+self.parameters["feature"]]))
         self.path_results = self.path_output+"Results/"
         self.files_name = (
             "XXX-"
@@ -115,7 +115,7 @@ class MachineLearn:
                 [arq, image_processing.img_process(self.parameters["data_base_path"] + arq,
                                                    self.parameters["library_img"],
                                                    self.parameters["img_processing"])])
-            self.images_processed.append([arq+" (Inverted)",
+            self.images_processed.append(["-".join((arq, "Inverted")),
                                           image_processing.img_process(self.parameters["data_base_path"]+arq,
                                                                        self.parameters["library_img"],
                                                                        self.parameters["img_processing"],
@@ -140,13 +140,8 @@ class MachineLearn:
                                                                             img[0],
                                                                             self.parameters["feature"],
                                                                             self.parameters["library_img"],
-<<<<<<< HEAD
                                                                             self.mlp_layers[0])
-                except TypeError:
-=======
-                                                                            self.mlp_layers[0])  
                 except ValueError:
->>>>>>> 5b91ae1 (tentando resolver color contounr)
                     pass
             progress_bar.end()
             result_save.features_save(self.csv_features, self.images_features)
@@ -164,7 +159,7 @@ class MachineLearn:
                                                 self.xml_name, file_save)
         return classifier
 
-    def labeling(self, X: List[int], y_correct: int, y_full: list, img_name: str, classifier: dict = {}):
+    def labeling(self, X: List[float], y_correct: int, y_full: list, img_name: str, classifier: dict = {}):
         """Do labeling and update results"""
         if classifier == {}:
             classifier = dict.fromkeys(self.methods.keys(), [])
@@ -205,17 +200,15 @@ class MachineLearn:
         print("Salvando Resultados em "+self.csv_results)
         result_save.save(self.csv_results, self.methods,  np.array(self.results))
 
-    def validation(self, X: List[List[float]], y: List[int], index: int,
-                   results: dict = None, classifier_save: bool = False):
+    def validation(self, X: List[List[float]], y: List[List[int]], index: int,
+                   results: list = None, classifier_save: bool = False):
         """Train and classify data to one validation in cross validation"""
         # To Remove inverted feature: jump next feature or previous above features
-        if index % 2 == 0:
-            pause = index
-            restart = index+2
-        else:
-            pause = index-1
-            restart = index+1
-        classifier = self.setup_train(X[:pause]+X[restart:], y[:pause]+y[restart:], file_save=classifier_save)
+        im_name = self.images_features[index, 0].split("-")[0]
+        index_test = self.images_features[:, 0].split("-")[0] == im_name
+        X_train = X[index_test]
+        y_train = y[index_test]
+        classifier = self.setup_train(X_train, y_train, file_save=classifier_save)
         if results == None:
             return self.labeling(X[index], y[index], y, self.images_features[index][0], classifier=classifier)
         else:
@@ -453,7 +446,7 @@ def mls_construct(todos: List[str],
 if __name__ == "__main__":
     # User Interface
     start_time = time.time()
-    todos = constants.todos(start=False, optimate=False,labeling_only=True)
+    todos = constants.todos(start=False, optimate=False, labeling_only=True)
     method_libraries = constants.methods_libraries(OpenCV=True)
     img_libraries = constants.img_libraries(OpenCV=True)
     img_processing = constants.img_processing(HSV=True, get_0=True, filter_blur=False, filter_gaussian_blur=True)
@@ -463,16 +456,10 @@ if __name__ == "__main__":
                                   image_patches_XXX=[False, 25*25],
                                   color_contours_255=[True, 255])
     data_base_paths = constants.data_base_paths(Data_Base_Cedulas=True, temp=False)
-<<<<<<< HEAD
     methods_parameters = constants.methods_parameters(
         knn_k=3, mlp_layers=[10],
         svm_c=1, svm_kernel=constants.svm_kernel(inter=True),
         svm_gamma=1, svm_degree=1, activation="sigmoid_sym", alpha=100, beta=100)
-=======
-    methods_parameters = constants.methods_parameters(knn_k=3, mlp_layers=[10],
-                                                      svm_c=1, svm_kernel=constants.svm_kernel(inter=True),
-                                                      svm_gamma=1, svm_degree=1,activation="sigmoid_sym",alpha=100,beta=100)
->>>>>>> 5b91ae1 (tentando resolver color contounr)
     methods_selected = constants.methods_selected(SVM=True, KNN=True, MLP=True)
     mls_construct(todos, method_libraries, img_libraries, img_processing, features,
                   data_base_paths, methods_parameters, methods_selected)

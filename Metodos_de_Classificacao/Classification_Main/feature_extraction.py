@@ -16,7 +16,7 @@ def color_contours(im, im_name: str, library_img):
     """Find contours in image"""
     returns = []
     im_hue = np.array(im)
-    im = image_processing.processing(im, library_img="OpenCV", img_processing=["thresh", "morphology"])
+    im = image_processing.processing(im, library_img="OpenCV", img_processing=["thresh", "filter_morphology"])
     if library_img == "OpenCV":
         contours, _ = cv.findContours(im, mode=cv.RETR_EXTERNAL, method=cv.CHAIN_APPROX_NONE)
         if len(contours):
@@ -26,7 +26,7 @@ def color_contours(im, im_name: str, library_img):
                     cv.drawContours(mask, [contour], -1, 255, -1)
                     temp = np.array(im_hue)
                     temp[mask == 0] = 0
-                    returns.append([im_name+str(index),
+                    returns.append(["-".join((im_name, str(index))),
                                     np.squeeze(normalize(cv.calcHist([temp], [0], None, [256], [0, 256])[1:]))])
     return returns
 

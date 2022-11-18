@@ -8,7 +8,6 @@
     name: 'screen_camera'
     on_enter:self.event()
     on_pre_leave:self.event.cancel()
-
     BoxLayout:
         orientation:'vertical'
         Camera:
@@ -16,7 +15,6 @@
             index: 0
             resolution: (640,480)
             play: True
-            # allow_stretch: True
             keep_ratio: True
             allow_stretch: True
             canvas.before:
@@ -30,8 +28,6 @@
                     origin: self.center
             canvas.after:
                 PopMatrix
-        
-       
 
     Button:
         id:botao_configuracao
