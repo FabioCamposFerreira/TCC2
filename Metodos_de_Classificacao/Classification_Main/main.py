@@ -72,7 +72,7 @@ class MachineLearn:
             "XXX-"
             + ",".join(p + "=" + str(self.parameters[p]).split("/")[-2:][0] for p in self.parameters))
         self.csv_results = self.path_results+self.files_name.replace("XXX", "Resultados")+".csv"
-        self.csv_features = self.path_features+self.path_graphics.replace("XXX", "Características")+".csv"
+        self.csv_features = self.path_features+self.files_name.replace("XXX", "Características")+".csv"
         self.xml_name = self.path_classifiers+self.files_name+".xml"
         # Construct classifiers
         self.methods = {}
@@ -204,11 +204,24 @@ class MachineLearn:
                    results: list = None, classifier_save: bool = False):
         """Train and classify data to one validation in cross validation"""
         # To Remove inverted feature: jump next feature or previous above features
-        im_name = self.images_features[index, 0].split("-")[0]
-        index_test = self.images_features[:, 0].split("-")[0] == im_name
-        X_train = X[index_test]
-        y_train = y[index_test]
+        im_name = self.images_features[index][0].split("-")[0]
+        index_pause = 0
+        index_restart = 0
+        length = len(self.images_features)-1
+        for index_test in range(index, -1, -1):
+            if self.images_features[index_test][0].split("-")[0] != im_name:
+                index_pause = index_test
+                break
+
+        for index_test in range(index, length):
+            if self.images_features[index_test][0].split("-")[0] != im_name:
+                index_restart = index_test
+                break
+        X_train = X[:index_pause]+X[index_restart:]
+        y_train = y[:index_pause]+y[index_restart:]
+        # Load classifier
         classifier = self.setup_train(X_train, y_train, file_save=classifier_save)
+        # Labeling
         if results == None:
             return self.labeling(X[index], y[index], y, self.images_features[index][0], classifier=classifier)
         else:
@@ -236,13 +249,10 @@ class MachineLearn:
         for index in range(features_len):
             progress_bar.print(index)
             results.append(self.validation(X, y, index, classifier_save=True))
-        progress_bar.end()
         self.results = list(results)
 
     def cross_validation(self, X, y, features_len, parallel: bool = True):
         """Make cross validation one-leave-out to each method"""
-        if 0:
-            print("Realizando o treinamento e classificação usando cross validation leve-one-out")
         if parallel == True:
             self.validation_parallel(X, y, features_len)
         else:
@@ -250,7 +260,9 @@ class MachineLearn:
 
     def cross_validation_parallel(self, X, y, features_len, method, parameters, results_xylabel):
         """Call self.cross validation to run in parallel form"""
+        time_start = time.time()
         self.cross_validation(X, y, features_len, False)
+        results_xylabel['tempo (s)'] += [time.time() - time_start]
         self.setup_metrics()
         results_xylabel['accuracy'] += [self.accuracy[method]]
         for key in parameters.keys():
@@ -295,7 +307,7 @@ class MachineLearn:
 
     def method_optimization(self, grid: dict, method: str, parallel: bool = True):
         """Optimize method and save results in graphic"""
-        manager_dict = {"accuracy": []}
+        manager_dict = {"accuracy": [], "tempo": []}
         for key in grid.keys():
             manager_dict[key] = []
         results_xylabel = Manager().dict(manager_dict)
@@ -392,13 +404,17 @@ class MachineLearn:
 def mls_optimate(mls):
     """Run code to generate optimization graphic"""
     for ml in mls:
-        ml.optimization(method="MLP", activation=["sigmoid_sym", "gaussian", "relu", "leakyrelu"],
-                        quantity_layers=5, quantity_insidelayers=2, range_layer=256, quantity_alpha=2,
-                        first_alpha=2.5, quantity_beta=2, first_beta=1e-2)
-        ml.optimization(method="KNN", quantity_k=10, first_k=1, last_k=10)
-        ml.optimization(method="SVM", svm_kernels=["linear", "poly", "rbf", "sigmoid", "chi2", "inter"],
-                        quantity_C=10, first_C=0.1, quantity_gamma=5, first_gamma=0.1, quantity_degree=10,
-                        first_degree=1)
+        methods_todo = ml.methods.keys()
+        if "MLP" in methods_todo:
+            ml.optimization(method="MLP", activation=["sigmoid_sym", "gaussian", "relu", "leakyrelu"],
+                            quantity_layers=5, quantity_insidelayers=2, range_layer=256, quantity_alpha=2,
+                            first_alpha=2.5, quantity_beta=2, first_beta=1e-2)
+        elif "KNN" in methods_todo:
+            ml.optimization(method="KNN", quantity_k=10, first_k=1, last_k=10)
+        elif "SVM" in methods_todo:
+            ml.optimization(method="SVM", svm_kernels=["linear", "poly", "rbf", "sigmoid", "chi2", "inter"],
+                            quantity_C=2, first_C=0.1, quantity_gamma=1, first_gamma=0.1, quantity_degree=1,
+                            first_degree=1)
 
 
 def mls_start(mls):
@@ -446,7 +462,7 @@ def mls_construct(todos: List[str],
 if __name__ == "__main__":
     # User Interface
     start_time = time.time()
-    todos = constants.todos(start=False, optimate=False, labeling_only=True)
+    todos = constants.todos(start=False, optimate=True, labeling_only=False)
     method_libraries = constants.methods_libraries(OpenCV=True)
     img_libraries = constants.img_libraries(OpenCV=True)
     img_processing = constants.img_processing(HSV=True, get_0=True, filter_blur=False, filter_gaussian_blur=True)
@@ -460,7 +476,7 @@ if __name__ == "__main__":
         knn_k=3, mlp_layers=[10],
         svm_c=1, svm_kernel=constants.svm_kernel(inter=True),
         svm_gamma=1, svm_degree=1, activation="sigmoid_sym", alpha=100, beta=100)
-    methods_selected = constants.methods_selected(SVM=True, KNN=True, MLP=True)
+    methods_selected = constants.methods_selected(SVM=True, KNN=False, MLP=False)
     mls_construct(todos, method_libraries, img_libraries, img_processing, features,
                   data_base_paths, methods_parameters, methods_selected)
     print("".join(("Tempo de execução:", str(others.TimeConversion(time.time()-start_time)))))

@@ -279,7 +279,7 @@ def make_sum(csv_name, row_last, column_index, rows_len, columns):
             sum += float(read_cell(csv_name, row_pos+2, column_index).replace(" segundos", ""))
         per = int(sum/rows_len*100)
         row_last += ";"+str(per)+" %"
-    elif columns[column_index] == "Tempo de classificação":
+    elif columns[column_index] == "Tempo":
         sum = 0
         for row_pos in range(rows_len):
             sum += float(read_cell(csv_name, row_pos+2, column_index).replace(" segundos", ""))
