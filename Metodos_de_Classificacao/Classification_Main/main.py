@@ -23,7 +23,6 @@ from sklearn.metrics import (accuracy_score, confusion_matrix,
 
 import install_dev
 import constants
-import image_processing
 import feature_extraction
 import training
 import classification
@@ -32,21 +31,20 @@ import result_save
 
 
 class MachineLearn:
-    def __init__(self, method_library: str, library_img: str, img_processing: List[str],
+    def __init__(self, method_library: str, library_img: str,
                  feature: str, data_base_path: str, method_parameters: dict, methods_selected: List[str]):
         self.data_base = os.listdir(data_base_path)
         self.data_base.sort(key=others.images_sort)
-        self.layer_first = int(feature.split("_")[-1])
+        feature_temp = feature.split("_")
+        self.layer_first = int(feature_temp[-1])
         self.parameters = {
             # Global
             "data_base_path": data_base_path,
             "method_library": method_library,
             "library_img": library_img,
-            "img_processing": img_processing,
-            "feature": "_".join(feature.split("_")[:-1]),
+            "feature": "_".join(feature_temp[:-1]),
         }
         # Results
-        self.images_processed = []  # [[name,image],[name,image],...]
         self.images_features = []  # [[name,feature],[name,feature],...]
         self.y = []
         self.X = []
@@ -103,46 +101,31 @@ class MachineLearn:
         print("CSV com as características: " + "\033[91m {}\033[00m".format(self.csv_features))
         print("CSV com os resultados: " + "\033[91m {}\033[00m".format(self.csv_results))
 
-    def setup_images(self):
-        """Do image processing"""
-        print("Realizando o processamento das imagens")
-        actual = 0
-        progress_bar = others.ProgressBar("Processando imagens ", len(self.data_base), 0)
-        for arq in self.data_base:
-            actual += 1
-            progress_bar.print(actual)
-            self.images_processed.append(
-                [arq, image_processing.img_process(self.parameters["data_base_path"] + arq,
-                                                   self.parameters["library_img"],
-                                                   self.parameters["img_processing"])])
-            self.images_processed.append(["-".join((arq, "Inverted")),
-                                          image_processing.img_process(self.parameters["data_base_path"]+arq,
-                                                                       self.parameters["library_img"],
-                                                                       self.parameters["img_processing"],
-                                                                       inverted=True)])
-        progress_bar.end()
-
     def setup_feature(self):
         """Do feature extraction"""
         try:
             self.images_features = result_save.features_open(self.csv_features)
         except:
             self.images_features = []
-            self.setup_images()
             print("Extraindo as características")
             actual = 0
-            progress_bar = others.ProgressBar("Extraindo "+self.parameters["feature"], len(self.images_processed), 0)
-            for img in self.images_processed:
+            progress_bar = others.ProgressBar("Extraindo características", len(self.data_base), 0)
+            for arq in self.data_base:
                 actual += 1
                 progress_bar.print(actual)
-                try:
-                    self.images_features += feature_extraction.get_features(img[1],
-                                                                            img[0],
-                                                                            self.parameters["feature"],
-                                                                            self.parameters["library_img"],
-                                                                            self.mlp_layers[0])
-                except ValueError:
-                    pass
+                self.images_features += feature_extraction.get_features("".join(
+                    (self.parameters["data_base_path"],
+                        arq)),
+                    self.parameters["feature"],
+                    self.parameters["library_img"],
+                    self.layer_first)
+                self.images_features += feature_extraction.get_features("".join(
+                    (self.parameters["data_base_path"],
+                        arq)),
+                    self.parameters["feature"],
+                    self.parameters["library_img"],
+                    self.layer_first,
+                    inverted=True)
             progress_bar.end()
             result_save.features_save(self.csv_features, self.images_features)
             print("Salvando gráficos em "+self.path_graphics)
@@ -351,6 +334,7 @@ class MachineLearn:
                         "C": np.linspace(first_C, 1000, num=quantity_C, dtype=float),
                         "degree": np.linspace(first_degree, 10, num=quantity_degree, dtype=int)}
             self.method_optimization(grid_svc, "SVM", False)
+
         elif method == "KNN":
             grid_knn = {"k": np.linspace(first_k, last_k, num=quantity_k, dtype=int)}
             self.method_optimization(grid_knn, "KNN", False)
@@ -434,7 +418,6 @@ def mls_labeling_only(mls):
 def mls_construct(todos: List[str],
                   method_libraries: List[str],
                   img_libraries: List[str],
-                  img_processing: List[List[str]],
                   features: List[str],
                   data_base_paths: List[str],
                   methods_parameters: List[dict],
@@ -443,13 +426,12 @@ def mls_construct(todos: List[str],
     mls = []
     for method_library in method_libraries:
         for img_library in img_libraries:
-            for processing in img_processing:
-                for feature in features:
-                    for data_base_path in data_base_paths:
-                        for method_parameters in methods_parameters:
-                            for methods_selected in methods_selected_s:
-                                mls += [MachineLearn(method_library, img_library, processing, feature,
-                                                     data_base_path, method_parameters, methods_selected)]
+            for feature in features:
+                for data_base_path in data_base_paths:
+                    for method_parameters in methods_parameters:
+                        for methods_selected in methods_selected_s:
+                            mls += [MachineLearn(method_library, img_library, feature,
+                                                 data_base_path, method_parameters, methods_selected)]
 
     if "optimate" in todos:
         mls_optimate(mls)
@@ -465,18 +447,34 @@ if __name__ == "__main__":
     todos = constants.todos(start=False, optimate=True, labeling_only=False)
     method_libraries = constants.methods_libraries(OpenCV=True)
     img_libraries = constants.img_libraries(OpenCV=True)
-    img_processing = constants.img_processing(HSV=True, get_0=True, filter_blur=False, filter_gaussian_blur=True)
-    features = constants.features(histogram_256=[False, 256],
-                                  histogram_filter_256=[False, 256],
-                                  histogram_reduce_XXX=[False, 10],
-                                  image_patches_XXX=[False, 25*25],
-                                  color_contours_255=[True, 255])
+    features = constants.features(histogramFull_256=[False,
+                                                     256,
+                                                     constants.img_processing(HSV=[1, ""], getChannel=[2, 0], filterGaussianBlur=[3, ""])],  # [Run?, features len, img_processing**] # [order, option]
+                                  histogramFilter_256=[False,
+                                                       256,
+                                                       constants.img_processing(HSV=[1, ""], getChannel=[2, ""], filterGaussianBlur=[3, ""])],
+                                  histogramReduce_XXX=[True,
+                                                       10,
+                                                       constants.img_processing(HSV=[1, ""], getChannel=[2, ""], filterGaussianBlur=[3, ""])],
+                                  imagePatches_XXX=[False,
+                                                    25*25,
+                                                    constants.img_processing(gray=[1, ""], filterGaussianBlur=[2, ""])],
+                                  colorContours_255=[False,
+                                                     255,
+                                                     constants.img_processing(
+                                                         gray=[1, ""],
+                                                         histogramEqualization=[2, ""],
+                                                         filterMedianBlur=[3, ""],
+                                                         canny=[4, ""],
+                                                         filterMorphology=[5, ""]),
+                                                     "processingBreak",
+                                                     constants.img_processing(HSV=[1, ""], getChannel=[2, 0], filterGaussianBlur=[3, ""])])
     data_base_paths = constants.data_base_paths(Data_Base_Cedulas=True, temp=False)
     methods_parameters = constants.methods_parameters(
         knn_k=3, mlp_layers=[10],
         svm_c=1, svm_kernel=constants.svm_kernel(inter=True),
         svm_gamma=1, svm_degree=1, activation="sigmoid_sym", alpha=100, beta=100)
-    methods_selected = constants.methods_selected(SVM=True, KNN=False, MLP=False)
-    mls_construct(todos, method_libraries, img_libraries, img_processing, features,
+    methods_selected = constants.methods_selected(SVM=True, KNN=True, MLP=True)
+    mls_construct(todos, method_libraries, img_libraries, features,
                   data_base_paths, methods_parameters, methods_selected)
     print("".join(("Tempo de execução:", str(others.TimeConversion(time.time()-start_time)))))

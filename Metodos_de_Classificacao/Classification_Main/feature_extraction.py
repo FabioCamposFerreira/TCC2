@@ -12,20 +12,23 @@ import constants
 import image_processing
 
 
-def color_contours(im, im_name: str, library_img):
+def color_contours(arq: str, feature: str, library_img: str, inverted: bool):
     """Find contours in image"""
+    im = image_processing.img_process(arq, library_img, feature.split("processingBreak")[0], inverted)
+    im2 = image_processing.img_process(arq, library_img, feature.split("processingBreak")[1], inverted)
+    im_name = "-".join((arq.split("/")[-1], "Inverted"*inverted))
     returns = []
-    im_hue = np.array(im)
     im = image_processing.processing(im, library_img="OpenCV", img_processing=["thresh", "filter_morphology"])
     if library_img == "OpenCV":
         contours, _ = cv.findContours(im, mode=cv.RETR_EXTERNAL, method=cv.CHAIN_APPROX_NONE)
         if len(contours):
             for index, contour in enumerate(contours):
-                if cv.contourArea(contour) > 3e3:
+                if cv.contourArea(contour) > constants.AREA_MIN:
                     mask = np.zeros(im.shape, dtype="uint8")
                     cv.drawContours(mask, [contour], -1, 255, -1)
-                    temp = np.array(im_hue)
+                    temp = np.array(im2)
                     temp[mask == 0] = 0
+                    cv.imwrite("".join(("./Output/imgs/",im_name)),temp)
                     returns.append(["-".join((im_name, str(index))),
                                     np.squeeze(normalize(cv.calcHist([temp], [0], None, [256], [0, 256])[1:]))])
     return returns
@@ -69,9 +72,10 @@ def image_patches(im, im_name: str, library_img, patches_len: int):
     return patches
 
 
-def histogram_reduce(im, im_name: str, library_img, n_features: int):
+def histogram_reduce(arq: str, feature: str, library_img: str,n_features:int, inverted: bool):
     """Recude 256 histogram features to n_features"""
-    hist = histogram(im, im_name, library_img)[0][1]
+    im_name = "-".join((arq.split("/")[-1], "Inverted"*inverted))
+    hist = histogramFull(arq, feature, library_img,inverted)[0][1]
     step = int(256/n_features)
     new_hist = []
     for index in range(n_features):
@@ -79,8 +83,10 @@ def histogram_reduce(im, im_name: str, library_img, n_features: int):
     return [[im_name, normalize(new_hist)]]
 
 
-def histogram(im, im_name: str, library_img):
-    """Receive image and return histogram of the channel H"""
+def histogramFull(arq: str, feature: str, library_img: str, inverted: bool):
+    """Receive path image and return histogram of the channel H"""
+    im = image_processing.img_process(arq, library_img, feature, inverted)
+    im_name = "-".join((arq.split("/")[-1], "Inverted"*inverted))
     h = []
     if library_img == "Pillow":
         h = im.getchannel(channel=0).histogram(mask=None, extrema=None)
@@ -110,19 +116,21 @@ def normalize(list_):
     return [(x-x_min)/(difference)*100 for x in list_]
 
 
-def get_features(im, im_name, feature, library_img, n_features=10):
+def get_features(arq: str, feature, library_img, n_features=10, inverted=False):
     """Extract image features
     """
-    if feature == "histogram":
-        features = histogram(im, im_name, library_img)
-    elif feature == "histogram_filter":
-        features = histogram_filter(im, im_name, library_img)
-    elif feature == "histogram_reduce":
-        features = histogram_reduce(im, im_name, library_img, n_features)
-    elif feature == "image_patches":
-        features = image_patches(im, im_name, library_img, n_features)
-    elif feature == "image_contours":
-        features = image_contours(im, im_name, library_img)
-    elif feature == "color_contours":
-        features = color_contours(im, im_name, library_img)
+    if "histogramFull" in feature:
+        features = histogramFull(arq, feature, library_img, inverted)
+    elif "histogramFilter" in feature:
+        features = histogram_filter(arq, feature, library_img, inverted)
+    elif "histogramReduce" in feature:
+        features = histogram_reduce(arq, feature, library_img, n_features, inverted)
+    elif "imagePatches" in feature:
+        features = image_patches(arq, feature, library_img, n_features, inverted)
+    elif "imageContours" in feature:
+        features = image_contours(arq, feature, library_img, inverted)
+    elif "colorContours" in feature:
+        features = color_contours(arq, feature, library_img, inverted)
+    else:
+        Exception("Feature not found!")
     return features

@@ -2,6 +2,7 @@
 # Contain modules for image processing
 # In general, the modules open the images from the database, process the images, the result is sent to be used by the modules of feature_extraction.py
 from typing import List
+import warnings
 
 import cv2 as cv
 import numpy as np
@@ -10,9 +11,9 @@ from PIL import Image, ImageFilter
 import constants
 
 
-def processing(im: np.ndarray, library_img: str, img_processing: List[str]):
+def processing(im, library_img: str, img_processing: List[str]):
     """Make processing image"""
-    for processing in img_processing:
+    for index, processing in enumerate(img_processing):
         if library_img == "Pillow":
             if "HSV" in processing:
                 im = im.convert(mode="HSV")
@@ -39,27 +40,35 @@ def processing(im: np.ndarray, library_img: str, img_processing: List[str]):
             if "filter_smoothMore" in processing:
                 im = im.filter(ImageFilter.SMOOTH_MORE)
         if library_img == "OpenCV":
-            if "HSV" in processing:
+            if "gray" in processing:
+                im = cv.cvtColor(im, cv.COLOR_BGR2GRAY)
+            elif "HSV" in processing:
                 im = cv.cvtColor(im, cv.COLOR_BGR2HSV_FULL)
-            elif "get_0" in processing:
-                im = im[:, :, 0]
-            elif "get_1" in processing:
-                im = im[:, :, 1]
-            elif "get_2" in processing:
-                im = im[:, :, 2]
-            elif "filter_blur" in processing:
+            elif "getChannel" in processing:
+                im = im[:, :, int(img_processing[index+1])]
+            elif "filterBlur" in processing:
                 im = cv.blur(im, (5, 5))
-            elif "filter_median_blur" in processing:
+            elif "filterMedianBlur" in processing:
                 im = cv.medianBlur(im, 5)
-            elif "filter_gaussian_blur" in processing:
+            elif "filterGaussianBlur" in processing:
                 im = cv.GaussianBlur(im, (5, 5), 0)
-            elif "filter_bilateral_filter" in processing:
+            elif "filterBilateralFilter" in processing:
                 im = cv.bilateralFilter(im, 9, 75, 75)
             elif "thresh" in processing:
                 im = cv.threshold(im, 127, 255, 0)[1]
-            elif "filter_morphology" in processing:
-                cv.morphologyEx(src=im, op=cv.MORPH_CLOSE,
-                                kernel=cv.getStructuringElement(shape=cv.MORPH_RECT, ksize=(22, 3)), dst=im)
+            elif "filterMorphology" in processing:
+                cv.morphologyEx(src=im, op=cv.MORPH_CLOSE, kernel=cv.getStructuringElement(
+                    shape=cv.MORPH_RECT, ksize=(10, 15)), dst=im)
+            elif "canny" in processing:
+                im = cv.Canny(im, 100, 200)
+            elif "histogramEqualization" in processing:
+                im = cv.equalizeHist(im)
+            else:
+                try:
+                    # Skip number configurations
+                    float(processing)
+                except:
+                    warnings.warn("".join(("Image processing \"", processing, "\" not found")))
     return im
 
 
@@ -85,8 +94,9 @@ def open_image(arq, library_img, inverted=False):
         return cv.resize(im, constants.RESOLUTION, cv.INTER_NEAREST)
 
 
-def img_process(arq, library_img, img_processing: List[str], inverted=False):
+def img_process(arq, library_img, features: str, inverted=False):
     "Get a path if the image, process and return it as pillow/array Image"
     im = open_image(arq, library_img, inverted=False)
+    img_processing = [p for p in features.split("_")[0:-1] if p!=""]
     im = processing(im, library_img, img_processing)
     return im

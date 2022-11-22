@@ -21,19 +21,28 @@ def img_libraries(OpenCV=0, Pillow=0):
     return [key for key in l if l[key] == 1]
 
 
-def img_processing(HSV=0, get_0=0,get_1=0,get_2=0, filter_blur=0, filter_gaussian_blur=0,filter_morphology=0):
-    l = locals()
-    return [[key for key in l if l[key] == 1]]
+def img_processing(
+        HSV=[False, 0],
+        getChannel=[False, 0],
+        filterBlur=[False, 0],
+        filterGaussianBlur=[False, 0],
+        filterMorphology=[False, 0],
+        gray=[False, 0],
+        histogramEqualization=[False, 0],
+        filterMedianBlur=[False, 0],
+        canny=[False, 0]):
+    l = {k: v for k, v in sorted(locals().items(), key=lambda item: item[1])}
+    return "_".join((["_".join(filter(None, (key, str(l[key][1])))) for key in l if l[key][0] != False]))
 
 
-def features(histogram_256=[0, None],
-             histogram_filter_256=[0, None],
-             image_patches_XXX=[0, 0],
-             image_contours_XXX=[0, 0],
-             histogram_reduce_XXX=[0, 0],
-             color_contours_255=[0,None]):
-    l = locals()
-    return [key.replace("XXX", str(l[key][1])) for key in l if l[key][0] == 1]
+def features(histogramFull_256=[0, None, None],
+             histogramFilter_256=[0, None, None],
+             imagePatches_XXX=[0, 0, None],
+             imageContours_XXX=[0, 0, None],
+             histogramReduce_XXX=[0, 0, None],
+             colorContours_255=[0, None, None]):
+    l = dict(locals())
+    return ["_".join(("_".join((l[key][2:])), key.replace("XXX", str(l[key][1])))) for key in l if l[key][0] == 1]
 
 
 def data_base_paths(temp=0, Data_Base_Cedulas=0):
@@ -66,3 +75,4 @@ def methods_selected(SVM=0, KNN=0, MLP=0):
 RESOLUTION = (854, 480)
 SATURATION_TOLERANCE = 0.8
 VALUE_TOLERANCE = 0.9
+AREA_MIN = 3e3
