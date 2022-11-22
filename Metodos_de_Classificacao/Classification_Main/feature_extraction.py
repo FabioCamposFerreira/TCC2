@@ -18,7 +18,6 @@ def color_contours(arq: str, feature: str, library_img: str, inverted: bool):
     im2 = image_processing.img_process(arq, library_img, feature.split("processingBreak")[1], inverted)
     im_name = "-".join((arq.split("/")[-1], "Inverted"*inverted))
     returns = []
-    im = image_processing.processing(im, library_img="OpenCV", img_processing=["thresh", "filter_morphology"])
     if library_img == "OpenCV":
         contours, _ = cv.findContours(im, mode=cv.RETR_EXTERNAL, method=cv.CHAIN_APPROX_NONE)
         if len(contours):

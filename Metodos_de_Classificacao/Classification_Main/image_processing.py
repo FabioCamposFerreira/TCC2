@@ -49,7 +49,7 @@ def processing(im, library_img: str, img_processing: List[str]):
             elif "filterBlur" in processing:
                 im = cv.blur(im, (5, 5))
             elif "filterMedianBlur" in processing:
-                im = cv.medianBlur(im, 5)
+                im = cv.medianBlur(im, int(img_processing[index+1]))
             elif "filterGaussianBlur" in processing:
                 im = cv.GaussianBlur(im, (5, 5), 0)
             elif "filterBilateralFilter" in processing:

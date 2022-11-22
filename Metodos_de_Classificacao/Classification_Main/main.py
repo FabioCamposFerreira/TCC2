@@ -7,9 +7,6 @@ Author: Fábio Campos Ferreira
 Contains step by step instructions for performing image processing, feature extraction, feature training and classification of unknown images
 Several configuration options are presented at each step for later comparison
 """
-import install_dev
-from sklearn.metrics import accuracy_score, precision_score, confusion_matrix, recall_score, mean_squared_error
-import numpy as np
 import time
 import os
 import random
@@ -17,7 +14,9 @@ import time
 from multiprocessing import Manager, Process
 from typing import List
 
+import cv2 as cv
 import numpy as np
+from sklearn.metrics import accuracy_score, precision_score, confusion_matrix, recall_score, mean_squared_error
 from sklearn.metrics import (accuracy_score, confusion_matrix,
                              mean_squared_error, precision_score, recall_score)
 
@@ -330,26 +329,41 @@ class MachineLearn:
         print("Começando processo de otimização...")
         if method == "SVM":
             grid_svc = {"kernel": svm_kernels,
-                        "gamma": np.linspace(first_gamma, 100, num=quantity_gamma, dtype=float),
                         "C": np.linspace(first_C, 1000, num=quantity_C, dtype=float),
+                        "gamma": np.linspace(first_gamma, 100, num=quantity_gamma, dtype=float),
                         "degree": np.linspace(first_degree, 10, num=quantity_degree, dtype=int)}
-            self.method_optimization(grid_svc, "SVM", False)
-
+            if 1:
+                grid_svc = {"kernel": svm_kernels,
+                            "C": cv.ml.ParamGrid_create(first_C, 1000, 1),
+                            "gamma": cv.ml.ParamGrid_create(first_gamma, 100, 1),
+                            "any": cv.ml.ParamGrid_create(1e-3, 100, 1),
+                            "degree": cv.ml.ParamGrid_create(first_degree, 10, 1)}
+                self.methods["SVM"].trainAuto(np.matrix(self.X, dtype=np.float32), cv.ml.ROW_SAMPLE, np.array(self.y), len(self.X),
+                      grid_svc["C"], grid_svc["gamma"], grid_svc["any"], grid_svc["any"], grid_svc["any"], grid_svc["degree"], False)
+                print("".join(("Melhor C = ", str(self.methods["SVM"].getC()))))
+                print("".join(("Melhor Coef0 = ", str(self.methods["SVM"].getCoef0()))))
+                print("".join(("Melhor Degree = ", str(self.methods["SVM"].getDegree()))))
+                print("".join(("Melhor Gamma = ", str(self.methods["SVM"].getGamma()))))
+                print("".join(("Melhor Kernel = ", str(self.methods["SVM"].getKernelType()))))
+                print("".join(("Melhor Nu = ", str(self.methods["SVM"].getNu()))))
+                print("".join(("Melhor P = ", str(self.methods["SVM"].getP()))))
+            else:
+                self.method_optimization(grid_svc, "SVM", False)
         elif method == "KNN":
-            grid_knn = {"k": np.linspace(first_k, last_k, num=quantity_k, dtype=int)}
+            grid_knn= {"k": np.linspace(first_k, last_k, num=quantity_k, dtype=int)}
             self.method_optimization(grid_knn, "KNN", False)
         elif method == "MLP":
-            layers = []
+            layers= []
             for _ in range(quantity_layers):
 
-                layer_inside = [self.mlp_layers[0],
+                layer_inside= [self.mlp_layers[0],
                                 [int(random.random() * range_layer) for _ in range(quantity_insidelayers)],
                                 self.mlp_layers[-1]]
                 if layer_inside[1] == 0:
-                    layer_inside[1] = 2
-                layer_inside = np.hstack(layer_inside).tolist()
+                    layer_inside[1]= 2
+                layer_inside= np.hstack(layer_inside).tolist()
                 layers.append(layer_inside)
-            grid_mlp = {"activation": activation,
+            grid_mlp= {"activation": activation,
                         "layers": layers,
                         "alpha": np.linspace(first_alpha, 100, num=quantity_alpha, dtype=float),
                         "beta": np.linspace(first_beta, 100, num=quantity_beta, dtype=float)}
@@ -357,7 +371,6 @@ class MachineLearn:
             self.method_optimization(grid_mlp, "MLP", False)
         self.__init__(self.parameters["method_library"],           # Reset machine learn
                       self.parameters["library_img"],
-                      self.parameters["img_processing"],
                       "_".join((self.parameters["feature"], str(self.layer_first))),
                       self.parameters["data_base_path"],
                       constants.methods_parameters(knn_k=3, mlp_layers=[10],
@@ -444,18 +457,18 @@ def mls_construct(todos: List[str],
 if __name__ == "__main__":
     # User Interface
     start_time = time.time()
-    todos = constants.todos(start=False, optimate=True, labeling_only=False)
+    todos = constants.todos(start=True, optimate=False, labeling_only=False)
     method_libraries = constants.methods_libraries(OpenCV=True)
     img_libraries = constants.img_libraries(OpenCV=True)
-    features = constants.features(histogramFull_256=[False,
+    features = constants.features(histogramFull_256=[True,
                                                      256,
                                                      constants.img_processing(HSV=[1, ""], getChannel=[2, 0], filterGaussianBlur=[3, ""])],  # [Run?, features len, img_processing**] # [order, option]
                                   histogramFilter_256=[False,
                                                        256,
                                                        constants.img_processing(HSV=[1, ""], getChannel=[2, ""], filterGaussianBlur=[3, ""])],
-                                  histogramReduce_XXX=[True,
+                                  histogramReduce_XXX=[False,
                                                        10,
-                                                       constants.img_processing(HSV=[1, ""], getChannel=[2, ""], filterGaussianBlur=[3, ""])],
+                                                       constants.img_processing(HSV=[1, ""], getChannel=[2, 0], filterGaussianBlur=[3, ""])],
                                   imagePatches_XXX=[False,
                                                     25*25,
                                                     constants.img_processing(gray=[1, ""], filterGaussianBlur=[2, ""])],
@@ -464,7 +477,7 @@ if __name__ == "__main__":
                                                      constants.img_processing(
                                                          gray=[1, ""],
                                                          histogramEqualization=[2, ""],
-                                                         filterMedianBlur=[3, ""],
+                                                         filterMedianBlur=[3, 15],
                                                          canny=[4, ""],
                                                          filterMorphology=[5, ""]),
                                                      "processingBreak",
@@ -474,7 +487,7 @@ if __name__ == "__main__":
         knn_k=3, mlp_layers=[10],
         svm_c=1, svm_kernel=constants.svm_kernel(inter=True),
         svm_gamma=1, svm_degree=1, activation="sigmoid_sym", alpha=100, beta=100)
-    methods_selected = constants.methods_selected(SVM=True, KNN=True, MLP=True)
+    methods_selected = constants.methods_selected(SVM=True, KNN=False, MLP=False)
     mls_construct(todos, method_libraries, img_libraries, features,
                   data_base_paths, methods_parameters, methods_selected)
     print("".join(("Tempo de execução:", str(others.TimeConversion(time.time()-start_time)))))
