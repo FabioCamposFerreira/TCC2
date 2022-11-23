@@ -8,6 +8,7 @@
 # pastas especificas do projeto
 .buildozer/
 bin/
+imgs/
 .idea/
 !/home/suporte/Documents/TCC2/Metodos_de_Classificacao/Classification_Main/docs/_build/html/
 
