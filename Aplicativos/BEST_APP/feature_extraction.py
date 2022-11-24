@@ -4,28 +4,21 @@ import numpy as np
 import image_processing
 
 
-def color_contours(im):
-    """Find contours in image"""
-    returns = []
-    im_hue = np.array(im)
-    im = cv.threshold(im, 127, 255, 0)[1]
-    # cv.morphologyEx(src=im, op=cv.MORPH_CLOSE, kernel=cv.getStructuringElement(shape=cv.MORPH_RECT,
-    #                                                                            ksize=(22, 3)), dst=im)
-    contours, _ = cv.findContours(im, mode=cv.RETR_EXTERNAL, method=cv.CHAIN_APPROX_NONE)
-    temp = np.array(im_hue)
-    cv.drawContours(temp,contours,-1,(0,255,0),-1)
-    cv.imwrite("".join(("morph", ".png")),im)
-    cv.imwrite("".join(("Contornos", ".png")),temp)
-    if len(contours):
-        for contour in contours:
-            if cv.contourArea(contour) > 3e3:
-                mask = np.zeros(im.shape, dtype="uint8")
-                cv.drawContours(mask, [contour], -1, 255, -1)
-                temp = np.array(im_hue)
-                temp[mask == 0] = 0
-                returns.append(np.squeeze(normalize(cv.calcHist([temp], [0], None, [256], [0, 256])[1:])))
-    return returns
+def histogram_reduce(im):
+    """Recude 256 histogram features to n_features"""
+    n_features = 60
+    hist = histogramFull(im)
+    step = int(256/n_features)
+    new_hist = []
+    for index in range(n_features):
+        new_hist += [sum(hist[step*index:(step*index)+step])]
+    return new_hist
 
+def histogramFull(im):
+    """Receive path image and return histogram of the channel H"""
+    im = image_processing.processing(im)
+    h = np.squeeze(cv.calcHist([im], [0], None, [256], [0, 256])).tolist()
+    return normalize(h)
 
 def normalize(list_):
     """Normalize list or array"""
@@ -38,4 +31,4 @@ def normalize(list_):
 
 
 def get_pattern(im):
-    return color_contours(im)
+    return histogram_reduce(im)

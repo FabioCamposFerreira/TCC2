@@ -10,6 +10,43 @@ import cv2 as cv
 
 import constants
 import image_processing
+import training
+import classification
+
+
+def sift_clustering(
+        data_base_path: str, paths: List[str],
+        n_features: int, feature: str, library_img: str, inverted: bool):
+    "Generate KNN  dict of the sith"
+    print("Gerando dicionario sith...")
+    array = sift_vectors("".join((data_base_path, paths[0])), feature, library_img, inverted)
+    for arq in paths[1:]:
+        array = np.vstack((array, sift_vectors("".join((data_base_path, arq)), feature, library_img, inverted)))
+    BoW = clustering(array, library_img, n_features)
+    knn_clustering = training.KNN_create("OpenCV", n_features)
+    return training.train(BoW, range(len(BoW)), "KNN", knn_clustering, "OpenCV", "", False)
+
+
+def sift_vectors(arq: str, feature: str, library_img: str, inverted: bool):
+    "Return all sift vector descritor to one im"
+    sift = cv.SIFT_create()
+    im = image_processing.img_process(arq, library_img, feature, inverted)
+    _, des = sift.detectAndCompute(im, None)
+    return np.array(des)
+
+
+def sift_histogram(arq: str, feature: str, library_img: str, inverted: bool, n_features: int, knn_clustering):
+    "Convert sift vector descritor to histogram"
+    sift = cv.SIFT_create()
+    im = image_processing.img_process(arq, library_img, feature, inverted)
+    im_name = "-".join((arq.split("/")[-1], "Inverted"*inverted))
+    returns = np.zeros(60)
+    _, des = sift.detectAndCompute(im, None)
+    des_length = len(des)
+    for d in des:
+        index = np.array(knn_clustering.predict(np.matrix(d, dtype=np.float32))[1], dtype=int)[0,0]
+        returns[index] += 1/des_length
+    return [[im_name,returns]]
 
 
 def color_contours(arq: str, feature: str, library_img: str, inverted: bool):
@@ -27,7 +64,7 @@ def color_contours(arq: str, feature: str, library_img: str, inverted: bool):
                     cv.drawContours(mask, [contour], -1, 255, -1)
                     temp = np.array(im2)
                     temp[mask == 0] = 0
-                    cv.imwrite("".join(("./Output/imgs/",im_name)),temp)
+                    cv.imwrite("".join(("./Output/imgs/", im_name)), temp)
                     returns.append(["-".join((im_name, str(index))),
                                     np.squeeze(normalize(cv.calcHist([temp], [0], None, [256], [0, 256])[1:]))])
     return returns
@@ -71,10 +108,10 @@ def image_patches(im, im_name: str, library_img, patches_len: int):
     return patches
 
 
-def histogram_reduce(arq: str, feature: str, library_img: str,n_features:int, inverted: bool):
+def histogram_reduce(arq: str, feature: str, library_img: str, n_features: int, inverted: bool):
     """Recude 256 histogram features to n_features"""
     im_name = "-".join((arq.split("/")[-1], "Inverted"*inverted))
-    hist = histogramFull(arq, feature, library_img,inverted)[0][1]
+    hist = histogramFull(arq, feature, library_img, inverted)[0][1]
     step = int(256/n_features)
     new_hist = []
     for index in range(n_features):
@@ -115,7 +152,16 @@ def normalize(list_):
     return [(x-x_min)/(difference)*100 for x in list_]
 
 
-def get_features(arq: str, feature, library_img, n_features=10, inverted=False):
+def clustering(array: np.ndarray, library_img: str, k=2):
+    "clustering list vectors to k vectors"
+    if library_img == "OpenCV":
+        _, _, center = cv.kmeans(array, k,
+                                 None, (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 10, 1.0),
+                                 10, cv.KMEANS_RANDOM_CENTERS)
+    return center
+
+
+def get_features(arq: str, feature, library_img, n_features=10, inverted=False, knn_clustering=None):
     """Extract image features
     """
     if "histogramFull" in feature:
@@ -130,6 +176,8 @@ def get_features(arq: str, feature, library_img, n_features=10, inverted=False):
         features = image_contours(arq, feature, library_img, inverted)
     elif "colorContours" in feature:
         features = color_contours(arq, feature, library_img, inverted)
+    elif "siftHistogram" in feature:
+        features = sift_histogram(arq, feature, library_img, inverted, n_features, knn_clustering)
     else:
         Exception("Feature not found!")
     return features

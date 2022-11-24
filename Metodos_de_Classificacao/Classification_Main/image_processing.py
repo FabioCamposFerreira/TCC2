@@ -63,6 +63,12 @@ def processing(im, library_img: str, img_processing: List[str]):
                 im = cv.Canny(im, 100, 200)
             elif "histogramEqualization" in processing:
                 im = cv.equalizeHist(im)
+            elif "filterKMeans" in processing:
+                _, label, center = cv.kmeans(np.float32(im.reshape((-1, 3))),
+                                             int(img_processing[index + 1]),
+                                             None, (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 10, 1.0),
+                                             10, cv.KMEANS_RANDOM_CENTERS)
+                im = center[label.flatten()].reshape((im.shape))
             else:
                 try:
                     # Skip number configurations
@@ -97,6 +103,6 @@ def open_image(arq, library_img, inverted=False):
 def img_process(arq, library_img, features: str, inverted=False):
     "Get a path if the image, process and return it as pillow/array Image"
     im = open_image(arq, library_img, inverted=False)
-    img_processing = [p for p in features.split("_")[0:-1] if p!=""]
+    img_processing = [p for p in features.split("_")[0:-1] if p != ""]
     im = processing(im, library_img, img_processing)
     return im

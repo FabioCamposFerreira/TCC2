@@ -109,22 +109,27 @@ class MachineLearn:
             print("Extraindo as características")
             actual = 0
             progress_bar = others.ProgressBar("Extraindo características", len(self.data_base), 0)
+            knn_clustering = None
+            if "siftHistogram" in self.parameters["feature"]:
+                knn_clustering = feature_extraction.sift_clustering(self.parameters["data_base_path"],
+                                                   self.data_base, self.layer_first,
+                                                   self.parameters["feature"],
+                                                   self.parameters["library_img"], False)
             for arq in self.data_base:
                 actual += 1
                 progress_bar.print(actual)
-                self.images_features += feature_extraction.get_features("".join(
-                    (self.parameters["data_base_path"],
-                        arq)),
-                    self.parameters["feature"],
-                    self.parameters["library_img"],
-                    self.layer_first)
-                self.images_features += feature_extraction.get_features("".join(
-                    (self.parameters["data_base_path"],
-                        arq)),
-                    self.parameters["feature"],
-                    self.parameters["library_img"],
-                    self.layer_first,
-                    inverted=True)
+                path = "".join((self.parameters["data_base_path"], arq))
+                self.images_features += feature_extraction.get_features(path,
+                                                                        self.parameters["feature"],
+                                                                        self.parameters["library_img"],
+                                                                        self.layer_first,
+                                                                        knn_clustering=knn_clustering)
+                self.images_features += feature_extraction.get_features(path,
+                                                                        self.parameters["feature"],
+                                                                        self.parameters["library_img"],
+                                                                        self.layer_first,
+                                                                        inverted=True,
+                                                                        knn_clustering=knn_clustering)
             progress_bar.end()
             result_save.features_save(self.csv_features, self.images_features)
             print("Salvando gráficos em "+self.path_graphics)
@@ -338,8 +343,17 @@ class MachineLearn:
                             "gamma": cv.ml.ParamGrid_create(first_gamma, 100, 1),
                             "any": cv.ml.ParamGrid_create(1e-3, 100, 1),
                             "degree": cv.ml.ParamGrid_create(first_degree, 10, 1)}
-                self.methods["SVM"].trainAuto(np.matrix(self.X, dtype=np.float32), cv.ml.ROW_SAMPLE, np.array(self.y), len(self.X),
-                      grid_svc["C"], grid_svc["gamma"], grid_svc["any"], grid_svc["any"], grid_svc["any"], grid_svc["degree"], False)
+                self.methods["SVM"].trainAuto(
+                    np.matrix(self.X, dtype=np.float32),
+                    cv.ml.ROW_SAMPLE, np.array(self.y),
+                    len(self.X),
+                    grid_svc["C"],
+                    grid_svc["gamma"],
+                    grid_svc["any"],
+                    grid_svc["any"],
+                    grid_svc["any"],
+                    grid_svc["degree"],
+                    False)
                 print("".join(("Melhor C = ", str(self.methods["SVM"].getC()))))
                 print("".join(("Melhor Coef0 = ", str(self.methods["SVM"].getCoef0()))))
                 print("".join(("Melhor Degree = ", str(self.methods["SVM"].getDegree()))))
@@ -350,20 +364,20 @@ class MachineLearn:
             else:
                 self.method_optimization(grid_svc, "SVM", False)
         elif method == "KNN":
-            grid_knn= {"k": np.linspace(first_k, last_k, num=quantity_k, dtype=int)}
+            grid_knn = {"k": np.linspace(first_k, last_k, num=quantity_k, dtype=int)}
             self.method_optimization(grid_knn, "KNN", False)
         elif method == "MLP":
-            layers= []
+            layers = []
             for _ in range(quantity_layers):
 
-                layer_inside= [self.mlp_layers[0],
+                layer_inside = [self.mlp_layers[0],
                                 [int(random.random() * range_layer) for _ in range(quantity_insidelayers)],
                                 self.mlp_layers[-1]]
                 if layer_inside[1] == 0:
-                    layer_inside[1]= 2
-                layer_inside= np.hstack(layer_inside).tolist()
+                    layer_inside[1] = 2
+                layer_inside = np.hstack(layer_inside).tolist()
                 layers.append(layer_inside)
-            grid_mlp= {"activation": activation,
+            grid_mlp = {"activation": activation,
                         "layers": layers,
                         "alpha": np.linspace(first_alpha, 100, num=quantity_alpha, dtype=float),
                         "beta": np.linspace(first_beta, 100, num=quantity_beta, dtype=float)}
@@ -460,15 +474,18 @@ if __name__ == "__main__":
     todos = constants.todos(start=True, optimate=False, labeling_only=False)
     method_libraries = constants.methods_libraries(OpenCV=True)
     img_libraries = constants.img_libraries(OpenCV=True)
-    features = constants.features(histogramFull_256=[True,
+    features = constants.features(histogramFull_256=[False,
                                                      256,
-                                                     constants.img_processing(HSV=[1, ""], getChannel=[2, 0], filterGaussianBlur=[3, ""])],  # [Run?, features len, img_processing**] # [order, option]
+                                                     constants.img_processing(filterGaussianBlur=[1, ""],
+                                                                              filterKMeans=[2, 10*6], HSV=[3, ""], getChannel=[4, 0])],  # [Run?, features len, img_processing**] # [order, option]
                                   histogramFilter_256=[False,
                                                        256,
-                                                       constants.img_processing(HSV=[1, ""], getChannel=[2, ""], filterGaussianBlur=[3, ""])],
-                                  histogramReduce_XXX=[False,
-                                                       10,
-                                                       constants.img_processing(HSV=[1, ""], getChannel=[2, 0], filterGaussianBlur=[3, ""])],
+                                                       constants.img_processing(HSV=[1, ""], getChannel=[2, ""],
+                                                                                filterGaussianBlur=[3, ""])],
+                                  histogramReduce_XXX=[True,
+                                                       6*10,
+                                                       constants.img_processing(HSV=[1, ""], getChannel=[2, 0],
+                                                                                filterGaussianBlur=[3, ""])],
                                   imagePatches_XXX=[False,
                                                     25*25,
                                                     constants.img_processing(gray=[1, ""], filterGaussianBlur=[2, ""])],
@@ -481,13 +498,16 @@ if __name__ == "__main__":
                                                          canny=[4, ""],
                                                          filterMorphology=[5, ""]),
                                                      "processingBreak",
-                                                     constants.img_processing(HSV=[1, ""], getChannel=[2, 0], filterGaussianBlur=[3, ""])])
+                                                     constants.img_processing(HSV=[1, ""], getChannel=[2, 0], filterGaussianBlur=[3, ""])],
+                                  siftHistogram_XXX=[False, 6*10,
+                                                     constants.img_processing(
+                                                         gray=[1, ""])])
     data_base_paths = constants.data_base_paths(Data_Base_Cedulas=True, temp=False)
     methods_parameters = constants.methods_parameters(
         knn_k=3, mlp_layers=[10],
         svm_c=1, svm_kernel=constants.svm_kernel(inter=True),
         svm_gamma=1, svm_degree=1, activation="sigmoid_sym", alpha=100, beta=100)
-    methods_selected = constants.methods_selected(SVM=True, KNN=False, MLP=False)
+    methods_selected = constants.methods_selected(SVM=True, KNN=True, MLP=True)
     mls_construct(todos, method_libraries, img_libraries, features,
                   data_base_paths, methods_parameters, methods_selected)
     print("".join(("Tempo de execução:", str(others.TimeConversion(time.time()-start_time)))))

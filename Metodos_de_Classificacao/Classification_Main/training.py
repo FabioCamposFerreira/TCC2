@@ -11,6 +11,7 @@ import numpy as np
 import cv2 as cv
 
 
+
 def train(X, y, method_name, method, library, xml_name, file_save: bool):
     """Get features and class to train and save method"""
     if library == "OpenCV":
@@ -68,3 +69,6 @@ def SVM_create(library="OpenCV", C=1, kernel="linear", gamma=1, degree=5):
     elif library == "scikit-learn":
         svm = SVC(C=C, kernel='linear')
         return svm
+
+
+

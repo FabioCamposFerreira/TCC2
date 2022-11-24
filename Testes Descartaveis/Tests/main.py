@@ -198,6 +198,7 @@ def normalize(list_):
     return [(x-x_min)/(difference)*100 for x in list_]
 
 
+
 def histogram_filter(im, im_name: str, library_img: str):
     """Receive image and return histogram of the channel H excruing pixels with low saturation and value in extrems"""
     if library_img == "Pillow":
@@ -416,7 +417,7 @@ def temp5():
         data_base[index] = "".join((path, "/", data_base[index]))
     ims = []
     for index, path in enumerate(data_base):
-        im = image_processing.img_process(path, "OpenCV", "_x", inverted=False)
+        im = image_processing.img_process(path, "OpenCV", "gray_x", inverted=False)
         filterKmeans(im, 2, index)
 
 
