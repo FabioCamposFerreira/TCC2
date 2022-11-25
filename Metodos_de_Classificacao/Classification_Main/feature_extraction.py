@@ -123,7 +123,6 @@ def histogramFull(arq: str, feature: str, library_img: str, inverted: bool):
     """Receive path image and return histogram of the channel H"""
     im = image_processing.img_process(arq, library_img, feature, inverted)
     im_name = "-".join((arq.split("/")[-1], "Inverted"*inverted))
-    h = []
     if library_img == "Pillow":
         h = im.getchannel(channel=0).histogram(mask=None, extrema=None)
     elif library_img == "OpenCV":

@@ -45,7 +45,6 @@ class ScreenCamera(Screen):
         if y != None:
             valor.text = str(int(y))
             valor.color = (1, 1, 0, 1)
-            print(str(platform))
             if platform == "android":
                 tts.speak("".join((str(int(y)), " reais")))
         else:

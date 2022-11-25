@@ -26,7 +26,7 @@ def labeling(X: list, y_full: list, method_name: str,  library: str, xml_name: s
                 method = training.KNN_create(library, default_k)
                 method.train(samples, cv.ml.ROW_SAMPLE, responses)
         X = np.matrix(X, dtype=np.float32)
-        y_predict = np.array(method.predict(X)[1], dtype=np.int)
+        y_predict = np.array(method.predict(X)[1], dtype=int)
         if method_name == "MLP":
             y_mlp=""
             enc = OneHotEncoder(sparse=False, dtype=np.float32, handle_unknown="ignore")

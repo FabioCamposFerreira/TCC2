@@ -23,6 +23,11 @@ def classify(im):
     """
     classifier = "SVM"
     pattern = feature_extraction.get_pattern(im)
+    if platform == "linux":
+        with open("".join(("Pattern", ".csv")), "w") as f:
+            writer = csv.writer(f)
+            writer.writerow("Características")
+            writer.writerow(pattern)
     if platform == "android":
         with open("".join(("/storage/emulated/0/Download/Pattern", ".csv")), "w") as f:
             writer = csv.writer(f)

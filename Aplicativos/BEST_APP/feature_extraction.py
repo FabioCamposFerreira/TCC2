@@ -12,7 +12,8 @@ def histogram_reduce(im):
     new_hist = []
     for index in range(n_features):
         new_hist += [sum(hist[step*index:(step*index)+step])]
-    return new_hist
+
+    return normalize(new_hist)
 
 def histogramFull(im):
     """Receive path image and return histogram of the channel H"""
@@ -27,7 +28,7 @@ def normalize(list_):
     difference = x_max-x_min
     if not difference:
         raise Exception("Extract feature is a string of zeros")
-    return [(x-x_min)/(difference) for x in list_]
+    return [(x-x_min)/(difference)*100 for x in list_]
 
 
 def get_pattern(im):
