@@ -32,7 +32,8 @@ def img_processing(
         filterMedianBlur=[False, 0],
         canny=[False, 0],
         filterKMeans=[False,2]):
-    l = {k: v for k, v in sorted(locals().items(), key=lambda item: item[0])}
+    l = [tuple_ for tuple_ in locals().items() if type(tuple_[1])==list]
+    l = {k: v for k, v in sorted(l, key=lambda item: item[1])}
     return "_".join((["_".join(filter(None, (key, str(l[key][1])))) for key in l if l[key][0] != False]))
 
 

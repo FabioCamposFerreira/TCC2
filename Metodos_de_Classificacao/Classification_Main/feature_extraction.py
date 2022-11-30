@@ -23,7 +23,7 @@ def sift_clustering(
     for arq in paths[1:]:
         array = np.vstack((array, sift_vectors("".join((data_base_path, arq)), feature, library_img, inverted)))
     BoW = clustering(array, library_img, n_features)
-    knn_clustering = training.KNN_create("OpenCV", n_features)
+    knn_clustering = training.KNN_create("OpenCV", 1)
     return training.train(BoW, range(len(BoW)), "KNN", knn_clustering, "OpenCV", "", False)
 
 
@@ -40,13 +40,13 @@ def sift_histogram(arq: str, feature: str, library_img: str, inverted: bool, n_f
     sift = cv.SIFT_create()
     im = image_processing.img_process(arq, library_img, feature, inverted)
     im_name = "-".join((arq.split("/")[-1], "Inverted"*inverted))
-    returns = np.zeros(60)
+    returns = np.zeros(n_features)
     _, des = sift.detectAndCompute(im, None)
     des_length = len(des)
     for d in des:
         index = np.array(knn_clustering.predict(np.matrix(d, dtype=np.float32))[1], dtype=int)[0,0]
         returns[index] += 1/des_length
-    return [[im_name,returns]]
+    return [[im_name,normalize(returns)]]
 
 
 def color_contours(arq: str, feature: str, library_img: str, inverted: bool):

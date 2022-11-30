@@ -16,6 +16,7 @@ from typing import List
 
 import cv2 as cv
 import numpy as np
+from scipy.stats import mode
 from sklearn.metrics import accuracy_score, precision_score, confusion_matrix, recall_score, mean_squared_error
 from sklearn.metrics import (accuracy_score, confusion_matrix,
                              mean_squared_error, precision_score, recall_score)
@@ -112,9 +113,9 @@ class MachineLearn:
             knn_clustering = None
             if "siftHistogram" in self.parameters["feature"]:
                 knn_clustering = feature_extraction.sift_clustering(self.parameters["data_base_path"],
-                                                   self.data_base, self.layer_first,
-                                                   self.parameters["feature"],
-                                                   self.parameters["library_img"], False)
+                                                                    self.data_base, self.layer_first,
+                                                                    self.parameters["feature"],
+                                                                    self.parameters["library_img"], False)
             for arq in self.data_base:
                 actual += 1
                 progress_bar.print(actual)
@@ -160,6 +161,25 @@ class MachineLearn:
 
     def setup_metrics(self):
         """Generate metrics of the result classification"""
+        #results =[image_name,correct_class, y_svm,time_svm,y_knn,time_knn,y_mlp,time_mlp]
+        results = np.array(self.results)
+        # Merge results from same image
+        results_id = np.array(["-".join(im_name.split("-")[0:2]) for im_name in results[:, 0]])
+        images_name = sorted(list(set(results_id)), key=others.images_sort)
+        self.results = []
+        for img_name in images_name:
+            results_to_merge = results[np.array(results_id) == img_name]
+            y_mlp = list(filter(None, "".join(results_to_merge[:, 6]).split("9")))
+            self.results.append(np.append([img_name],  # image_name
+                                          [results_to_merge[0, 1],  # correct_class
+                                          max(set(results_to_merge[:, 2]), key=list(
+                                              results_to_merge[:, 2]).count),  # y_svm
+                                          np.mean(np.array(results_to_merge[:, 3], dtype=float)),  # time_svm
+                                          max(set(results_to_merge[:, 4]), key=list(
+                                              results_to_merge[:, 4]).count),  # y_knn
+                                          np.mean(np.array(results_to_merge[:, 5], dtype=float)),  # time_knn
+                                          max(set(y_mlp), key=list(y_mlp).count),  # y_mlp
+                                          np.mean(np.array(results_to_merge[:, 7], dtype=float))]))  # time_mlp
         results = np.array(self.results)
         classes_correct = results[:, 1]
         classes_correct = np.array(classes_correct, dtype=int)
@@ -168,8 +188,9 @@ class MachineLearn:
         results = np.array(results, dtype=float)
         results = np.array(results, dtype=int)
         for index, method in enumerate(self.methods):
-            if method == "MLP":
-                results[:, (2*index)] = [int(str(result).split("9")[1]) for result in results[:, (2*index)]]
+            # if method == "MLP":
+            #     results[:, (2*index)] = [int(max(set(str(result).split("9")), key=list(str(result).split("9")).count))
+            #                              for result in results[:, (2*index)]]
             self.accuracy[method] = accuracy_score(classes_correct, results[:, (2*index)])
             self.precision[method] = np.average(precision_score(classes_correct,
                                                                 results[:, (2 * index)],
@@ -328,7 +349,7 @@ class MachineLearn:
             quantity_k=100, first_k=1, last_k=100,
             activation=["identity", "sigmoid_sym", "gaussian", "relu", "leakyrelu"],
             quantity_layers=10, quantity_insidelayers=1, range_layer=10, quantity_alpha=10, first_alpha=1e-6,
-            quantity_beta=10, first_beta=1e-2):
+            quantity_beta=10, first_beta=1e-2, parallel=True):
         """Optimize classifier selected with your parameters range"""
         self.setup_feature()
         print("Começando processo de otimização...")
@@ -362,10 +383,10 @@ class MachineLearn:
                 print("".join(("Melhor Nu = ", str(self.methods["SVM"].getNu()))))
                 print("".join(("Melhor P = ", str(self.methods["SVM"].getP()))))
             else:
-                self.method_optimization(grid_svc, "SVM", False)
+                self.method_optimization(grid_svc, "SVM", parallel)
         elif method == "KNN":
             grid_knn = {"k": np.linspace(first_k, last_k, num=quantity_k, dtype=int)}
-            self.method_optimization(grid_knn, "KNN", False)
+            self.method_optimization(grid_knn, "KNN", parallel)
         elif method == "MLP":
             layers = []
             for _ in range(quantity_layers):
@@ -382,7 +403,7 @@ class MachineLearn:
                         "alpha": np.linspace(first_alpha, 100, num=quantity_alpha, dtype=float),
                         "beta": np.linspace(first_beta, 100, num=quantity_beta, dtype=float)}
 
-            self.method_optimization(grid_mlp, "MLP", False)
+            self.method_optimization(grid_mlp, "MLP", parallel)
         self.__init__(self.parameters["method_library"],           # Reset machine learn
                       self.parameters["library_img"],
                       "_".join((self.parameters["feature"], str(self.layer_first))),
@@ -471,7 +492,7 @@ def mls_construct(todos: List[str],
 if __name__ == "__main__":
     # User Interface
     start_time = time.time()
-    todos = constants.todos(start=False, optimate=False, labeling_only=True)
+    todos = constants.todos(start=True, optimate=False, labeling_only=False)
     method_libraries = constants.methods_libraries(OpenCV=True)
     img_libraries = constants.img_libraries(OpenCV=True)
     features = constants.features(histogramFull_256=[False,
@@ -482,7 +503,7 @@ if __name__ == "__main__":
                                                        256,
                                                        constants.img_processing(HSV=[1, ""], getChannel=[2, ""],
                                                                                 filterGaussianBlur=[3, ""])],
-                                  histogramReduce_XXX=[True,
+                                  histogramReduce_XXX=[False,
                                                        6*10,
                                                        constants.img_processing(HSV=[1, ""], getChannel=[2, 0],
                                                                                 filterGaussianBlur=[3, ""])],
@@ -499,7 +520,7 @@ if __name__ == "__main__":
                                                          filterMorphology=[5, ""]),
                                                      "processingBreak",
                                                      constants.img_processing(HSV=[1, ""], getChannel=[2, 0], filterGaussianBlur=[3, ""])],
-                                  siftHistogram_XXX=[False, 6*10,
+                                  siftHistogram_XXX=[True, 6*10,
                                                      constants.img_processing(
                                                          gray=[1, ""])])
     data_base_paths = constants.data_base_paths(Data_Base_Cedulas=True, temp=False)

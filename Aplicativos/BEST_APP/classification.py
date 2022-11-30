@@ -28,11 +28,11 @@ def classify(im):
             writer = csv.writer(f)
             writer.writerow("Características")
             writer.writerow(pattern)
-    if platform == "android":
-        with open("".join(("/storage/emulated/0/Download/Pattern", ".csv")), "w") as f:
-            writer = csv.writer(f)
-            writer.writerow("Características")
-            writer.writerow(pattern)
+    # if platform == "android":
+    #     with open("".join(("/storage/emulated/0/Download/Pattern", ".csv")), "w") as f:
+    #         writer = csv.writer(f)
+    #         writer.writerow("Características")
+    #         writer.writerow(pattern)
     if len(pattern) > 0:
         pattern = np.matrix(pattern, dtype=np.float32)
         clsf = read_object(classifier+".xml")

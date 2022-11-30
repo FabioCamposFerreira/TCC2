@@ -94,7 +94,7 @@ def mls_saves(ml, csv_name: str):
     with open(csv_name, "+a") as csv_file:
         for method in list(ml.methods.keys()):
             row = ('"' + ml.files_name.replace("XXX", "Resultados") + '"' + ";" + method + ";" + "accuracy_score="
-                   + str(ml.accuracy[method]) + ";" + '"confusion_matrix=' + str(ml.confusion_matrix[method])
+                   + str(ml.accuracy[method]) + ";" + '"confusion_matrix=\n' + str(ml.confusion_matrix[method])
                    + '";precision_score =' + str(ml.precision[method]) + ";" + "recall_score=" + str(ml.recall[method])
                    + ";"
                    + "meansquare_error=" + str(ml.meansquare_error[method]))
@@ -230,7 +230,7 @@ def graphics_save(files_name: str, images_features: list):
         images_name = np.array(images_features, dtype=object)[:, 0]
         classes = set(labels)
         graphics_lines(classes, labels, features, files_name, images_name)
-        if len(images_features[0][1]) <= 10:
+        if len(images_features[0][1]) <= 100:
             graphics_box1(classes, labels, features, files_name)
             graphics_box2(classes, labels, features, files_name)
             graphics_splom(labels, features, files_name)
@@ -301,7 +301,7 @@ def predict_line(result):
     for r in range(len(result)):
         if r % 2 == 0:
             line += ";"+result[r]  # class_predict
-            line += ";"+str(int(class_correct == str(result[r])))  # is_correct
+            line += ";"+str(int(class_correct == str(result[r]).split("9")[0]))  # is_correct
         else:
             line += ";"+str(result[r])+" segundos"  # time
     return line
