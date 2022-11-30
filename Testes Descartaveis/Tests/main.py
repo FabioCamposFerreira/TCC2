@@ -43,9 +43,11 @@ def feature_sift(arq: str, feature: str, library_img: str, n_features: int, inve
     im = image_processing.img_process(arq, "OpenCV", "_x", inverted=False)
     gray = image_processing.img_process(arq, "OpenCV", "gray_x", inverted=False)
     sift = cv.SIFT_create()
-    _, des = sift.detectAndCompute(gray, None)
-    _, _, center = cv.kmeans(np.float32(des), 60, None, (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 10, 1.0),
-                             10, cv.KMEANS_RANDOM_CENTERS)
+    kp, des = sift.detectAndCompute(gray, None)
+    cv.imwrite(str(time.time())+".png",cv.drawKeypoints(gray,kp,im,flags=cv.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS))
+    
+    #_, _, center = cv.kmeans(np.float32(des), 60, None, (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 10, 1.0),
+    #                         10, cv.KMEANS_RANDOM_CENTERS)
 
 
 def add_hue_bar(f, length: int):
@@ -404,8 +406,11 @@ def temp4():
     path = "../../Data_Base/Data_Base_Refencia"
     data_base = os.listdir(path)
     data_base.sort(key=others.images_sort)
-    path = "/".join((path, data_base[0]))
-    feature_sift(path, "", "", 0, False)
+    for index in range(len(data_base)):
+        data_base[index] = "".join((path, "/", data_base[index]))
+    ims = []
+    for index, path in enumerate(data_base):
+        feature_sift(path, "", "", 0, False)
 
 
 def temp5():
@@ -424,4 +429,4 @@ def temp5():
 if __name__ == "__main__":
     import others
     import image_processing
-    temp5()
+    temp4()
