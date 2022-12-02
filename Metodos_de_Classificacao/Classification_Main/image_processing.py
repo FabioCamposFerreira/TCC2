@@ -69,6 +69,8 @@ def processing(im, library_img: str, img_processing: List[str]):
                                              None, (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 10, 1.0),
                                              10, cv.KMEANS_RANDOM_CENTERS)
                 im = center[label.flatten()].reshape((im.shape))
+            elif "filterHOG" in processing:
+                pass
             else:
                 try:
                     # Skip number configurations

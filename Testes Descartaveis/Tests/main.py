@@ -15,8 +15,23 @@ import constants
 from typing import List
 from bokeh.models import CustomJS, Dropdown
 import bokeh.plotting as bokeh
+from skimage.feature import hog as hog_sk
 sys.path.append('../../Metodos_de_Classificacao/Classification_Main/')
 
+def gradienteHistogram(im, index):
+    block_size = (2,2)
+    cell_size = (16,16)
+    nbins = 9
+    hog = cv.HOGDescriptor(_winSize=(im.shape[1] // cell_size[1] * cell_size[1],
+                                      im.shape[0] // cell_size[0] * cell_size[0]),
+                            _blockSize=(block_size[1] * cell_size[1],
+                                        block_size[0] * cell_size[0]),
+                            _blockStride=(cell_size[1], cell_size[0]),
+                            _cellSize=(cell_size[1], cell_size[0]),
+                            _nbins=nbins)
+    #compute(img[, winStride[, padding[, locations]]]) -> descriptors
+    hist = hog.compute(im)
+    cv.imwrite(str(index)+"hog.png",h)
 
 def filterKmeans(im, k=10, index=0):
     Z = np.float32(im.reshape((-1, 3)))
@@ -425,8 +440,18 @@ def temp5():
         im = image_processing.img_process(path, "OpenCV", "gray_x", inverted=False)
         filterKmeans(im, 2, index)
 
+def temp6():
+    "Test HOG"
+    path = "../../Data_Base/Data_Base_Refencia"
+    data_base = os.listdir(path)
+    data_base.sort(key=others.images_sort)
+    for index in range(len(data_base)):
+        data_base[index] = "".join((path, "/", data_base[index]))
+    for index, path in enumerate(data_base):
+        im = image_processing.img_process(path, "OpenCV", "gray_thresh_x", inverted=False)
+        gradienteHistogram(im,index)
 
 if __name__ == "__main__":
     import others
     import image_processing
-    temp4()
+    temp6()

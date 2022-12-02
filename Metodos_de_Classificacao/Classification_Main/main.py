@@ -16,10 +16,12 @@ from typing import List
 
 import cv2 as cv
 import numpy as np
+import joblib
 from scipy.stats import mode
 from sklearn.metrics import accuracy_score, precision_score, confusion_matrix, recall_score, mean_squared_error
 from sklearn.metrics import (accuracy_score, confusion_matrix,
                              mean_squared_error, precision_score, recall_score)
+from sklearn.model_selection import GridSearchCV
 
 import install_dev
 import constants
@@ -36,13 +38,13 @@ class MachineLearn:
         self.data_base = os.listdir(data_base_path)
         self.data_base.sort(key=others.images_sort)
         feature_temp = feature.split("_")
-        self.layer_first = int(feature_temp[-1])
         self.parameters = {
             # Global
             "data_base_path": data_base_path,
             "method_library": method_library,
             "library_img": library_img,
             "feature": "_".join(feature_temp[:-1]),
+            "layer_first": int(feature_temp[-1])
         }
         # Results
         self.images_features = []  # [[name,feature],[name,feature],...]
@@ -61,10 +63,7 @@ class MachineLearn:
         self.path_graphics = (self.path_output
                               + "Graphics/"
                               + "XXX,"
-                              + ",".join(
-                                  ["data_base_path"+"="+"".join(self.parameters["data_base_path"].split("/")[-2:]),
-                                   "library_img"+"="+self.parameters["library_img"],
-                                   "feature"+"="+self.parameters["feature"]]))
+                              + ",".join(p + "=" + str(self.parameters[p]).split("/")[-2:][0] for p in self.parameters))
         self.path_results = self.path_output+"Results/"
         self.files_name = (
             "XXX-"
@@ -84,7 +83,7 @@ class MachineLearn:
             self.methods["KNN"] = training.KNN_create(library=self.parameters["method_library"],
                                                       k=method_parameters["knn_k"])
         if "MLP" in methods_selected:
-            self.mlp_layers = ([self.layer_first] + method_parameters["mlp_layers"] +
+            self.mlp_layers = ([self.parameters["layer_first"]] + method_parameters["mlp_layers"] +
                                [len(list(dict.fromkeys([arq.split(".")[0] for arq in self.data_base])))])
             self.methods["MLP"] = training.MLP_create(
                 library=self.parameters["method_library"],
@@ -113,7 +112,7 @@ class MachineLearn:
             knn_clustering = None
             if "siftHistogram" in self.parameters["feature"]:
                 knn_clustering = feature_extraction.sift_clustering(self.parameters["data_base_path"],
-                                                                    self.data_base, self.layer_first,
+                                                                    self.data_base, self.parameters["layer_first"],
                                                                     self.parameters["feature"],
                                                                     self.parameters["library_img"], False)
             for arq in self.data_base:
@@ -123,12 +122,12 @@ class MachineLearn:
                 self.images_features += feature_extraction.get_features(path,
                                                                         self.parameters["feature"],
                                                                         self.parameters["library_img"],
-                                                                        self.layer_first,
+                                                                        self.parameters["layer_first"],
                                                                         knn_clustering=knn_clustering)
                 self.images_features += feature_extraction.get_features(path,
                                                                         self.parameters["feature"],
                                                                         self.parameters["library_img"],
-                                                                        self.layer_first,
+                                                                        self.parameters["layer_first"],
                                                                         inverted=True,
                                                                         knn_clustering=knn_clustering)
             progress_bar.end()
@@ -161,7 +160,7 @@ class MachineLearn:
 
     def setup_metrics(self):
         """Generate metrics of the result classification"""
-        #results =[image_name,correct_class, y_svm,time_svm,y_knn,time_knn,y_mlp,time_mlp]
+        # results =[image_name,correct_class, y_svm,time_svm,y_knn,time_knn,y_mlp,time_mlp]
         results = np.array(self.results)
         # Merge results from same image
         results_id = np.array(["-".join(im_name.split("-")[0:2]) for im_name in results[:, 0]])
@@ -266,81 +265,95 @@ class MachineLearn:
         else:
             self.validation_serial(X, y, features_len)
 
-    def cross_validation_parallel(self, X, y, features_len, method, parameters, results_xylabel):
-        """Call self.cross validation to run in parallel form"""
+    def cross_validation_parallel(self, X, y, features_len, method, parameters, results_xy_label):
+        """Call self.cross_validation to run in parallel form"""
+        if method == "SVM":
+            self.methods = {"SVM": training.SVM_create(self.parameters["method_library"],
+                                                       C=parameters["C"],
+                                                       kernel=parameters["kernel"],
+                                                       gamma=parameters["gamma"],
+                                                       degree=parameters["degree"])}
+        elif method == "KNN":
+            self.methods = {"KNN": training.KNN_create(self.parameters["method_library"], k=parameters["k"])}
+        elif method == "MLP":
+            self.methods = {"MLP": training.MLP_create(library=self.parameters["method_library"],
+                                                       mlp_layers=parameters["layers"],
+                                                       activation=parameters["activation"],
+                                                       alpha=parameters["alpha"],
+                                                       beta=parameters["beta"])}
         time_start = time.time()
         self.cross_validation(X, y, features_len, False)
-        results_xylabel['tempo (s)'] += [time.time() - time_start]
+        results_xy_label['tempo (s)'] += [time.time() - time_start]
         self.setup_metrics()
-        results_xylabel['accuracy'] += [self.accuracy[method]]
+        results_xy_label['accuracy'] += [self.accuracy[method]]
         for key in parameters.keys():
-            results_xylabel[key] += [parameters[key]]
+            results_xy_label[key] += [parameters[key]]
 
-    def parameters_combination(self, keys: List[str], grid: dict, parameters: dict, method: str,
-                               progress_bar: others.ProgressBar, actual: int, results_xylabel: list,
-                               process_parallel: Process = None) -> int:
-        """Recursive function that make cross validation to each combination parameters in grid"""
+    def parameters_combination(self, keys: List[str], grid: dict, parameters: dict, method: str, combination=[]):
+        """Recursive function that make combination parameters in grid"""
         try:
             for parameter in grid[keys[0]]:
                 parameters[keys[0]] = parameter
-                actual = self.parameters_combination(keys[1:], grid, parameters, method, progress_bar, actual,
-                                                     results_xylabel, process_parallel)
+                self.parameters_combination(keys[1:], grid, parameters, method, combination)
         except IndexError:
-            if process_parallel == None:
-                progress_bar.print(actual)
-            if method == "SVM":
-                self.methods = {"SVM": training.SVM_create(self.parameters["method_library"],
-                                                           C=parameters["C"],
-                                                           kernel=parameters["kernel"],
-                                                           gamma=parameters["gamma"],
-                                                           degree=parameters["degree"])}
-            elif method == "KNN":
-                self.methods = {"KNN": training.KNN_create(self.parameters["method_library"], k=parameters["k"])}
-            elif method == "MLP":
-                self.methods = {"MLP": training.MLP_create(library=self.parameters["method_library"],
-                                                           mlp_layers=parameters["layers"],
-                                                           activation=parameters["activation"],
-                                                           alpha=parameters["alpha"],
-                                                           beta=parameters["beta"])}
-            if process_parallel != None:
-                p = Process(target=self.cross_validation_parallel, args=(self.X, self.y, len(self.images_features),
-                                                                         method, parameters, results_xylabel))
-                process_parallel.append(p)
-                p.start()
-            else:
-                self.cross_validation_parallel(self.X, self.y, len(self.images_features), method, parameters,
-                                               results_xylabel)
-            return actual+1
-        return actual
+            combination.append(parameters)
+
+    def grid_sklearn(self, grid: dict, method: str, result_dict: dict):
+        """Optimize method to scikit-learn """
+        if method == "SVM":
+            self.methods = {"SVM": training.SVM_create(self.parameters["method_library"])}
+        elif method == "KNN":
+            self.methods = {"KNN": training.KNN_create(self.parameters["method_library"], 3)}
+            grid["n_neighbors"] = grid.pop("k")
+        elif method == "MLP":
+            self.methods = {"MLP": training.MLP_create(
+                mlp_layers=grid["layers"],
+                library=self.parameters["method_library"])}
+            grid.pop("beta")
+            grid["hidden_layer_sizes"] = grid.pop("layers")
+            grid["activation"] = ["identity", "logistic", "tanh", "relu"]
+        clf = GridSearchCV(self.methods[method], grid, verbose=3, n_jobs=-1)
+        # remove inverted imagens #TODO: find other solution
+        index_s = [("Inverted" in im[0]) for im in self.images_features]
+        clf.fit(np.array(self.X)[index_s], np.array(self.y)[index_s])
+        result_dict['tempo (s)'] = clf.cv_results_["mean_fit_time"]
+        result_dict['accuracy'] = clf.cv_results_["mean_test_score"]
+        for key in grid.keys():
+            result_dict[key] = []
+            for result in clf.cv_results_["params"]:
+                result_dict[key] += [result[key]]
+        return result_dict
 
     def method_optimization(self, grid: dict, method: str, parallel: bool = True):
         """Optimize method and save results in graphic"""
-        manager_dict = {"accuracy": [], "tempo": []}
-        for key in grid.keys():
-            manager_dict[key] = []
-        results_xylabel = Manager().dict(manager_dict)
-        print("Otimizando {}: ".format(method)+str(grid).replace("{", "").replace("}", ""))
-        total = 1
-        for key in grid.keys():
-            total *= len(grid[key])
-        print("\n")  # to progress bar not bug
-        progress_bar = others.ProgressBar("Otimizando "+method, total, 0)
-        if parallel == True:
-            process_parallel = []
+        manager_dict = {"accuracy": [], "tempo (s)": []}
+        if self.parameters["method_library"] == "OpenCV":
+            for key in grid.keys():
+                manager_dict[key] = []
+            results_xy_label = Manager().dict(manager_dict)
+            print("Otimizando {}: ".format(method)+str(grid).replace("{", "").replace("}", ""))
+            total = 1
+            for key in grid.keys():
+                total *= len(grid[key])
+            print("\n")  # to progress bar not bug
+            progress_bar = others.ProgressBar("Otimizando "+method, total, 0)
+            combinations = []
             self.parameters_combination(keys=list(grid.keys()),
                                         grid=grid, parameters={},
-                                        method=method, progress_bar=None, actual=0, results_xylabel=results_xylabel,
-                                        process_parallel=process_parallel)
-            for index, p in enumerate(process_parallel):
-                progress_bar.print(index)
-                print("")
-                p.join()
-        else:
-            self.parameters_combination(keys=list(grid.keys()),
-                                        grid=grid, parameters={},
-                                        method=method, progress_bar=progress_bar, actual=0,
-                                        results_xylabel=results_xylabel)
-        result_save.optimization_graph(dict(results_xylabel),
+                                        method=method, combination=combinations)
+            if parallel:
+                with joblib.parallel_backend("threading"):
+                    with joblib.Parallel() as job_parallel:
+                        job_parallel(joblib.delayed(self.cross_validation_parallel)
+                                     (self.X, self.y, len(self.images_features),
+                                     method, combination, results_xy_label) for combination in combinations)
+            else:
+                (self.cross_validation_parallel(self.X, self.y, len(self.images_features),
+                 method, combination, results_xy_label) for combination in combinations)
+        elif self.parameters["method_library"] == "scikit-learn":
+            results_xy_label = self.grid_sklearn(grid, method, manager_dict)
+
+        result_save.optimization_graph(dict(results_xy_label),
                                        self.path_graphics.replace("XXX", "".join((method, "_otimização"))))
 
     def optimization(
@@ -348,8 +361,8 @@ class MachineLearn:
             quantity_C=10, first_C=0.1, quantity_gamma=10, first_gamma=0.1, quantity_degree=10, first_degree=1,
             quantity_k=100, first_k=1, last_k=100,
             activation=["identity", "sigmoid_sym", "gaussian", "relu", "leakyrelu"],
-            quantity_layers=10, quantity_insidelayers=1, range_layer=10, quantity_alpha=10, first_alpha=1e-6,
-            quantity_beta=10, first_beta=1e-2, parallel=True):
+            quantity_networks=10, quantity_inside_layers=1, range_layer=10, quantity_alpha=10, first_alpha=1e-6,
+            quantity_beta=10, first_beta=1e-2, parallel=False):
         """Optimize classifier selected with your parameters range"""
         self.setup_feature()
         print("Começando processo de otimização...")
@@ -358,7 +371,7 @@ class MachineLearn:
                         "C": np.linspace(first_C, 1000, num=quantity_C, dtype=float),
                         "gamma": np.linspace(first_gamma, 100, num=quantity_gamma, dtype=float),
                         "degree": np.linspace(first_degree, 10, num=quantity_degree, dtype=int)}
-            if 1:
+            if 0:
                 grid_svc = {"kernel": svm_kernels,
                             "C": cv.ml.ParamGrid_create(first_C, 1000, 1),
                             "gamma": cv.ml.ParamGrid_create(first_gamma, 100, 1),
@@ -389,10 +402,10 @@ class MachineLearn:
             self.method_optimization(grid_knn, "KNN", parallel)
         elif method == "MLP":
             layers = []
-            for _ in range(quantity_layers):
+            for _ in range(quantity_networks):
 
                 layer_inside = [self.mlp_layers[0],
-                                [int(random.random() * range_layer) for _ in range(quantity_insidelayers)],
+                                [int(random.random() * range_layer) for _ in range(quantity_inside_layers)],
                                 self.mlp_layers[-1]]
                 if layer_inside[1] == 0:
                     layer_inside[1] = 2
@@ -406,11 +419,11 @@ class MachineLearn:
             self.method_optimization(grid_mlp, "MLP", parallel)
         self.__init__(self.parameters["method_library"],           # Reset machine learn
                       self.parameters["library_img"],
-                      "_".join((self.parameters["feature"], str(self.layer_first))),
+                      "_".join((self.parameters["feature"], str(self.parameters["layer_first"]))),
                       self.parameters["data_base_path"],
                       constants.methods_parameters(knn_k=3, mlp_layers=[10],
                                                    svm_c=1, svm_kernel=constants.svm_kernel(inter=True),
-                                                   svm_gamma=1, svm_degree=1),
+                                                   svm_gamma=1, svm_degree=1, activation="sigmoid_sym", alpha=100, beta=100),
                       constants.methods_selected(SVM=True, KNN=True, MLP=True)
                       )
 
@@ -421,32 +434,32 @@ class MachineLearn:
         for index in range(len(self.images_features)):
             self.results.append(self.labeling(self.X[index], self.y[index],
                                 self.y, self.images_features[index][0]))
-        self.setup_save()
         self.setup_metrics()
+        self.setup_save()
 
     def run(self):
         """Do the train and classification of the database using cross validation leve-one-out"""
         self.show()
         self.setup_feature()
         self.results.append(self.cross_validation(self.X, self.y, len(self.images_features), False))
-        self.setup_save()
         self.setup_metrics()
+        self.setup_save()
 
 
 def mls_optimate(mls):
     """Run code to generate optimization graphic"""
     for ml in mls:
         methods_todo = ml.methods.keys()
-        if "MLP" in methods_todo:
-            ml.optimization(method="MLP", activation=["sigmoid_sym", "gaussian", "relu", "leakyrelu"],
-                            quantity_layers=5, quantity_insidelayers=2, range_layer=256, quantity_alpha=2,
-                            first_alpha=2.5, quantity_beta=2, first_beta=1e-2)
-        elif "KNN" in methods_todo:
-            ml.optimization(method="KNN", quantity_k=10, first_k=1, last_k=10)
-        elif "SVM" in methods_todo:
+        if "SVM" in methods_todo:
             ml.optimization(method="SVM", svm_kernels=["linear", "poly", "rbf", "sigmoid", "chi2", "inter"],
                             quantity_C=2, first_C=0.1, quantity_gamma=1, first_gamma=0.1, quantity_degree=1,
                             first_degree=1)
+        if "KNN" in methods_todo:
+            ml.optimization(method="KNN", quantity_k=10, first_k=1, last_k=10)
+        if "MLP" in methods_todo:
+            ml.optimization(method="MLP", activation=["sigmoid_sym", "gaussian", "relu", "leakyrelu"],
+                            quantity_networks=1, quantity_inside_layers=1, range_layer=300, quantity_alpha=1,
+                            first_alpha=1, quantity_beta=1, first_beta=1e-2)
 
 
 def mls_start(mls):
@@ -492,37 +505,41 @@ def mls_construct(todos: List[str],
 if __name__ == "__main__":
     # User Interface
     start_time = time.time()
-    todos = constants.todos(start=True, optimate=False, labeling_only=False)
-    method_libraries = constants.methods_libraries(OpenCV=True)
+    todos = constants.todos(start=False, optimate=True, labeling_only=False)
+    method_libraries = constants.methods_libraries(OpenCV=True, scikit_learn=False)
     img_libraries = constants.img_libraries(OpenCV=True)
-    features = constants.features(histogramFull_256=[False,
-                                                     256,
-                                                     constants.img_processing(filterGaussianBlur=[1, ""],
-                                                                              filterKMeans=[2, 10*6], HSV=[3, ""], getChannel=[4, 0])],  # [Run?, features len, img_processing**] # [order, option]
-                                  histogramFilter_256=[False,
-                                                       256,
-                                                       constants.img_processing(HSV=[1, ""], getChannel=[2, ""],
-                                                                                filterGaussianBlur=[3, ""])],
-                                  histogramReduce_XXX=[False,
-                                                       6*10,
-                                                       constants.img_processing(HSV=[1, ""], getChannel=[2, 0],
-                                                                                filterGaussianBlur=[3, ""])],
-                                  imagePatches_XXX=[False,
-                                                    25*25,
-                                                    constants.img_processing(gray=[1, ""], filterGaussianBlur=[2, ""])],
-                                  colorContours_255=[False,
-                                                     255,
-                                                     constants.img_processing(
-                                                         gray=[1, ""],
-                                                         histogramEqualization=[2, ""],
-                                                         filterMedianBlur=[3, 15],
-                                                         canny=[4, ""],
-                                                         filterMorphology=[5, ""]),
-                                                     "processingBreak",
-                                                     constants.img_processing(HSV=[1, ""], getChannel=[2, 0], filterGaussianBlur=[3, ""])],
-                                  siftHistogram_XXX=[True, 6*10,
-                                                     constants.img_processing(
-                                                         gray=[1, ""])])
+    features = []
+    n_features = np.linspace(60, 100, num=1, dtype=int)
+    for n in n_features:
+        features += constants.features(histogramFull_256=[False,
+                                                          256,
+                                                          constants.img_processing(filterGaussianBlur=[1, ""],
+                                                                                   filterKMeans=[2, 10*6], HSV=[3, ""], getChannel=[4, 0])],  # [Run?, features len, img_processing**] # [order, option]
+                                       histogramFilter_256=[False,
+                                                            256,
+                                                            constants.img_processing(HSV=[1, ""], getChannel=[2, ""],
+                                                                                     filterGaussianBlur=[3, ""])],
+                                       histogramReduce_XXX=[True,
+                                                            n,
+                                                            constants.img_processing(HSV=[1, ""], getChannel=[2, 0],
+                                                                                     filterGaussianBlur=[3, ""])],
+                                       imagePatches_XXX=[False,
+                                                         25*25,
+                                                         constants.img_processing(gray=[1, ""], filterGaussianBlur=[2, ""])],
+                                       colorContours_255=[False,
+                                                          255,
+                                                          constants.img_processing(
+                                                              gray=[1, ""],
+                                                              histogramEqualization=[2, ""],
+                                                              filterMedianBlur=[3, 15],
+                                                              canny=[4, ""],
+                                                              filterMorphology=[5, ""]),
+                                                          "processingBreak",
+                                                          constants.img_processing(HSV=[1, ""], getChannel=[2, 0], filterGaussianBlur=[3, ""])],
+                                       siftHistogram_XXX=[False, 6*1000,
+                                                          constants.img_processing(
+                                                              gray=[1, ""])],
+                                       gradienteHistogram_XXX=[False, 36*4, ""])
     data_base_paths = constants.data_base_paths(Data_Base_Cedulas=True, temp=False)
     methods_parameters = constants.methods_parameters(
         knn_k=3, mlp_layers=[10],

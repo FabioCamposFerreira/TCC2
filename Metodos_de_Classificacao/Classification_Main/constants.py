@@ -31,7 +31,8 @@ def img_processing(
         histogramEqualization=[False, 0],
         filterMedianBlur=[False, 0],
         canny=[False, 0],
-        filterKMeans=[False,2]):
+        filterKMeans=[False,2],
+        filerHOG=[False,0]):
     l = [tuple_ for tuple_ in locals().items() if type(tuple_[1])==list]
     l = {k: v for k, v in sorted(l, key=lambda item: item[1])}
     return "_".join((["_".join(filter(None, (key, str(l[key][1])))) for key in l if l[key][0] != False]))
@@ -43,7 +44,8 @@ def features(histogramFull_256=[0, None, None], #[True/False,n of the features,i
              imageContours_XXX=[0, 0, None],
              histogramReduce_XXX=[0, 0, None],
              colorContours_255=[0, None, None],
-             siftHistogram_XXX=[0,None,None]):
+             siftHistogram_XXX=[0,None,None],
+             gradienteHistogram_XXX=[0,None,None]):
     l = dict(locals())
     return ["_".join(("_".join((l[key][2:])), key.replace("XXX", str(l[key][1])))) for key in l if l[key][0] == 1]
 

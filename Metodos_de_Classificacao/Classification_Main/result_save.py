@@ -139,7 +139,6 @@ def graphics_interactive(curves: list, labels: list, file_path: str):
     f = add_hue_bar(f, length)
     bokeh.output_file(file_path+".html")
     bokeh.save(f)
-    
 
 
 def graphics_splom(labels: List[str], features: np.ndarray, file_path: str):
@@ -155,7 +154,7 @@ def graphics_splom(labels: List[str], features: np.ndarray, file_path: str):
         labels_color = np.array(labels, dtype=object)
         for index, l_s in enumerate(labels_set):
             labels_color[labels_color == l_s] = colors[index]
-        progress_bar = others.ProgressBar("Criando gráfico splom",len(column_packs),0)
+        progress_bar = others.ProgressBar("Criando gráfico splom", len(column_packs), 0)
         for i, pack in enumerate(column_packs):
             progress_bar.print(i)
             plt.rcParams["figure.subplot.right"] = 0.8
@@ -174,7 +173,7 @@ def graphics_box2(classes: set, labels: List[str], features: np.ndarray, file_pa
     features_len = len(features[0])
     with PdfPages(pdf_path) as pdf:
         print("Construindo "+pdf_path)
-        progress_bar = others.ProgressBar("Criando gráfico Box2", features_len,0) 
+        progress_bar = others.ProgressBar("Criando gráfico Box2", features_len, 0)
         for index in range(features_len):
             progress_bar.print(index)
             plt.clf()
@@ -198,9 +197,31 @@ def graphics_box1(classes: set, labels: List[str], features: np.ndarray, file_pa
     plt.savefig(file_path.replace("XXX", "BoxFeaturesByClass")+".pdf", bbox_inches='tight')
 
 
+def graphic_points(labels: List[str],  features: List[List[int]], file_path: str):
+    """Save in file html graph interactive with many points"""
+    array_reference = np.ones(len(features[0]))
+    norm_reference = np.linalg.norm(array_reference)
+    features = np.array(features)
+    # x = magnitude
+    xs = np.linalg.norm(features, axis=1)
+    # y =  angle
+    ys = np.rad2deg(np.arccos(np.dot(features, array_reference)/(x*norm_reference)))
+    colors = itertools.cycle(palette)
+    f = bokeh.figure(sizing_mode="stretch_both", tools="pan,wheel_zoom,box_zoom,reset,save", output_backend="svg")
+    for x, y,label, color in zip(xs, ys, labels, colors):
+        l = f.scatter(x, y,  line_color=color, legend_label=label, line_width=2)
+        f.add_tools(HoverTool(renderers=[l], tooltips=[('Name', label), ]))
+    f.legend.location = "top_right"
+    f.legend.click_policy = "hide"
+    f.xaxis.axis_label = 'Magnitude'
+    f.yaxis.axis_label = 'Angle'
+    bokeh.output_file(file_path.replace("XXX", "MagnitudeVSAngle")+".html")
+    bokeh.save(f)
+
+
 def graphics_lines(classes: set, labels: List[str],  features: List[List[int]], file_path: str, images_name: List[str]):
-    legends = {"mean": [], "median": [], "mode": [], "Sandard Deviation": []}
-    curves = {"mean": [], "median": [], "mode": [], "Sandard Deviation": []}
+    legends = {"mean": [], "median": [], "mode": [], "Standard Deviation": []}
+    curves = {"mean": [], "median": [], "mode": [], "Standard Deviation": []}
     for c in classes:
         positions = list(labels == c)
         for key in legends.keys():
@@ -210,7 +231,7 @@ def graphics_lines(classes: set, labels: List[str],  features: List[List[int]], 
                 curves[key].append(np.median(features[positions], axis=0))
             elif key == "mode":
                 curves[key].append(stats.mode(features[positions], axis=0, keepdims=True)[0][0])
-            elif key == "Sandard Deviation":
+            elif key == "Standard Deviation":
                 curves[key].append(np.std(features[positions], axis=0))
             legends[key].append("Nota de "+str(c))
         graphics_interactive(features[positions], np.array(images_name)[positions], file_path.replace("XXX", c))
@@ -230,7 +251,8 @@ def graphics_save(files_name: str, images_features: list):
         images_name = np.array(images_features, dtype=object)[:, 0]
         classes = set(labels)
         graphics_lines(classes, labels, features, files_name, images_name)
-        if len(images_features[0][1]) <= 100:
+        graphic_points(labels, features, files_name)
+        if len(images_features[0][1]) <= 10:
             graphics_box1(classes, labels, features, files_name)
             graphics_box2(classes, labels, features, files_name)
             graphics_splom(labels, features, files_name)

@@ -14,6 +14,26 @@ import training
 import classification
 
 
+def gradienteHistogram(arq: str, feature: str, library_img: str, inverted: bool,n_features):
+    im = image_processing.img_process(arq, library_img, feature.split("processingBreak")[0], inverted)
+    im_name = "-".join((arq.split("/")[-1], "Inverted"*inverted))
+    returns = []
+    if library_img == "OpenCV":
+        block_size = (2,2)
+        cell_size = (16,16)
+        nbins = 9
+        hog = cv.HOGDescriptor(_winSize=(im.shape[1] // cell_size[1] * cell_size[1],
+                                        im.shape[0] // cell_size[0] * cell_size[0]),
+                                _blockSize=(block_size[1] * cell_size[1],
+                                            block_size[0] * cell_size[0]),
+                                _blockStride=(cell_size[1], cell_size[0]),
+                                _cellSize=(cell_size[1], cell_size[0]),
+                                _nbins=nbins)
+        hist = hog.compute(im) # len(hist) = int((im.shape[0]-cell_size[0])/(cell_size[0]))*int((im.shape[1]-cell_size[1])/(cell_size[1]))*36
+    for index,h in enumerate(np.reshape(hist,(int(hist.shape[0]/n_features),n_features))):
+        returns.append(["-".join((im_name, str(index))),h])
+    return []
+
 def sift_clustering(
         data_base_path: str, paths: List[str],
         n_features: int, feature: str, library_img: str, inverted: bool):
@@ -177,6 +197,8 @@ def get_features(arq: str, feature, library_img, n_features=10, inverted=False, 
         features = color_contours(arq, feature, library_img, inverted)
     elif "siftHistogram" in feature:
         features = sift_histogram(arq, feature, library_img, inverted, n_features, knn_clustering)
+    elif "gradienteHistogram" in feature:
+        features = gradienteHistogram(arq, feature, library_img, inverted, n_features)
     else:
         Exception("Feature not found!")
     return features
