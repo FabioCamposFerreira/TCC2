@@ -69,65 +69,6 @@ def sift_histogram(arq: str, feature: str, library_img: str, inverted: bool, n_f
     return [[im_name,normalize(returns)]]
 
 
-def color_contours(arq: str, feature: str, library_img: str, inverted: bool):
-    """Find contours in image"""
-    im = image_processing.img_process(arq, library_img, feature.split("processingBreak")[0], inverted)
-    im2 = image_processing.img_process(arq, library_img, feature.split("processingBreak")[1], inverted)
-    im_name = "-".join((arq.split("/")[-1], "Inverted"*inverted))
-    returns = []
-    if library_img == "OpenCV":
-        contours, _ = cv.findContours(im, mode=cv.RETR_EXTERNAL, method=cv.CHAIN_APPROX_NONE)
-        if len(contours):
-            for index, contour in enumerate(contours):
-                if cv.contourArea(contour) > constants.AREA_MIN:
-                    mask = np.zeros(im.shape, dtype="uint8")
-                    cv.drawContours(mask, [contour], -1, 255, -1)
-                    temp = np.array(im2)
-                    temp[mask == 0] = 0
-                    cv.imwrite("".join(("./Output/imgs/", im_name)), temp)
-                    returns.append(["-".join((im_name, str(index))),
-                                    np.squeeze(normalize(cv.calcHist([temp], [0], None, [256], [0, 256])[1:]))])
-    return returns
-
-
-def image_contours(im, im_name: str, library_img):
-    """Find contours in image"""
-    if library_img == "Pillow":
-        im = im.getchannel(channel=1)
-        contours = cv.findContours(np.array(im), mode=cv.RETR_EXTERNAL, method=cv.CHAIN_APPROX_NONE)
-        counts = 0
-        returns = []
-        for imgs in contours:
-            returns.append([im_name+str(counts), imgs.resize((854, 480),
-                           resample=Image.Resampling.NEAREST).histogram()])
-            counts += 1
-        return returns
-
-
-def image_patches(im, im_name: str, library_img, patches_len: int):
-    """Split image  in paths of 256 pixels"""
-    patches = []
-    step = int(patches_len**(1/2))
-    left, upper, right, lower = 0, 0, step, step
-    count = 0
-    if library_img == "Pillow":
-        l, h = im.size
-    if library_img == "OpenCV":
-        h, l = im.shape[:2]
-        count = 0
-        while right < l:
-            while lower < h:
-                if library_img == "Pillow":
-                    a = im.crop((left, upper, right, lower))
-                if library_img == "OpenCV":
-                    a = im[upper:lower, left:right]
-                patches.append([im_name+str(count), np.hstack(np.array(a))])
-                count += 1
-                left, upper, right, lower = left, upper+step, right, lower+step
-            left, upper, right, lower = left+step, 0, right+step, step
-    return patches
-
-
 def histogram_reduce(arq: str, feature: str, library_img: str, n_features: int, inverted: bool):
     """Recude 256 histogram features to n_features"""
     im_name = "-".join((arq.split("/")[-1], "Inverted"*inverted))
@@ -189,12 +130,6 @@ def get_features(arq: str, feature, library_img, n_features=10, inverted=False, 
         features = histogram_filter(arq, feature, library_img, inverted)
     elif "histogramReduce" in feature:
         features = histogram_reduce(arq, feature, library_img, n_features, inverted)
-    elif "imagePatches" in feature:
-        features = image_patches(arq, feature, library_img, n_features, inverted)
-    elif "imageContours" in feature:
-        features = image_contours(arq, feature, library_img, inverted)
-    elif "colorContours" in feature:
-        features = color_contours(arq, feature, library_img, inverted)
     elif "siftHistogram" in feature:
         features = sift_histogram(arq, feature, library_img, inverted, n_features, knn_clustering)
     elif "gradienteHistogram" in feature:

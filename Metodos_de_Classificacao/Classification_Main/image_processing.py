@@ -10,7 +10,49 @@ from PIL import Image, ImageFilter
 
 import constants
 
+def image2contours(im, library_img):
+    """Find contours"""
+    returns = []
+    if library_img == "OpenCV":
+        contours, _ = cv.findContours(im, mode=cv.RETR_EXTERNAL, method=cv.CHAIN_APPROX_NONE)
+        if len(contours):
+            for index, contour in enumerate(contours):
+                if cv.contourArea(contour) > constants.AREA_MIN:
+                    mask = np.zeros(im.shape, dtype="uint8")
+                    cv.drawContours(mask, [contour], -1, 255, -1)
+                    temp = np.array(im2)
+                    temp[mask == 0] = 0
+                    returns.append(temp)
+    return returns
 
+def image2patches(im, library_img, patches_len: int):
+    """Split image  in paths of 256 pixels"""
+    patches = []
+    step = int(patches_len**(1/2))
+    left, upper, right, lower = 0, 0, step, step
+    count = 0
+    if library_img == "Pillow":
+        l, h = im.size
+    if library_img == "OpenCV":
+        h, l = im.shape[:2]
+        count = 0
+        while right < l:
+            while lower < h:
+                if library_img == "Pillow":
+                    a = im.crop((left, upper, right, lower))
+                if library_img == "OpenCV":
+                    a = im[upper:lower, left:right]
+                patches.append([np.hstack(np.array(a))])
+                count += 1
+                left, upper, right, lower = left, upper+step, right, lower+step
+            left, upper, right, lower = left+step, 0, right+step, step
+    return patches
+
+def image2images(im, library_img: str, slip_criteria: str):
+    """Split image in masks with criteria"""
+    if library_img == "OpenCV":
+        if "patches" == processing:
+            image2patches(im, library_img, patches_len)
 def processing(im, library_img: str, img_processing: List[str]):
     """Make processing image"""
     for index, processing in enumerate(img_processing):
@@ -53,7 +95,7 @@ def processing(im, library_img: str, img_processing: List[str]):
             elif "filterGaussianBlur" in processing:
                 im = cv.GaussianBlur(im, (5, 5), 0)
             elif "filterBilateralFilter" in processing:
-                im = cv.bilateralFilter(im, 9, 75, 75)
+                im = cv.bilateralFilter(im, 100, 200, 200)
             elif "thresh" in processing:
                 im = cv.threshold(im, 127, 255, 0)[1]
             elif "filterMorphology" in processing:
@@ -107,4 +149,5 @@ def img_process(arq, library_img, features: str, inverted=False):
     im = open_image(arq, library_img, inverted=False)
     img_processing = [p for p in features.split("_")[0:-1] if p != ""]
     im = processing(im, library_img, img_processing)
-    return im
+    ims = image2images(im, library_img, img_processing)
+    return ims

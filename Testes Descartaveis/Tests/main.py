@@ -245,74 +245,6 @@ def histogram(im, im_name: str, library_img):
         return [[im_name, normalize(np.squeeze(cv.calcHist([im], [0], None, [256], [0, 256])).tolist())]]
 
 
-def processing(im, library_img: str, img_processing: List[str]):
-    """Make processing image"""
-    for processing in img_processing:
-        if library_img == "Pillow":
-
-            if "HSV" in processing:
-                im = im.convert(mode="HSV")
-            elif "get_H" in processing:
-                im = im.getchannel(0)
-            elif "filter_blur" in processing:
-                im = im.filter(ImageFilter.BLUR)
-            elif "filter_contour" in processing:
-                im = im.filter(ImageFilter.CONTOUR)
-            elif "filter_detail" in processing:
-                im = im.filter(ImageFilter.DETAIL)
-            elif "filter_edgeEnhance" in processing:
-                im = im.filter(ImageFilter.EDGE_ENHANCE)
-            elif "filter_edgeEnhanceMore" in processing:
-                im = im.filter(ImageFilter.EDGE_ENHANCE_MORE)
-            elif "filter_emboss" in processing:
-                im = im.filter(ImageFilter.EMBOSS)
-            elif "filter_findEdges" in processing:
-                im = im.filter(ImageFilter.FIND_EDGES)
-            elif "filter_sharpen" in processing:
-                im = im.filter(ImageFilter.SHARPEN)
-            elif "filter_smooth" in processing:
-                im = im.filter(ImageFilter.SMOOTH)
-            elif "filter_smoothMore" in processing:
-                im = im.filter(ImageFilter.SMOOTH_MORE)
-        if library_img == "OpenCV":
-            if "gray" in processing:
-                im = cv.cvtColor(im, cv.COLOR_BGR2GRAY)
-            elif "sobel" in processing:
-                im = cv.Sobel(im, cv.CV_8U, 1, 0, ksize=3)
-            elif "HSV" in processing:
-                im = cv.cvtColor(im, cv.COLOR_BGR2HSV_FULL)
-            elif "get_0" in processing:
-                im = im[:, :, 0]
-            elif "get_1" in processing:
-                im = im[:, :, 1]
-            elif "get_2" in processing:
-                im = im[:, :, 2]
-            elif "filter_blur" in processing:
-                im = cv.blur(im, (5, 5))
-            elif "filter_median_blur" in processing:
-                im = cv.medianBlur(im, 15)
-            elif "filter_gaussian_blur" in processing:
-                im = cv.GaussianBlur(im, (5, 5), 15)
-            elif "filter_bilateral_filter" in processing:
-                im = cv.bilateralFilter(im, 9, 75, 75)
-            elif "thresh" in processing:
-                im = cv.threshold(im, int(255*0.2), 255, 0)[1]
-            elif "gaussian" in processing:
-                im = cv.GaussianBlur(im, (77, 77), 0)
-            elif "sobel" in processing:
-                im = cv.Sobel(im, cv.CV_8U, 1, 0, ksize=3)
-            elif "morphology" in processing:
-                cv.morphologyEx(src=im, op=cv.MORPH_CLOSE, kernel=cv.getStructuringElement(
-                    shape=cv.MORPH_RECT, ksize=(10, 15)), dst=im)
-            elif "median_blur" in processing:
-                im = cv.medianBlur(im, 5)
-            elif "histogram_equalization" in processing:
-                im = cv.equalizeHist(im)
-            elif "canny" in processing:
-                im = cv.Canny(im, 100, 200)
-    return im
-
-
 def open_image(arq, library_img, inverted=False):
     """Get a path if the image and return it as pillow/array Image"""
     if library_img == "Pillow":
@@ -347,31 +279,6 @@ def img_process(arq, library_img, img_processing: List[str], inverted=False):
     cv.imwrite("original.png", im)
     im = processing(im, library_img, img_processing)
     return im
-
-
-arq = "../../Data_Base/Data_Base_Cedulas/20.8.jpg"
-features = constants.features(histogramFull_256=[False,
-                                                 256,
-                                                 constants.img_processing(HSV=[1, ""], getChannel=[2, 0], filterGaussianBlur=[3, ""])],  # [Run?, features len, img_processing**] # [order, option]
-                              histogramFilter_256=[False,
-                                                   256,
-                                                   constants.img_processing(HSV=[1, ""], getChannel=[2, ""], filterGaussianBlur=[3, ""])],
-                              histogramReduce_XXX=[False,
-                                                   10,
-                                                   constants.img_processing(HSV=[1, ""], getChannel=[2, 0], filterGaussianBlur=[3, ""])],
-                              imagePatches_XXX=[False,
-                                                25*25,
-                                                constants.img_processing(gray=[1, ""], filterGaussianBlur=[2, ""])],
-                              colorContours_255=[True,
-                                                 255,
-                                                 constants.img_processing(
-                                                     gray=[1, ""],
-                                                     histogramEqualization=[2, ""],
-                                                     filterMedianBlur=[3, 15],
-                                                     canny=[4, ""],
-                                                     filterMorphology=[5, ""]),
-                                                 "processingBreak",
-                                                 constants.img_processing(HSV=[1, ""], getChannel=[2, 0], filterGaussianBlur=[3, ""])])
 
 
 def temp1():
@@ -451,7 +358,18 @@ def temp6():
         im = image_processing.img_process(path, "OpenCV", "gray_thresh_x", inverted=False)
         gradienteHistogram(im,index)
 
+def temp7():
+    "Test Bilateral"
+    path = "../../Data_Base/Data_Base_Refencia"
+    data_base = os.listdir(path)
+    data_base.sort(key=others.images_sort)
+    for index in range(len(data_base)):
+        data_base[index] = "".join((path, "/", data_base[index]))
+    for index, path in enumerate(data_base):
+        im = image_processing.img_process(path, "OpenCV", "filterBilateralFilter_x", inverted=False)
+        cv.imwrite(str(index)+"bilateral.png",im)
+
 if __name__ == "__main__":
     import others
     import image_processing
-    temp6()
+    temp7()
