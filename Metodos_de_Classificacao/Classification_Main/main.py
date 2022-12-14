@@ -78,7 +78,7 @@ def mls_construct(todos: List[str],
 if __name__ == "__main__":
     # User Interface
     start_time = time.time()
-    todos = constants.todos(start=True, optimate=False, labeling_only=False)
+    todos = constants.todos(start=False, optimate=True, labeling_only=False)
     method_libraries = constants.methods_libraries(OpenCV=True, scikit_learn=False)
     img_libraries = constants.img_libraries(OpenCV=True)
     features = []
@@ -92,7 +92,7 @@ if __name__ == "__main__":
                                                             256,
                                                             constants.img_processing(HSV=[1, ""], getChannel=[2, ""],
                                                                                      filterGaussianBlur=[3, ""])],
-                                       histogramReduce_XXX=[False,
+                                       histogramReduce_XXX=[True,
                                                             n,
                                                             constants.img_processing(HSV=[1, ""], getChannel=[2, 0],
                                                                                      filterGaussianBlur=[3, ""])],
@@ -109,7 +109,7 @@ if __name__ == "__main__":
                                                               filterMorphology=[5, ""]),
                                                           "processingBreak",
                                                           constants.img_processing(HSV=[1, ""], getChannel=[2, 0], filterGaussianBlur=[3, ""])],
-                                       siftHistogram_XXX=[True, n,
+                                       siftHistogram_XXX=[False, n,
                                                           constants.img_processing(
                                                               gray=[1, ""])],
                                        gradienteHistogram_XXX=[False, 36*4, ""])
