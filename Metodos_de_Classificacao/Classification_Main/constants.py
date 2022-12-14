@@ -32,7 +32,10 @@ def img_processing(
         filterMedianBlur=[False, 0],
         canny=[False, 0],
         filterKMeans=[False,2],
-        filerHOG=[False,0]):
+        filerHOG=[False,0],
+        dontSlip=[False,0],
+        patchSlip=[False,0],
+        contourSlip=[False,0]):
     l = [tuple_ for tuple_ in locals().items() if type(tuple_[1])==list]
     l = {k: v for k, v in sorted(l, key=lambda item: item[1])}
     return "_".join((["_".join(filter(None, (key, str(l[key][1])))) for key in l if l[key][0] != False]))

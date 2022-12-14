@@ -11,46 +11,59 @@ import time
 import numpy as np
 import cv2 as cv
 from PIL import Image, ImageFilter
-import constants
+
 from typing import List
 from bokeh.models import CustomJS, Dropdown
 import bokeh.plotting as bokeh
 from skimage.feature import hog as hog_sk
 sys.path.append('../../Metodos_de_Classificacao/Classification_Main/')
 
+
 def gradienteHistogram(im, index):
-    block_size = (2,2)
-    cell_size = (16,16)
+    block_size = (2, 2)
+    cell_size = (16, 16)
     nbins = 9
     hog = cv.HOGDescriptor(_winSize=(im.shape[1] // cell_size[1] * cell_size[1],
-                                      im.shape[0] // cell_size[0] * cell_size[0]),
-                            _blockSize=(block_size[1] * cell_size[1],
-                                        block_size[0] * cell_size[0]),
-                            _blockStride=(cell_size[1], cell_size[0]),
-                            _cellSize=(cell_size[1], cell_size[0]),
-                            _nbins=nbins)
-    #compute(img[, winStride[, padding[, locations]]]) -> descriptors
+                                     im.shape[0] // cell_size[0] * cell_size[0]),
+                           _blockSize=(block_size[1] * cell_size[1],
+                                       block_size[0] * cell_size[0]),
+                           _blockStride=(cell_size[1], cell_size[0]),
+                           _cellSize=(cell_size[1], cell_size[0]),
+                           _nbins=nbins)
+    # compute(img[, winStride[, padding[, locations]]]) -> descriptors
     hist = hog.compute(im)
-    cv.imwrite(str(index)+"hog.png",h)
+    cv.imwrite(str(index)+"hog.png", h)
+
 
 def filterKmeans(im, k=10, index=0):
     Z = np.float32(im.reshape((-1, 3)))
     ret, label, center = cv.kmeans(Z, k, None, (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 10, 1.0),
                                    10, cv.KMEANS_RANDOM_CENTERS)
     im = center[label.flatten()].reshape((im.shape))
-    cv.imwrite("".join((str(index),"kmeans.png")), im)
+    cv.imwrite("".join((str(index), "kmeans.png")), im)
 
 
 def images_union(ims: List[np.ndarray], blank_size=10):
     im_final1 = ims[0]
     im_final2 = ims[3]
     for index in range(1, 3):
-        im_final1 = np.concatenate((im_final1, np.zeros(
-            (ims[0].shape[0], blank_size))+255, ims[index]), axis=1)
+        try:
+            im_final1 = np.concatenate((im_final1, np.zeros((ims[0].shape[0], blank_size))+255, ims[index]), axis=1)
+        except ValueError:
+            im_final1 = np.concatenate((im_final1, np.zeros((ims[0].shape[0], blank_size, ims[0].shape[2]))+255,
+                                        ims[index]), axis=1)
     for index in range(4, len(ims)):
-        im_final2 = np.concatenate((im_final2, np.zeros(
-            (ims[0].shape[0], blank_size))+255, ims[index]), axis=1)
-    im_final = np.concatenate((im_final1, np.zeros((blank_size, im_final2.shape[1]))+255, im_final2), axis=0)
+        try:
+            im_final2 = np.concatenate((im_final2, np.zeros((ims[0].shape[0], blank_size))+255,
+                                        ims[index]), axis=1)
+        except ValueError:
+            im_final2 = np.concatenate((im_final2, np.zeros((ims[0].shape[0], blank_size, ims[0].shape[2]))+255,
+                                        ims[index]), axis=1)
+    try:
+        im_final = np.concatenate((im_final1, np.zeros((blank_size, im_final2.shape[1]))+255, im_final2), axis=0)
+    except ValueError:
+        im_final = np.concatenate((im_final1, np.zeros((blank_size, im_final2.shape[1], im_final2.shape[2]))+255,
+                                   im_final2), axis=0)
     cv.imwrite("images_merged.png", im_final)
 
 
@@ -59,9 +72,9 @@ def feature_sift(arq: str, feature: str, library_img: str, n_features: int, inve
     gray = image_processing.img_process(arq, "OpenCV", "gray_x", inverted=False)
     sift = cv.SIFT_create()
     kp, des = sift.detectAndCompute(gray, None)
-    cv.imwrite(str(time.time())+".png",cv.drawKeypoints(gray,kp,im,flags=cv.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS))
-    
-    #_, _, center = cv.kmeans(np.float32(des), 60, None, (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 10, 1.0),
+    cv.imwrite(str(time.time())+".png", cv.drawKeypoints(gray, kp, im, flags=cv.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS))
+
+    # _, _, center = cv.kmeans(np.float32(des), 60, None, (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 10, 1.0),
     #                         10, cv.KMEANS_RANDOM_CENTERS)
 
 
@@ -215,7 +228,6 @@ def normalize(list_):
     return [(x-x_min)/(difference)*100 for x in list_]
 
 
-
 def histogram_filter(im, im_name: str, library_img: str):
     """Receive image and return histogram of the channel H excruing pixels with low saturation and value in extrems"""
     if library_img == "Pillow":
@@ -319,7 +331,7 @@ def temp3():
         data_base[index] = "".join((path, "/", data_base[index]))
     ims = []
     for path in data_base:
-        ims.append(image_processing.img_process(path, "OpenCV", "HSV_getChannel_0_x", inverted=False))
+        ims.append(image_processing.img_process(path, "OpenCV", "canny_filterMorphology_x", inverted=False))
     images_union(ims)
 
 
@@ -347,6 +359,7 @@ def temp5():
         im = image_processing.img_process(path, "OpenCV", "gray_x", inverted=False)
         filterKmeans(im, 2, index)
 
+
 def temp6():
     "Test HOG"
     path = "../../Data_Base/Data_Base_Refencia"
@@ -356,7 +369,8 @@ def temp6():
         data_base[index] = "".join((path, "/", data_base[index]))
     for index, path in enumerate(data_base):
         im = image_processing.img_process(path, "OpenCV", "gray_thresh_x", inverted=False)
-        gradienteHistogram(im,index)
+        gradienteHistogram(im, index)
+
 
 def temp7():
     "Test Bilateral"
@@ -367,9 +381,11 @@ def temp7():
         data_base[index] = "".join((path, "/", data_base[index]))
     for index, path in enumerate(data_base):
         im = image_processing.img_process(path, "OpenCV", "filterBilateralFilter_x", inverted=False)
-        cv.imwrite(str(index)+"bilateral.png",im)
+        cv.imwrite(str(index)+"bilateral.png", im)
+
 
 if __name__ == "__main__":
     import others
     import image_processing
-    temp7()
+    import constants
+    temp3()

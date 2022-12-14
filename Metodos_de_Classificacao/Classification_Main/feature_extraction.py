@@ -14,25 +14,27 @@ import training
 import classification
 
 
-def gradienteHistogram(arq: str, feature: str, library_img: str, inverted: bool,n_features):
+def gradienteHistogram(arq: str, feature: str, library_img: str, inverted: bool, n_features):
     im = image_processing.img_process(arq, library_img, feature.split("processingBreak")[0], inverted)
     im_name = "-".join((arq.split("/")[-1], "Inverted"*inverted))
     returns = []
     if library_img == "OpenCV":
-        block_size = (2,2)
-        cell_size = (16,16)
+        block_size = (2, 2)
+        cell_size = (16, 16)
         nbins = 9
         hog = cv.HOGDescriptor(_winSize=(im.shape[1] // cell_size[1] * cell_size[1],
-                                        im.shape[0] // cell_size[0] * cell_size[0]),
-                                _blockSize=(block_size[1] * cell_size[1],
-                                            block_size[0] * cell_size[0]),
-                                _blockStride=(cell_size[1], cell_size[0]),
-                                _cellSize=(cell_size[1], cell_size[0]),
-                                _nbins=nbins)
-        hist = hog.compute(im) # len(hist) = int((im.shape[0]-cell_size[0])/(cell_size[0]))*int((im.shape[1]-cell_size[1])/(cell_size[1]))*36
-    for index,h in enumerate(np.reshape(hist,(int(hist.shape[0]/n_features),n_features))):
-        returns.append(["-".join((im_name, str(index))),h])
+                                         im.shape[0] // cell_size[0] * cell_size[0]),
+                               _blockSize=(block_size[1] * cell_size[1],
+                                           block_size[0] * cell_size[0]),
+                               _blockStride=(cell_size[1], cell_size[0]),
+                               _cellSize=(cell_size[1], cell_size[0]),
+                               _nbins=nbins)
+        # len(hist) = int((im.shape[0]-cell_size[0])/(cell_size[0]))*int((im.shape[1]-cell_size[1])/(cell_size[1]))*36
+        hist = hog.compute(im)
+    for index, h in enumerate(np.reshape(hist, (int(hist.shape[0]/n_features), n_features))):
+        returns.append(["-".join((im_name, str(index))), h])
     return []
+
 
 def sift_clustering(
         data_base_path: str, paths: List[str],
@@ -50,9 +52,13 @@ def sift_clustering(
 def sift_vectors(arq: str, feature: str, library_img: str, inverted: bool):
     "Return all sift vector descritor to one im"
     sift = cv.SIFT_create()
-    im = image_processing.img_process(arq, library_img, feature, inverted)
-    _, des = sift.detectAndCompute(im, None)
-    return np.array(des)
+    ims = image_processing.img_process(arq, library_img, feature, inverted)
+    des_list = []
+    for im in ims:
+        _, des = sift.detectAndCompute(im, None)
+        if des != None:
+            des_list += [des]
+    return np.array(des_list[1:0])
 
 
 def sift_histogram(arq: str, feature: str, library_img: str, inverted: bool, n_features: int, knn_clustering):
@@ -64,9 +70,9 @@ def sift_histogram(arq: str, feature: str, library_img: str, inverted: bool, n_f
     _, des = sift.detectAndCompute(im, None)
     des_length = len(des)
     for d in des:
-        index = np.array(knn_clustering.predict(np.matrix(d, dtype=np.float32))[1], dtype=int)[0,0]
+        index = np.array(knn_clustering.predict(np.matrix(d, dtype=np.float32))[1], dtype=int)[0, 0]
         returns[index] += 1/des_length
-    return [[im_name,normalize(returns)]]
+    return [[im_name, normalize(returns)]]
 
 
 def histogram_reduce(arq: str, feature: str, library_img: str, n_features: int, inverted: bool):

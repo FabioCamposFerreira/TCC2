@@ -82,7 +82,7 @@ if __name__ == "__main__":
     method_libraries = constants.methods_libraries(OpenCV=True, scikit_learn=False)
     img_libraries = constants.img_libraries(OpenCV=True)
     features = []
-    n_features = np.linspace(60, 1000, num=10, dtype=int)
+    n_features = np.linspace(60, 1000, num=1, dtype=int)
     for n in n_features:
         features += constants.features(histogramFull_256=[False,
                                                           256,
@@ -111,7 +111,7 @@ if __name__ == "__main__":
                                                           constants.img_processing(HSV=[1, ""], getChannel=[2, 0], filterGaussianBlur=[3, ""])],
                                        siftHistogram_XXX=[True, n,
                                                           constants.img_processing(
-                                                              gray=[1, ""])],
+                                                              gray=[1, 0],patchSlip=[1,10])],
                                        gradienteHistogram_XXX=[False, 36*4, ""])
     data_base_paths = constants.data_base_paths(Data_Base_Cedulas=True, temp=False)
     methods_parameters = constants.methods_parameters(
