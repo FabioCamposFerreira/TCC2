@@ -8,3 +8,4 @@ scipy
 bokeh
 pandas
 scikit-learn
+scikit-image

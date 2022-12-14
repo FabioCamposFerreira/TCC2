@@ -105,10 +105,9 @@ def processing(im, library_img: str, img_processing: List[str]):
             elif "filterMedianBlur" in processing:
                 im = cv.medianBlur(im, int(img_processing[index+1]))
             elif "filterGaussianBlur" in processing:
-                im = cv.GaussianBlur(im, (25, 25), 0)
-            elif "filterBilateralFilter" in processing:
-                im = cv.bilateralFilter(im, int(img_processing[index + 1]),
-                                        int(img_processing[index + 1]) * 2, int(img_processing[index + 1]) / 2)
+                im = cv.GaussianBlur(im, (5, 5), 0)
+            elif "filterBilateral" in processing:
+                im = cv.bilateralFilter(im, int(img_processing[index+1]), int(img_processing[index+1])*2, int(img_processing[index+1])/2)
             elif "thresh" in processing:
                 im = cv.threshold(im, 127, 255, 0)[1]
             elif "filterMorphology" in processing:

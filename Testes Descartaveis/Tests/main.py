@@ -331,7 +331,7 @@ def temp3():
         data_base[index] = "".join((path, "/", data_base[index]))
     ims = []
     for path in data_base:
-        ims.append(image_processing.img_process(path, "OpenCV", "canny_filterMorphology_x", inverted=False))
+        ims.append(image_processing.img_process(path, "OpenCV", "filterBilateral_25_x", inverted=False))
     images_union(ims)
 
 
