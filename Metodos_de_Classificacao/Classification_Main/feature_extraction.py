@@ -36,9 +36,8 @@ def gradienteHistogram(arq: str, feature: str, library_img: str, inverted: bool,
     return []
 
 
-def sift_clustering(
-        data_base_path: str, paths: List[str],
-        n_features: int, feature: str, library_img: str, inverted: bool):
+def sift_clustering(data_base_path: str, paths: List[str],
+                    n_features: int, feature: str, library_img: str, inverted: bool):
     "Generate KNN  dict of the sith"
     print("Gerando dicionario sith...")
     array = sift_vectors("".join((data_base_path, paths[0])), feature, library_img, inverted)
@@ -58,7 +57,8 @@ def sift_vectors(arq: str, feature: str, library_img: str, inverted: bool):
         _, des = sift.detectAndCompute(im, None)
         if des != None:
             des_list += [des]
-    return np.array(des_list[1:0])
+    if des_list != []:
+        return np.array(des_list[1:0])
 
 
 def sift_histogram(arq: str, feature: str, library_img: str, inverted: bool, n_features: int, knn_clustering):
