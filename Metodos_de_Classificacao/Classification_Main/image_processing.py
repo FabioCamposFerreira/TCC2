@@ -53,6 +53,7 @@ def image2patches(im, library_img, patches_len: int):
 
 def image2images(im, im2, library_img: str, img_processing: list):
     """Split image in masks with criteria"""
+    ims=[]
     for index, processing in enumerate(img_processing):
         if library_img == "OpenCV":
             if "patchSlip" in processing:
@@ -60,7 +61,7 @@ def image2images(im, im2, library_img: str, img_processing: list):
             elif "contourSlip" in processing:
                 ims = image2contours(im, im2, library_img)
     if len(ims) == 0:
-        ims = [im]
+        ims = im
 
     return ims
 
@@ -105,7 +106,7 @@ def processing(im, library_img: str, img_processing: List[str]):
             elif "filterMedianBlur" in processing:
                 im = cv.medianBlur(im, int(img_processing[index+1]))
             elif "filterGaussianBlur" in processing:
-                im = cv.GaussianBlur(im, (5, 5), 0)
+                im = cv.GaussianBlur(im, (int(img_processing[index+1]), int(img_processing[index+1])), 0)
             elif "filterBilateral" in processing:
                 im = cv.bilateralFilter(im, int(img_processing[index+1]), int(img_processing[index+1])*2, int(img_processing[index+1])/2)
             elif "thresh" in processing:
@@ -125,6 +126,9 @@ def processing(im, library_img: str, img_processing: List[str]):
                 im = center[label.flatten()].reshape((im.shape))
             elif "filterHOG" in processing:
                 pass
+            elif "filterConnected" in processing:
+                _, im, _, _ = cv.connectedComponentsWithStats(im)
+
             elif processing in constants.img_processing(dontSlip=[1, ""], patchSlip=[1, ""], contourSlip=[1, ""]):
                 # Skip split processings
                 pass

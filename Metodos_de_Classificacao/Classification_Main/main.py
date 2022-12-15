@@ -78,17 +78,17 @@ def mls_construct(todos: List[str],
 if __name__ == "__main__":
     # User Interface
     start_time = time.time()
-    todos = constants.todos(start=False, optimate=True, labeling_only=False)
+    todos = constants.todos(start=True, optimate=False, labeling_only=False)
     method_libraries = constants.methods_libraries(OpenCV=True, scikit_learn=False)
     img_libraries = constants.img_libraries(OpenCV=True)
     features = []
     n_features = np.linspace(60, 1000, num=1, dtype=int)
     for n in n_features:
-        features += constants.features(histogramFull_256=[False,
+        features += constants.features(histogramFull_256=[True,
                                                           256,
                                                           constants.img_processing(filterGaussianBlur=[1, ""],
                                                                                    filterKMeans=[2, 10*6], HSV=[3, ""], getChannel=[4, 0])],  # [Run?, features len, img_processing**] # [order, option]
-                                       histogramFilter_256=[False,
+                                       histogramFilter_256=[True,
                                                             256,
                                                             constants.img_processing(HSV=[1, ""], getChannel=[2, ""],
                                                                                      filterGaussianBlur=[3, ""])],
@@ -96,7 +96,7 @@ if __name__ == "__main__":
                                                             n,
                                                             constants.img_processing(HSV=[1, ""], getChannel=[2, 0],
                                                                                      filterGaussianBlur=[3, ""])],
-                                       imagePatches_XXX=[False,
+                                       imagePatches_XXX=[True,
                                                          25*25,
                                                          constants.img_processing(gray=[1, ""], filterGaussianBlur=[2, ""])],
                                        colorContours_255=[False,
@@ -109,10 +109,10 @@ if __name__ == "__main__":
                                                               filterMorphology=[5, ""]),
                                                           "processingBreak",
                                                           constants.img_processing(HSV=[1, ""], getChannel=[2, 0], filterGaussianBlur=[3, ""])],
-                                       siftHistogram_XXX=[False, n,
+                                       siftHistogram_XXX=[True, n,
                                                           constants.img_processing(
                                                               gray=[1, 0],patchSlip=[1,10])],
-                                       gradienteHistogram_XXX=[False, 36*4, ""])
+                                       gradienteHistogram_XXX=[True, 36*4, ""])
     data_base_paths = constants.data_base_paths(Data_Base_Cedulas=True, temp=False)
     methods_parameters = constants.methods_parameters(
         knn_k=3, mlp_layers=[10],
