@@ -331,7 +331,7 @@ def temp3():
         data_base[index] = "".join((path, "/", data_base[index]))
     ims = []
     for path in data_base:
-        ims.append(image_processing.img_process(path, "OpenCV", "filterGaussianBlur_25_x", inverted=False))
+        ims.append(image_processing.img_process(path, "OpenCV", "filterGaussianBlur_10001_x", inverted=False)[0])
     images_union(ims)
 
 
@@ -356,7 +356,7 @@ def temp5():
         data_base[index] = "".join((path, "/", data_base[index]))
     ims = []
     for index, path in enumerate(data_base):
-        im = image_processing.img_process(path, "OpenCV", "gray_x", inverted=False)
+        im = image_processing.img_process(path, "OpenCV", "filterGaussianBlur_25_x", inverted=False)
         filterKmeans(im, 2, index)
 
 

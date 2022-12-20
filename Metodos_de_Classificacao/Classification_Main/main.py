@@ -18,6 +18,7 @@ import others
 import result_save
 import machine_learn
 
+
 def mls_optimate(mls):
     """Run code to generate optimization graphic"""
     parallel = False
@@ -65,7 +66,7 @@ def mls_construct(todos: List[str],
                     for method_parameters in methods_parameters:
                         for methods_selected in methods_selected_s:
                             mls += [machine_learn.MachineLearn(method_library, img_library, feature,
-                                                 data_base_path, method_parameters, methods_selected)]
+                                                               data_base_path, method_parameters, methods_selected)]
 
     if "optimate" in todos:
         mls_optimate(mls)
@@ -82,38 +83,46 @@ if __name__ == "__main__":
     method_libraries = constants.methods_libraries(OpenCV=True, scikit_learn=False)
     img_libraries = constants.img_libraries(OpenCV=True)
     features = []
-    n_features = np.linspace(60, 1000, num=1, dtype=int)
+    n_features = [5,55,105,205]#np.linspace(1, 1000, num=3, dtype=int)
     for n in n_features:
-        features += constants.features(histogramFull_256=[True,
-                                                          256,
-                                                          constants.img_processing(filterGaussianBlur=[1, ""],
-                                                                                   filterKMeans=[2, 10*6], HSV=[3, ""], getChannel=[4, 0])],  # [Run?, features len, img_processing**] # [order, option]
-                                       histogramFilter_256=[True,
+        # [Run?, features len, img_processing**] # [order, option]
+        features += constants.features(histogramFull_256=[False, 256,
+                                       constants.img_processing(HSV=[1, ""], getChannel=[2, 0])])
+        features += constants.features(histogramFull_256=[False, 256, constants.img_processing(filterGaussianBlur=[1, n], HSV=[
+                                       2, ""], getChannel=[3, 0])])  # [Run?, features len, img_processing**] # [order, option]
+        features += constants.features(histogramFull_256=[True, 256, constants.img_processing(filterMedianBlur=[1, n], HSV=[
+                                       2, ""], getChannel=[3, 0])])  # [Run?, features len, img_processing**] # [order, option]
+        features += constants.features(histogramFull_256=[True, 256, constants.img_processing(filterBilateral=[1, n], HSV=[
+                                       2, ""], getChannel=[3, 0])])  # [Run?, features len, img_processing**] # [order, option]
+        features += constants.features(histogramFull_256=[False, 256, constants.img_processing(filterBilateral=[1, n],filterKMeans=[2,3], HSV=[
+                                       3, ""], getChannel=[4, 0])])  # [Run?, features len, img_processing**] # [order, option]
+        features += constants.features(
+            histogramFull_256=[False, 256, constants.img_processing(
+                filterMedianBlur=[1, 25],
+                HSV=[2, ""],
+                getChannel=[3, 0],
+                patchSlip=[4, 40000])])  # [Run?, features len, img_processing**] # [order, option]
+        features += constants.features(
+            histogramFull_256=[False, 256, constants.img_processing(
+                filterMedianBlur=[1, 25],
+                HSV=[2, ""],
+                getChannel=[3, 0],
+                contourSlip=[4, ""])])  # [Run?, features len, img_processing**] # [order, option]
+        features += constants.features(histogramFilter_256=[False,
                                                             256,
                                                             constants.img_processing(HSV=[1, ""], getChannel=[2, ""],
-                                                                                     filterGaussianBlur=[3, ""])],
-                                       histogramReduce_XXX=[True,
+                                                                                     filterGaussianBlur=[3, ""])])
+        features += constants.features(histogramReduce_XXX=[False,
                                                             n,
                                                             constants.img_processing(HSV=[1, ""], getChannel=[2, 0],
-                                                                                     filterGaussianBlur=[3, ""])],
-                                       imagePatches_XXX=[True,
-                                                         25*25,
-                                                         constants.img_processing(gray=[1, ""], filterGaussianBlur=[2, ""])],
-                                       colorContours_255=[False,
-                                                          255,
+                                                                                     filterGaussianBlur=[3, ""])])
+        features += constants.features(imagePatches_XXX=[False, 25*25,
+                                       constants.img_processing(gray=[1, ""], filterGaussianBlur=[2, ""])])
+        features += constants.features(siftHistogram_XXX=[False, n,
                                                           constants.img_processing(
-                                                              gray=[1, ""],
-                                                              histogramEqualization=[2, ""],
-                                                              filterMedianBlur=[3, 15],
-                                                              canny=[4, ""],
-                                                              filterMorphology=[5, ""]),
-                                                          "processingBreak",
-                                                          constants.img_processing(HSV=[1, ""], getChannel=[2, 0], filterGaussianBlur=[3, ""])],
-                                       siftHistogram_XXX=[True, n,
-                                                          constants.img_processing(
-                                                              gray=[1, 0],patchSlip=[1,10])],
-                                       gradienteHistogram_XXX=[True, 36*4, ""])
-    data_base_paths = constants.data_base_paths(Data_Base_Cedulas=True, temp=False)
+                                                              gray=[1, 0], patchSlip=[1, 10])])
+        features += constants.features(gradienteHistogram_XXX=[False, 36*4, ""])
+    data_base_paths = constants.data_base_paths(Data_Base_Cedulas=True, temp=False, Data_Base_Refencia=False)
     methods_parameters = constants.methods_parameters(
         knn_k=3, mlp_layers=[10],
         svm_c=1, svm_kernel=constants.svm_kernel(inter=True),

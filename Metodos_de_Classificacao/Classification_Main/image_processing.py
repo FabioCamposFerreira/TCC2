@@ -53,7 +53,7 @@ def image2patches(im, library_img, patches_len: int):
 
 def image2images(im, im2, library_img: str, img_processing: list):
     """Split image in masks with criteria"""
-    ims=[]
+    ims = []
     for index, processing in enumerate(img_processing):
         if library_img == "OpenCV":
             if "patchSlip" in processing:
@@ -61,7 +61,7 @@ def image2images(im, im2, library_img: str, img_processing: list):
             elif "contourSlip" in processing:
                 ims = image2contours(im, im2, library_img)
     if len(ims) == 0:
-        ims = im
+        ims.append(im)
 
     return ims
 
@@ -108,7 +108,9 @@ def processing(im, library_img: str, img_processing: List[str]):
             elif "filterGaussianBlur" in processing:
                 im = cv.GaussianBlur(im, (int(img_processing[index+1]), int(img_processing[index+1])), 0)
             elif "filterBilateral" in processing:
-                im = cv.bilateralFilter(im, int(img_processing[index+1]), int(img_processing[index+1])*2, int(img_processing[index+1])/2)
+                im = cv.bilateralFilter(
+                    im, int(img_processing[index + 1]),
+                    int(img_processing[index + 1]) * 2, int(img_processing[index + 1]) / 2)
             elif "thresh" in processing:
                 im = cv.threshold(im, 127, 255, 0)[1]
             elif "filterMorphology" in processing:
@@ -129,6 +131,11 @@ def processing(im, library_img: str, img_processing: List[str]):
             elif "filterConnected" in processing:
                 _, im, _, _ = cv.connectedComponentsWithStats(im)
 
+            elif "incriseContrastBrightness" in processing:
+                for y in range(im.shape[0]):
+                    for x in range(im.shape[1]):
+                        for c in range(im.shape[2]):
+                            im[y, x, c] = np.clip(2.2*im[y, x, c] + 50, 0, 255)
             elif processing in constants.img_processing(dontSlip=[1, ""], patchSlip=[1, ""], contourSlip=[1, ""]):
                 # Skip split processings
                 pass

@@ -12,7 +12,7 @@ import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from bokeh.models import LabelSet, HoverTool, CustomJS, Dropdown
+from bokeh.models import HoverTool, CustomJS, Dropdown, ColumnDataSource
 from bokeh.palettes import Dark2_5 as palette
 from bokeh.layouts import column, row
 from bokeh.transform import factor_cmap
@@ -205,12 +205,16 @@ def graphic_points(labels: List[str],  features: List[List[int]], file_path: str
     # x = magnitude
     xs = np.linalg.norm(features, axis=1)
     # y =  angle
-    ys = np.rad2deg(np.arccos(np.dot(features, array_reference)/(x*norm_reference)))
-    colors = itertools.cycle(palette)
+    ys = np.rad2deg(np.arccos(np.dot(features, array_reference)/(xs*norm_reference)))
+    paleta = itertools.cycle(palette)
     f = bokeh.figure(sizing_mode="stretch_both", tools="pan,wheel_zoom,box_zoom,reset,save", output_backend="svg")
-    for x, y,label, color in zip(xs, ys, labels, colors):
-        l = f.scatter(x, y,  line_color=color, legend_label=label, line_width=2)
-        f.add_tools(HoverTool(renderers=[l], tooltips=[('Name', label), ]))
+    colors=[]
+    for x, color in zip(xs, paleta):
+        colors+=[color]
+    source = ColumnDataSource({"xs":xs,"ys":ys,"colors":colors,"labels":labels})
+    l = f.scatter("xs", "ys",  color="colors", legend_label="labels", size=10,source=source)
+    hover = HoverTool(renderers=[l], tooltips=[("Name","@labels")])
+    f.add_tools(hover)
     f.legend.location = "top_right"
     f.legend.click_policy = "hide"
     f.xaxis.axis_label = 'Magnitude'
@@ -241,21 +245,24 @@ def graphics_lines(classes: set, labels: List[str],  features: List[List[int]], 
 
 def graphics_save(files_name: str, images_features: list):
     """Save graphics of the features to compare quality of distribution"""
-    if len(images_features[0][1]) <= 500:
-        features = []
-        labels = np.array([])
-        for item in images_features:
-            labels = np.append(labels, item[0].split(".")[0])
-            features.append(item[1])
-        features = np.array(features)
-        images_name = np.array(images_features, dtype=object)[:, 0]
-        classes = set(labels)
-        graphics_lines(classes, labels, features, files_name, images_name)
-        graphic_points(labels, features, files_name)
-        if len(images_features[0][1]) <= 10:
-            graphics_box1(classes, labels, features, files_name)
-            graphics_box2(classes, labels, features, files_name)
-            graphics_splom(labels, features, files_name)
+    if len(images_features) < 1000:
+        if len(images_features[0][1]) <= 500:
+            features = []
+            labels = np.array([])
+            for item in images_features:
+                labels = np.append(labels, item[0].split(".")[0])
+                features.append(item[1])
+            features = np.array(features)
+            images_name = np.array(images_features, dtype=object)[:, 0]
+            classes = set(labels)
+            graphics_lines(classes, labels, features, files_name, images_name)
+            graphic_points(labels, features, files_name)
+            if len(images_features[0][1]) <= 10:
+                graphics_box1(classes, labels, features, files_name)
+                graphics_box2(classes, labels, features, files_name)
+                graphics_splom(labels, features, files_name)
+    else:
+        print("O numero de padrões é grande demais para construir gráficos!")
 
 
 def features_save(csv_name: str, images_features: list):

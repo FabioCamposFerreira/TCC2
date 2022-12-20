@@ -26,6 +26,7 @@ def img_processing(
         getChannel=[False, 0],
         filterBlur=[False, 0],
         filterGaussianBlur=[False, 0],
+        filterBilateral=[False,0],
         filterMorphology=[False, 0],
         gray=[False, 0],
         histogramEqualization=[False, 0],
@@ -33,6 +34,7 @@ def img_processing(
         canny=[False, 0],
         filterKMeans=[False,2],
         filerHOG=[False,0],
+        increseContrastBrightness=[False,0],
         dontSlip=[False,0],
         patchSlip=[False,0],
         contourSlip=[False,0]):
@@ -46,19 +48,14 @@ def features(histogramFull_256=[0, None, None], #[True/False,n of the features,i
              imagePatches_XXX=[0, 0, None],
              imageContours_XXX=[0, 0, None],
              histogramReduce_XXX=[0, 0, None],
-             colorContours_255=[0, None, None],
+            #  colorContours_255=[0, None, None],
              siftHistogram_XXX=[0,None,None],
              gradienteHistogram_XXX=[0,None,None]):
     l = dict(locals())
     return ["_".join(("_".join((l[key][2:])), key.replace("XXX", str(l[key][1])))) for key in l if l[key][0] == 1]
 
 
-def data_base_paths(temp=0, Data_Base_Cedulas=0):
-    l = locals()
-    return ["".join(("../../Data_Base/", key, "/")) for key in l if l[key] == 1]
-
-
-def data_base_paths(temp=0, Data_Base_Cedulas=0):
+def data_base_paths(temp=0, Data_Base_Cedulas=0, Data_Base_Refencia=0):
     l = locals()
     return ["".join(("../../Data_Base/", key, "/")) for key in l if l[key] == 1]
 

@@ -43,7 +43,7 @@ def labeling(X: list, y_full: list, method_name: str,  library: str, xml_name: s
             # y_predict = y_mlp
             temp  = sorted(set(y_full))
             y_predict = np.array(method.predict(X)[0], dtype=int)
-            y_predict = temp[y_predict] cv.ml_ANN_MLP_INDENTY
+            y_predict = temp[y_predict] 
         return y_predict
     elif library == "scikit-learn":
         method = load(xml_name.replace("XXX", method_name).replace(".xml", ".joblib"))

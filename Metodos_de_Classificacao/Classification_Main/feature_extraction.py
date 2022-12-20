@@ -88,13 +88,18 @@ def histogram_reduce(arq: str, feature: str, library_img: str, n_features: int, 
 
 def histogramFull(arq: str, feature: str, library_img: str, inverted: bool):
     """Receive path image and return histogram of the channel H"""
-    im = image_processing.img_process(arq, library_img, feature, inverted)
-    im_name = "-".join((arq.split("/")[-1], "Inverted"*inverted))
-    if library_img == "Pillow":
-        h = im.getchannel(channel=0).histogram(mask=None, extrema=None)
-    elif library_img == "OpenCV":
-        h = np.squeeze(cv.calcHist([im], [0], None, [256], [0, 256])).tolist()
-    return [[im_name, normalize(h)]]
+    ims = image_processing.img_process(arq, library_img, feature, inverted)
+    returns = []
+    for index, im in enumerate(ims):
+        im_name = "-".join((arq.split("/")[-1], "Inverted"*inverted))
+        if im_name=='2.3.jpg-':
+            im_name = '2.3.jpg-'
+        if library_img == "Pillow":
+            h = im.getchannel(channel=0).histogram(mask=None, extrema=None)
+        elif library_img == "OpenCV":
+            returns += [["-".join((im_name, str(index))),
+                        normalize(np.squeeze(cv.calcHist([im], [0], None, [256], [0, 256])).tolist())]]
+    return returns
 
 
 def histogram_filter(im: np.ndarray, im_name: str, library_img: str):
