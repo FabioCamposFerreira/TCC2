@@ -130,8 +130,8 @@ class MachineLearn:
                                                                         knn_clustering=knn_clustering)
             progress_bar.end()
             result_save.features_save(self.csv_features, self.images_features)
-            # print("Salvando gráficos em "+self.path_graphics)
-            # result_save.graphics_save(self.path_graphics, self.images_features)
+            print("Salvando gráficos em "+self.path_graphics)
+            result_save.graphics_save(self.path_graphics, self.images_features)
         self.y = [int(row[0].split(".")[0]) for row in self.images_features]
         self.X = [row[1] for row in self.images_features]
 

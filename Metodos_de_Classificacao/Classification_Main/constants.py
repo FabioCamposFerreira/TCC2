@@ -26,31 +26,31 @@ def img_processing(
         getChannel=[False, 0],
         filterBlur=[False, 0],
         filterGaussianBlur=[False, 0],
-        filterBilateral=[False,0],
+        filterBilateral=[False, 0],
         filterMorphology=[False, 0],
         gray=[False, 0],
         histogramEqualization=[False, 0],
         filterMedianBlur=[False, 0],
         canny=[False, 0],
-        filterKMeans=[False,2],
-        filerHOG=[False,0],
-        increseContrastBrightness=[False,0],
-        dontSlip=[False,0],
-        patchSlip=[False,0],
-        contourSlip=[False,0]):
-    l = [tuple_ for tuple_ in locals().items() if type(tuple_[1])==list]
+        filterKMeans=[False, 2],
+        filerHOG=[False, 0],
+        increseContrastBrightness=[False, 0],
+        dontSlip=[False, 0],
+        patchSlip=[False, 0],
+        contourSlip=[False, 0]):
+    l = [tuple_ for tuple_ in locals().items() if type(tuple_[1]) == list]
     l = {k: v for k, v in sorted(l, key=lambda item: item[1])}
     return "_".join((["_".join(filter(None, (key, str(l[key][1])))) for key in l if l[key][0] != False]))
 
 
-def features(histogramFull_256=[0, None, None], #[True/False,n of the features,image processing]
+def features(histogramFull_256=[0, None, None],  # [True/False,n of the features,image processing]
              histogramFilter_256=[0, None, None],
              imagePatches_XXX=[0, 0, None],
              imageContours_XXX=[0, 0, None],
              histogramReduce_XXX=[0, 0, None],
-            #  colorContours_255=[0, None, None],
-             siftHistogram_XXX=[0,None,None],
-             gradienteHistogram_XXX=[0,None,None]):
+             #  colorContours_255=[0, None, None],
+             siftHistogram_XXX=[0, None, None],
+             gradienteHistogram_XXX=[0, None, None]):
     l = dict(locals())
     return ["_".join(("_".join((l[key][2:])), key.replace("XXX", str(l[key][1])))) for key in l if l[key][0] == 1]
 
@@ -82,3 +82,7 @@ SATURATION_TOLERANCE = 0.8
 VALUE_TOLERANCE = 0.9
 AREA_MIN = 3e3
 knn_clustering = []
+COLORS=["#FF0000", "#0000FF", "#FFA500", "#800080", "#FFFF00", "#00FF00", "#00008B", "#A52A2A", "#000000",
+                 "#800000", "#008000", "#FF00FF", "#808000", "#FFC0CB", "#7FFFD4", "#00FFFF", "#ADD8E6"]
+MARKERS = ["circle", "diamond", "triangle", "square", "plus", "star",
+           "triangle_pin", "hex", "inverted_triangle", "asterisk", "cross", "x", "y"]
