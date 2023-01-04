@@ -25,13 +25,13 @@ def mls_optimate(mls):
     for ml in mls:
         methods_todo = ml.methods.keys()
         if "SVM" in methods_todo:
-            ml.optimization(method="SVM", svm_kernels=["linear", "poly", "rbf", "sigmoid", "chi2", "inter"],
-                            quantity_C=2, first_C=0.1, quantity_gamma=1, first_gamma=0.1, quantity_degree=1,
+            ml.optimization(method="SVM", svm_kernels=["linear","poly"],#,  "rbf", "sigmoid", "chi2", "inter"],
+                            quantity_C=1, first_C=0.1, quantity_gamma=1, first_gamma=0.1, quantity_degree=1,
                             first_degree=1, parallel=parallel)
         if "KNN" in methods_todo:
-            ml.optimization(method="KNN", quantity_k=10, first_k=1, last_k=10, parallel=parallel)
+            ml.optimization(method="KNN", quantity_k=2, first_k=1, last_k=10, parallel=parallel)
         if "MLP" in methods_todo:
-            ml.optimization(method="MLP", activation=["sigmoid_sym", "gaussian", "relu", "leakyrelu"],
+            ml.optimization(method="MLP", activation=["sigmoid_sym", "gaussian"],#, "relu", "leakyrelu"],
                             quantity_networks=1, quantity_inside_layers=1, range_layer=300, quantity_alpha=1,
                             first_alpha=1, quantity_beta=1, first_beta=1e-2, parallel=parallel)
 
@@ -79,20 +79,20 @@ def mls_construct(todos: List[str],
 if __name__ == "__main__":
     # User Interface
     start_time = time.time()
-    todos = constants.todos(start=False, optimate=True, labeling_only=False)
+    todos = constants.todos(start=True, optimate=False, labeling_only=False)
     method_libraries = constants.methods_libraries(OpenCV=True, scikit_learn=False)
     img_libraries = constants.img_libraries(OpenCV=True)
     features = []
     # [Run?, features len, img_processing**] # [order, option]
-    features += constants.features(histogramFull_256=[True, 256,
+    features += constants.features(histogramFull_256=[False, 256,
                                                       constants.img_processing(HSV=[1, ""], getChannel=[2, 0])])
     n_features = [5, 55, 105, 205]  # grid search kernel size blur
     for n in n_features:
-        features += constants.features(histogramFull_256=[False, 256, constants.img_processing(filterGaussianBlur=[1, n], HSV=[
+        features += constants.features(histogramFull_256=[True, 256, constants.img_processing(filterGaussianBlur=[1, n], HSV=[
                                        2, ""], getChannel=[3, 0])])  # [Run?, features len, img_processing**] # [order, option]
-        features += constants.features(histogramFull_256=[False, 256, constants.img_processing(filterMedianBlur=[1, n], HSV=[
+        features += constants.features(histogramFull_256=[True, 256, constants.img_processing(filterMedianBlur=[1, n], HSV=[
                                        2, ""], getChannel=[3, 0])])  # [Run?, features len, img_processing**] # [order, option]
-        features += constants.features(histogramFull_256=[False, 256, constants.img_processing(filterBilateral=[1, n], HSV=[
+        features += constants.features(histogramFull_256=[True, 256, constants.img_processing(filterBilateral=[1, n], HSV=[
                                        2, ""], getChannel=[3, 0])])  # [Run?, features len, img_processing**] # [order, option]
     n_features = [2, 10, 50, 100]  # grid search k from k means
     for n in n_features:
@@ -139,7 +139,7 @@ if __name__ == "__main__":
         knn_k=3, mlp_layers=[10],
         svm_c=1, svm_kernel=constants.svm_kernel(inter=True),
         svm_gamma=1, svm_degree=1, activation="sigmoid_sym", alpha=100, beta=100)
-    methods_selected = constants.methods_selected(SVM=True, KNN=True, MLP=True)
+    methods_selected = constants.methods_selected(SVM=True, KNN=True, MLP=True )
     mls_construct(todos, method_libraries, img_libraries, features,
                   data_base_paths, methods_parameters, methods_selected)
     print("".join(("Tempo de execução:", str(others.TimeConversion(time.time()-start_time)))))

@@ -82,7 +82,7 @@ SATURATION_TOLERANCE = 0.8
 VALUE_TOLERANCE = 0.9
 AREA_MIN = 3e3
 knn_clustering = []
-COLORS=["#FF0000", "#0000FF", "#FFA500", "#800080", "#FFFF00", "#00FF00", "#00008B", "#A52A2A", "#000000",
+COLORS=["#FF0000", "#0000FF", "#FFA500", "#800080", "#ABAB13", "#248524", "#00008B", "#A52A2A", "#000000",
                  "#800000", "#008000", "#FF00FF", "#808000", "#FFC0CB", "#7FFFD4", "#00FFFF", "#ADD8E6"]
 MARKERS = ["circle", "diamond", "triangle", "square", "plus", "star",
            "triangle_pin", "hex", "inverted_triangle", "asterisk", "cross", "x", "y"]

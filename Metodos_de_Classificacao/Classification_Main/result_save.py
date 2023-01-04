@@ -56,9 +56,12 @@ def optimization_graph(points: dict, file_path: str):
     source = bokeh.ColumnDataSource(points)
     f = bokeh.figure(sizing_mode="stretch_both", output_backend="svg", tools="pan,wheel_zoom,box_zoom,reset,hover,save",
                      tooltips=labels)
-    f.scatter("x", "y", source=source, legend_field=legend_id, size=20,
-                                 color=factor_cmap(legend_id, 'Category10_3', sorted(set(points[legend_id]))),
-                                 marker=factor_mark(legend_id, constants.MARKERS, sorted(set(points[legend_id]))))
+    if legend_id == "k":
+        f.scatter("x", "y", source=source, size=20)
+    else:
+        f.scatter("x", "y", source=source, legend_field=legend_id, size=20,
+                  color=factor_cmap(legend_id, 'Category10_3', sorted(set(points[legend_id]))),
+                  marker=factor_mark(legend_id, constants.MARKERS, sorted(set(points[legend_id]))))
     font_size = "20pt"
     f.add_layout(f.legend[0], 'right')
     f.legend[0].click_policy = "hide"
@@ -136,9 +139,12 @@ def graphics_interactive(curves: list, labels: list, file_path: str):
     f = bokeh.figure(sizing_mode="stretch_both", tools="pan,wheel_zoom,box_zoom,reset,save", output_backend="svg")
     colors = list(labels)
     markers = list(labels)
-    for label, color, marker in zip(sorted(set(labels)), constants.COLORS*len(set(labels))), constants.MARKERS*(len(set(labels))):
-        colors = [color if label==c else c for c in colors]
-        markers = [marker if label==m else m for m in markers]
+    for label, color, marker in zip(
+            sorted(set(labels)),
+            constants.COLORS * len(set(labels)),
+            constants.MARKERS * (len(set(labels)))):
+        colors = [color if label == c else c for c in colors]
+        markers = [marker if label == m else m for m in markers]
     for curve, label, color, marker in zip(curves, labels, colors, markers):
         l = f.line(x, curve,  line_color=color, legend_label=label, line_width=2)
         f.add_tools(HoverTool(renderers=[l], tooltips=[('Legenda', label)]))
@@ -147,8 +153,8 @@ def graphics_interactive(curves: list, labels: list, file_path: str):
     f.legend.location = "top_right"
     f.legend[0].click_policy = "hide"
     f.legend.label_text_font_size = font_size
-    f.xaxis.axis_label = 'Magnitude'
-    f.yaxis.axis_label = 'Angle'
+    f.xaxis.axis_label = 'Intensidades'
+    f.yaxis.axis_label = '% de Pixels'
     f.xaxis.major_label_text_font_size = font_size
     f.xaxis.axis_label_text_font_size = font_size
     f.yaxis.major_label_text_font_size = font_size
@@ -249,7 +255,7 @@ def graphic_points(labels: List[str],  features: List[List[int]], file_path: str
 def graphics_lines(classes: set, labels: List[str],  features: List[List[int]], file_path: str, images_name: List[str]):
     legends = {"mean": [], "median": [], "mode": [], "Standard Deviation": []}
     curves = {"mean": [], "median": [], "mode": [], "Standard Deviation": []}
-    for c in classes:
+    for c in sorted(classes):
         positions = list(labels == c)
         for key in legends.keys():
             if key == "mean":
@@ -261,7 +267,7 @@ def graphics_lines(classes: set, labels: List[str],  features: List[List[int]], 
             elif key == "Standard Deviation":
                 curves[key].append(np.std(features[positions], axis=0))
             legends[key].append("Nota de "+str(c))
-        graphics_interactive(features[positions], np.array(images_name)[positions], file_path.replace("XXX", c))
+        # graphics_interactive(features[positions], np.array(images_name)[positions], file_path.replace("XXX", c))
     for key in legends.keys():
         graphics_interactive(curves[key], legends[key], file_path.replace("XXX", key))
 
@@ -279,11 +285,11 @@ def graphics_save(files_name: str, images_features: list):
             images_name = np.array(images_features, dtype=object)[:, 0]
             classes = set(labels)
             graphics_lines(classes, labels, features, files_name, images_name)
-            graphic_points(labels, features, files_name)
-            if len(images_features[0][1]) <= 10:
-                graphics_box1(classes, labels, features, files_name)
-                graphics_box2(classes, labels, features, files_name)
-                graphics_splom(labels, features, files_name)
+            # graphic_points(labels, features, files_name)
+            # if len(images_features[0][1]) <= 10:
+            #     graphics_box1(classes, labels, features, files_name)
+            #     graphics_box2(classes, labels, features, files_name)
+            #     graphics_splom(labels, features, files_name)
     else:
         print("O numero de padrões é grande demais para construir gráficos!")
 
