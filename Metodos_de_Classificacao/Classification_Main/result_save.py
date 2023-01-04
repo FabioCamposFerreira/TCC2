@@ -118,7 +118,7 @@ def features_open(file_name):
     return images_features
 
 
-def add_hue_bar(f: bokeh.Figure, length: int):
+def add_hue_bar(f, length: int):
     """Add in graphic from bokeh bar with hue spectrum"""
     x = [r for r in range(length)]
     y = [-1 for _ in range(length)]
