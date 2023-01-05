@@ -119,7 +119,8 @@ def normalize(list_):
     x_min = min(list_)
     difference = x_max-x_min
     if not difference:
-        raise Exception("Extract feature is a string of zeros")
+        print("Extract feature is a string of zeros!")
+        return list_
     return [(x-x_min)/(difference)*100 for x in list_]
 
 

@@ -7,6 +7,11 @@ import time
 def images_sort(e: str):
     return float(".".join(e.split(".")[0:2]))
 
+def class_sort(e: str):
+    return float(e)
+
+def labels_sort(e: str):
+    return float(e.replace("Nota de ",""))
 
 class TimeConversion():
     def __init__(self, seconds) -> None:

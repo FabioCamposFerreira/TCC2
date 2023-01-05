@@ -40,7 +40,7 @@ def MLP_create(mlp_layers: list, library="OpenCV", activation="sigmoid_sym", alp
         mlp.setTermCriteria((cv.TERM_CRITERIA_MAX_ITER + cv.TERM_CRITERIA_EPS, 300, 0.01))
         return mlp
     elif library == "scikit-learn":
-        mlp = MLPClassifier(hidden_layer_sizes=mlp_layers[1:-1], activation="logistic", max_iter=300)
+        mlp = MLPClassifier(hidden_layer_sizes=mlp_layers[1:-1], activation="identity", max_iter=300,alpha=alpha)
         return mlp
 
 

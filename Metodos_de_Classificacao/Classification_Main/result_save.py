@@ -139,10 +139,8 @@ def graphics_interactive(curves: list, labels: list, file_path: str):
     f = bokeh.figure(sizing_mode="stretch_both", tools="pan,wheel_zoom,box_zoom,reset,save", output_backend="svg")
     colors = list(labels)
     markers = list(labels)
-    for label, color, marker in zip(
-            sorted(set(labels)),
-            constants.COLORS * len(set(labels)),
-            constants.MARKERS * (len(set(labels)))):
+    for label, color, marker in zip(sorted(set(labels),key=others.labels_sort), constants.COLORS * len(set(labels)),
+                                    constants.MARKERS * (len(set(labels)))):
         colors = [color if label == c else c for c in colors]
         markers = [marker if label == m else m for m in markers]
     for curve, label, color, marker in zip(curves, labels, colors, markers):
@@ -255,7 +253,7 @@ def graphic_points(labels: List[str],  features: List[List[int]], file_path: str
 def graphics_lines(classes: set, labels: List[str],  features: List[List[int]], file_path: str, images_name: List[str]):
     legends = {"mean": [], "median": [], "mode": [], "Standard Deviation": []}
     curves = {"mean": [], "median": [], "mode": [], "Standard Deviation": []}
-    for c in sorted(classes):
+    for c in sorted(classes, key=others.class_sort):
         positions = list(labels == c)
         for key in legends.keys():
             if key == "mean":

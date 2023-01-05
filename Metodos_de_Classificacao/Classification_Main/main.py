@@ -31,9 +31,9 @@ def mls_optimate(mls):
         if "KNN" in methods_todo:
             ml.optimization(method="KNN", quantity_k=2, first_k=1, last_k=10, parallel=parallel)
         if "MLP" in methods_todo:
-            ml.optimization(method="MLP", activation=["sigmoid_sym", "gaussian"],#, "relu", "leakyrelu"],
-                            quantity_networks=1, quantity_inside_layers=1, range_layer=300, quantity_alpha=1,
-                            first_alpha=1, quantity_beta=1, first_beta=1e-2, parallel=parallel)
+            ml.optimization(method="MLP", activation=["sigmoid_sym"],#, "gaussian", "relu"],
+                            quantity_networks=1, quantity_inside_layers=1, range_layer=300, quantity_alpha=5,
+                            first_alpha=.001,last_alpha=2.5, quantity_beta=1, first_beta=1, parallel=parallel)
 
 
 def mls_start(mls):
@@ -86,22 +86,23 @@ if __name__ == "__main__":
     # [Run?, features len, img_processing**] # [order, option]
     features += constants.features(histogramFull_256=[False, 256,
                                                       constants.img_processing(HSV=[1, ""], getChannel=[2, 0])])
-    n_features = [5, 55, 105, 205]  # grid search kernel size blur
+    n_features = [5]  # grid search kernel size blur
     for n in n_features:
-        features += constants.features(histogramFull_256=[True, 256, constants.img_processing(filterGaussianBlur=[1, n], HSV=[
+        features += constants.features(histogramFull_256=[False, 256, constants.img_processing(filterGaussianBlur=[1, n], HSV=[
                                        2, ""], getChannel=[3, 0])])  # [Run?, features len, img_processing**] # [order, option]
-        features += constants.features(histogramFull_256=[True, 256, constants.img_processing(filterMedianBlur=[1, n], HSV=[
+        features += constants.features(histogramFull_256=[False, 256, constants.img_processing(filterMedianBlur=[1, n], HSV=[
                                        2, ""], getChannel=[3, 0])])  # [Run?, features len, img_processing**] # [order, option]
-        features += constants.features(histogramFull_256=[True, 256, constants.img_processing(filterBilateral=[1, n], HSV=[
+    n_features = [5]  # grid search kernel size blur to bilateral
+    for n in n_features:
+        features += constants.features(histogramFull_256=[False, 256, constants.img_processing(filterBilateral=[1, n], HSV=[
                                        2, ""], getChannel=[3, 0])])  # [Run?, features len, img_processing**] # [order, option]
-    n_features = [2, 10, 50, 100]  # grid search k from k means
+    n_features = [1,2,3,5, 30, 60, 100,200]  # grid search k from k means
     for n in n_features:
         features += constants.features(
-            histogramFull_256=[False, 256, constants.img_processing(
-                filterGaussianBlur=[1, n],
-                filterKMeans=[2, 3],
-                HSV=[3, ""],
-                getChannel=[4, 0])])  # [Run?, features len, img_processing**] # [order, option]
+            histogramFull_256=[True, 256, constants.img_processing(
+                filterKMeans=[1, n],
+                HSV=[2, ""],
+                getChannel=[3, 0])])  # [Run?, features len, img_processing**] # [order, option]
     pixels_len = constants.RESOLUTION[0]*constants.RESOLUTION[1]
     n_features = np.linspace(int(pixels_len*0.1), pixels_len, 4, dtype=int)  # grid search best size paths
     for n in n_features:
@@ -138,7 +139,7 @@ if __name__ == "__main__":
     methods_parameters = constants.methods_parameters(
         knn_k=3, mlp_layers=[10],
         svm_c=1, svm_kernel=constants.svm_kernel(inter=True),
-        svm_gamma=1, svm_degree=1, activation="sigmoid_sym", alpha=100, beta=100)
+        svm_gamma=1, svm_degree=1, activation="sigmoid_sym", alpha=0.5, beta=1)
     methods_selected = constants.methods_selected(SVM=True, KNN=True, MLP=True )
     mls_construct(todos, method_libraries, img_libraries, features,
                   data_base_paths, methods_parameters, methods_selected)

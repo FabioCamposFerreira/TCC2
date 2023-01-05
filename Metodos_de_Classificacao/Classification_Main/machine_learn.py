@@ -30,6 +30,7 @@ import constants
 import others
 import result_save
 
+
 class MachineLearn:
     def __init__(self, method_library: str, library_img: str,
                  feature: str, data_base_path: str, method_parameters: dict, methods_selected: List[str]):
@@ -259,14 +260,14 @@ class MachineLearn:
             results.append(self.validation(X, y, index, classifier_save=True))
         self.results = list(results)
 
-    def cross_validation(self, X, y, features_len, parallel: bool = True,print_bar=True):
+    def cross_validation(self, X, y, features_len, parallel: bool = True, print_bar=True):
         """Make cross validation one-leave-out to each method"""
         if parallel == True:
             self.validation_parallel(X, y, features_len)
         else:
-            self.validation_serial(X, y, features_len,print_bar)
+            self.validation_serial(X, y, features_len, print_bar)
 
-    def cross_validation_parallel(self, X, y, features_len, method, parameters, results_xy_label,print_bar=True):
+    def cross_validation_parallel(self, X, y, features_len, method, parameters, results_xy_label, print_bar=True):
         """Call self.cross_validation to run in parallel form"""
         if method == "SVM":
             self.methods = {"SVM": training.SVM_create(self.parameters["method_library"],
@@ -283,7 +284,7 @@ class MachineLearn:
                                                        alpha=parameters["alpha"],
                                                        beta=parameters["beta"])}
         time_start = time.time()
-        self.cross_validation(X, y, features_len, False,print_bar)
+        self.cross_validation(X, y, features_len, False, print_bar)
         results_xy_label['tempo (s)'] += [time.time() - time_start]
         self.setup_metrics()
         results_xy_label['accuracy'] += [self.accuracy[method]]
@@ -345,13 +346,13 @@ class MachineLearn:
             if parallel:
                 processes = []
                 for combination in combinations:
-                    p = Process(target=self.cross_validation_parallel, args=(self.X, self.y, len(self.images_features),
-                                                                             method, combination, results_xy_label,False))
+                    p = Process(target=self.cross_validation_parallel, args=(self.X, self.y, len(
+                        self.images_features), method, combination, results_xy_label, False))
                     processes.append(p)
                     p.start()
-                for index,processe in enumerate(processes):    
-                        processe.join()
-                        progress_bar.print(index)
+                for index, processe in enumerate(processes):
+                    processe.join()
+                    progress_bar.print(index)
             else:
                 print("")
                 for index, combination in enumerate(combinations):
@@ -371,7 +372,7 @@ class MachineLearn:
             quantity_k=100, first_k=1, last_k=100,
             activation=["identity", "sigmoid_sym", "gaussian", "relu", "leakyrelu"],
             quantity_networks=10, quantity_inside_layers=1, range_layer=10, quantity_alpha=10, first_alpha=1e-6,
-            quantity_beta=10, first_beta=1e-2, parallel=False):
+            last_alpha=100, quantity_beta=10, first_beta=1e-2, parallel=False):
         """Optimize classifier selected with your parameters range"""
         self.setup_feature()
         print("Começando processo de otimização...")
@@ -380,7 +381,7 @@ class MachineLearn:
                         "C": np.linspace(first_C, 1000, num=quantity_C, dtype=float),
                         "gamma": np.linspace(first_gamma, 100, num=quantity_gamma, dtype=float),
                         "degree": np.linspace(first_degree, 10, num=quantity_degree, dtype=int)}
-            if False: # Testing grid from opencv
+            if False:  # Testing grid from opencv
                 grid_svc = {"kernel": svm_kernels,
                             "C": cv.ml.ParamGrid_create(first_C, 1000, 1),
                             "gamma": cv.ml.ParamGrid_create(first_gamma, 100, 1),
@@ -422,7 +423,7 @@ class MachineLearn:
                 layers.append(layer_inside)
             grid_mlp = {"activation": activation,
                         "layers": layers,
-                        "alpha": np.linspace(first_alpha, 100, num=quantity_alpha, dtype=float),
+                        "alpha": np.linspace(first_alpha, last_alpha, num=quantity_alpha, dtype=float),
                         "beta": np.linspace(first_beta, 100, num=quantity_beta, dtype=float)}
 
             self.method_optimization(grid_mlp, "MLP", parallel)
