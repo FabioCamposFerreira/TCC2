@@ -31,21 +31,24 @@ def img_processing(
         gray=[False, 0],
         histogramEqualization=[False, 0],
         filterMedianBlur=[False, 0],
+        thresh=[False,0],
         canny=[False, 0],
         filterKMeans=[False, 2],
         filerHOG=[False, 0],
         increseContrastBrightness=[False, 0],
+        processingBreak=[False,0],
         dontSlip=[False, 0],
         patchSlip=[False, 0],
-        contourSlip=[False, 0]):
+        contourSlip=[False, 0],
+        segmentation=[False,0]):
     l = [tuple_ for tuple_ in locals().items() if type(tuple_[1]) == list]
     l = {k: v for k, v in sorted(l, key=lambda item: item[1])}
     return "_".join((["_".join(filter(None, (key, str(l[key][1])))) for key in l if l[key][0] != False]))
 
 
-def features(histogramFull_256=[0, None, None],  # [True/False,n of the features,image processing]
+def features(histogramFull_XXX=[0, None, None],  # [True/False,n of the features,image processing]
              histogramFilter_256=[0, None, None],
-             imagePatches_XXX=[0, 0, None],
+             imageFull_XXX=[0, 0, None],
              imageContours_XXX=[0, 0, None],
              histogramReduce_XXX=[0, 0, None],
              #  colorContours_255=[0, None, None],
@@ -78,6 +81,7 @@ def methods_selected(SVM=0, KNN=0, MLP=0):
 
 
 RESOLUTION = (854, 480)
+#RESOLUTION = (85, 48) # Used in imagemFull
 SATURATION_TOLERANCE = 0.8
 VALUE_TOLERANCE = 0.9
 AREA_MIN = 3e3

@@ -131,8 +131,8 @@ class MachineLearn:
                                                                         knn_clustering=knn_clustering)
             progress_bar.end()
             result_save.features_save(self.csv_features, self.images_features)
-            print("Salvando gráficos em "+self.path_graphics)
-            result_save.graphics_save(self.path_graphics, self.images_features)
+        # print("Salvando gráficos -em "+self.path_graphics)
+        # result_save.graphics_save(self.path_graphics, self.images_features)
         self.y = [int(row[0].split(".")[0]) for row in self.images_features]
         self.X = [row[1] for row in self.images_features]
 
@@ -169,11 +169,11 @@ class MachineLearn:
             results_to_merge = results[np.array(results_id) == img_name]
             result_temp = []
             for index, method in enumerate(self.methods):
-                if method == "MLP":
-                    y_mlp = list(filter(None, "".join(results_to_merge[:, 2*(index+1)]).split("9")))
-                    result_temp += [max(set(y_mlp), key=list(y_mlp).count),  # y_mlp
-                                    np.mean(np.array(results_to_merge[:, 2*(index+1)+1], dtype=float))]  # time_mlp
-                else:
+                # if method == "MLP":
+                #     y_mlp = list(filter(None, "".join(results_to_merge[:, 2*(index+1)]).split("9")))
+                #     result_temp += [max(set(y_mlp), key=list(y_mlp).count),  # y_mlp
+                #                     np.mean(np.array(results_to_merge[:, 2*(index+1)+1], dtype=float))]  # time_mlp
+                # else:
                     result_temp += [max(set(results_to_merge[:, 2*(index+1)]), key=list(results_to_merge[:, 2*(index+1)]).count),  # y
                                     np.mean(np.array(results_to_merge[:, 2*(index+1)+1], dtype=float))]  # time
             temp = [img_name, results_to_merge[0, 1]]

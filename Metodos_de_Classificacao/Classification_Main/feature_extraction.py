@@ -14,26 +14,43 @@ import training
 import classification
 
 
-def gradienteHistogram(arq: str, feature: str, library_img: str, inverted: bool, n_features):
-    im = image_processing.img_process(arq, library_img, feature.split("processingBreak")[0], inverted)
+def imageFull(arq, feature, library_img, inverted, n_features):
+    """Convert array 3D in 1D"""
+    ims = image_processing.img_process(arq, library_img, feature, inverted)
     im_name = "-".join((arq.split("/")[-1], "Inverted"*inverted))
     returns = []
     if library_img == "OpenCV":
-        block_size = (2, 2)
-        cell_size = (16, 16)
-        nbins = 9
-        hog = cv.HOGDescriptor(_winSize=(im.shape[1] // cell_size[1] * cell_size[1],
-                                         im.shape[0] // cell_size[0] * cell_size[0]),
-                               _blockSize=(block_size[1] * cell_size[1],
-                                           block_size[0] * cell_size[0]),
-                               _blockStride=(cell_size[1], cell_size[0]),
-                               _cellSize=(cell_size[1], cell_size[0]),
-                               _nbins=nbins)
-        # len(hist) = int((im.shape[0]-cell_size[0])/(cell_size[0]))*int((im.shape[1]-cell_size[1])/(cell_size[1]))*36
-        hist = hog.compute(im)
-    for index, h in enumerate(np.reshape(hist, (int(hist.shape[0]/n_features), n_features))):
-        returns.append(["-".join((im_name, str(index))), h])
-    return []
+        if im_name == '2.3.jpg-':
+            im_name = '2.3.jpg-'
+        for index, im in enumerate(ims):
+            im_name = "-".join((arq.split("/")[-1], "Inverted"*inverted))
+            returns += [["-".join((im_name, str(index))), np.ravel(im)  ]]
+    return returns
+
+
+def gradienteHistogram(arq: str, feature: str, library_img: str, inverted: bool, n_features):
+    ims = image_processing.img_process(arq, library_img, feature, inverted)
+    im_name = "-".join((arq.split("/")[-1], "Inverted"*inverted))
+    returns = []
+    if im_name == '2.3.jpg-':
+        im_name = '2.3.jpg-'
+    for index, im in enumerate(ims):
+        if library_img == "OpenCV":
+            block_size = (2, 2)
+            cell_size = (16, 16)
+            nbins = 9
+            hog = cv.HOGDescriptor(_winSize=(im.shape[1] // cell_size[1] * cell_size[1],
+                                            im.shape[0] // cell_size[0] * cell_size[0]),
+                                _blockSize=(block_size[1] * cell_size[1],
+                                            block_size[0] * cell_size[0]),
+                                _blockStride=(cell_size[1], cell_size[0]),
+                                _cellSize=(cell_size[1], cell_size[0]),
+                                _nbins=nbins)
+            # len(hist) = int((im.shape[0]-cell_size[0])/(cell_size[0]))*int((im.shape[1]-cell_size[1])/(cell_size[1]))*36
+            hist = hog.compute(im)
+        # for index, h in enumerate(np.reshape(hist, (int(hist.shape[0]/n_features), n_features))):
+            returns.append(["-".join((im_name, str(index))), hist])
+    return returns
 
 
 def sift_clustering(data_base_path: str, paths: List[str],
@@ -55,19 +72,19 @@ def sift_vectors(arq: str, feature: str, library_img: str, inverted: bool):
     des_list = []
     for im in ims:
         _, des = sift.detectAndCompute(im, None)
-        if des != None:
+        if type(des) != None:
             des_list += [des]
     if des_list != []:
-        return np.array(des_list[1:0])
+        return np.array(des_list[0])
 
 
 def sift_histogram(arq: str, feature: str, library_img: str, inverted: bool, n_features: int, knn_clustering):
     "Convert sift vector descritor to histogram"
     sift = cv.SIFT_create()
-    im = image_processing.img_process(arq, library_img, feature, inverted)
+    ims = image_processing.img_process(arq, library_img, feature, inverted)
     im_name = "-".join((arq.split("/")[-1], "Inverted"*inverted))
     returns = np.zeros(n_features)
-    _, des = sift.detectAndCompute(im, None)
+    _, des = sift.detectAndCompute(ims[0], None)
     des_length = len(des)
     for d in des:
         index = np.array(knn_clustering.predict(np.matrix(d, dtype=np.float32))[1], dtype=int)[0, 0]
@@ -86,31 +103,43 @@ def histogram_reduce(arq: str, feature: str, library_img: str, n_features: int, 
     return [[im_name, normalize(new_hist)]]
 
 
-def histogramFull(arq: str, feature: str, library_img: str, inverted: bool):
+def histogramFull(arq: str, feature: str, library_img: str, inverted: bool, alpha_channel=False):
     """Receive path image and return histogram of the channel H"""
     ims = image_processing.img_process(arq, library_img, feature, inverted)
     returns = []
     for index, im in enumerate(ims):
         im_name = "-".join((arq.split("/")[-1], "Inverted"*inverted))
-        if im_name=='2.3.jpg-':
+        if im_name == '2.3.jpg-':
             im_name = '2.3.jpg-'
         if library_img == "Pillow":
             h = im.getchannel(channel=0).histogram(mask=None, extrema=None)
         elif library_img == "OpenCV":
-            returns += [["-".join((im_name, str(index))),
-                        normalize(np.squeeze(cv.calcHist([im], [0], None, [256], [0, 256])).tolist())]]
+            if alpha_channel:
+                returns += [["-".join((im_name, str(index))),
+                             normalize(np.squeeze(cv.calcHist([im], [0], None, [256], [0, 256])[1:]).tolist())]]
+            else:
+                returns += [["-".join((im_name, str(index))),
+                             normalize(np.squeeze(cv.calcHist([im], [0], None, [256], [0, 256])).tolist())]]
     return returns
 
 
-def histogram_filter(im: np.ndarray, im_name: str, library_img: str):
+def histogram_filter(arq: str, feature: str, library_img: str, inverted: bool):
     """Receive image and return histogram of the channel H excruing pixels with low saturation and value in extrems"""
+    ims = image_processing.img_process(arq, library_img, feature, inverted)
+    returns = []
     if library_img == "Pillow":
         im = np.array(im)
         im = np.vstack(im)
-    im = im[(im[:, :, 1] > 255 - 255 * constants.SATURATION_TOLERANCE)
-            & (im[:, :, 2] > 255 / 2 - 255 / 2 * constants.VALUE_TOLERANCE)
-            & (im[:, :, 2] < 255 / 2 + 255 / 2 * constants.VALUE_TOLERANCE)]
-    return [[im_name, np.histogram(im[:, 0], bins=range(256+1))[0]]]
+    if library_img == "OpenCV":
+        for index, im in enumerate(ims):
+            im_name = "-".join((arq.split("/")[-1], "Inverted"*inverted))
+            im = im[(im[:, :, 1] > 255 - 255 * constants.SATURATION_TOLERANCE)
+                    & (im[:, :, 2] > 255 / 2 - 255 / 2 * constants.VALUE_TOLERANCE)
+                    & (im[:, :, 2] < 255 / 2 + 255 / 2 * constants.VALUE_TOLERANCE)]
+            if im_name == '2.3.jpg-':
+                im_name = '2.3.jpg-'
+            returns += [["-".join((im_name, str(index))), normalize(np.histogram(im[:, 0], bins=range(256+1))[0])]]
+    return returns
 
 
 def normalize(list_):
@@ -136,8 +165,10 @@ def clustering(array: np.ndarray, library_img: str, k=2):
 def get_features(arq: str, feature, library_img, n_features=10, inverted=False, knn_clustering=None):
     """Extract image features
     """
+    alpha_channel = True in [i in feature for i in constants.img_processing(
+        contourSlip=[1, ""], segmentation=[1, ""]).split("_")]
     if "histogramFull" in feature:
-        features = histogramFull(arq, feature, library_img, inverted)
+        features = histogramFull(arq, feature, library_img, inverted, alpha_channel)
     elif "histogramFilter" in feature:
         features = histogram_filter(arq, feature, library_img, inverted)
     elif "histogramReduce" in feature:
@@ -146,6 +177,8 @@ def get_features(arq: str, feature, library_img, n_features=10, inverted=False, 
         features = sift_histogram(arq, feature, library_img, inverted, n_features, knn_clustering)
     elif "gradienteHistogram" in feature:
         features = gradienteHistogram(arq, feature, library_img, inverted, n_features)
+    elif "imageFull" in feature:
+        features = imageFull(arq, feature, library_img, inverted, n_features)
     else:
         Exception("Feature not found!")
     return features

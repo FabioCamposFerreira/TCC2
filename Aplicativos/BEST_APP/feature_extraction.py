@@ -4,16 +4,7 @@ import numpy as np
 import image_processing
 
 
-def histogram_reduce(im):
-    """Recude 256 histogram features to n_features"""
-    n_features = 60
-    hist = histogramFull(im)
-    step = int(256/n_features)
-    new_hist = []
-    for index in range(n_features):
-        new_hist += [sum(hist[step*index:(step*index)+step])]
 
-    return normalize(new_hist)
 
 def histogramFull(im):
     """Receive path image and return histogram of the channel H"""
@@ -32,4 +23,4 @@ def normalize(list_):
 
 
 def get_pattern(im):
-    return histogram_reduce(im)
+    return histogramFull(im)

@@ -144,20 +144,20 @@ def graphics_interactive(curves: list, labels: list, file_path: str):
         colors = [color if label == c else c for c in colors]
         markers = [marker if label == m else m for m in markers]
     for curve, label, color, marker in zip(curves, labels, colors, markers):
-        l = f.line(x, curve,  line_color=color, legend_label=label, line_width=2)
+        l = f.line(x, curve[:1000],  line_color=color, legend_label=label, line_width=2)
         f.add_tools(HoverTool(renderers=[l], tooltips=[('Legenda', label)]))
         l = f.scatter(x[1::30], curve[1::30],  color=color, legend_label=label, size=10, marker=marker)
     font_size = "20pt"
     f.legend.location = "top_right"
     f.legend[0].click_policy = "hide"
     f.legend.label_text_font_size = font_size
-    f.xaxis.axis_label = 'Intensidades'
-    f.yaxis.axis_label = '% de Pixels'
+    f.xaxis.axis_label = 'Posição'
+    f.yaxis.axis_label = 'Intensidades'
     f.xaxis.major_label_text_font_size = font_size
     f.xaxis.axis_label_text_font_size = font_size
     f.yaxis.major_label_text_font_size = font_size
     f.yaxis.axis_label_text_font_size = font_size
-    f = add_hue_bar(f, length)
+    # f = add_hue_bar(f, length)
     bokeh.output_file(file_path+".html")
     bokeh.save(f)
 
@@ -251,19 +251,19 @@ def graphic_points(labels: List[str],  features: List[List[int]], file_path: str
 
 
 def graphics_lines(classes: set, labels: List[str],  features: List[List[int]], file_path: str, images_name: List[str]):
-    legends = {"mean": [], "median": [], "mode": [], "Standard Deviation": []}
-    curves = {"mean": [], "median": [], "mode": [], "Standard Deviation": []}
+    legends = {"mean": []}#, "median": [], "mode": [], "Standard Deviation": []}
+    curves = {"mean": []}#, "median": [], "mode": [], "Standard Deviation": []}
     for c in sorted(classes, key=others.class_sort):
         positions = list(labels == c)
         for key in legends.keys():
             if key == "mean":
                 curves[key].append(np.mean(features[positions], axis=0))
-            elif key == "median":
-                curves[key].append(np.median(features[positions], axis=0))
-            elif key == "mode":
-                curves[key].append(stats.mode(features[positions], axis=0, keepdims=True)[0][0])
-            elif key == "Standard Deviation":
-                curves[key].append(np.std(features[positions], axis=0))
+            # elif key == "median":
+            #     curves[key].append(np.median(features[positions], axis=0))
+            # elif key == "mode":
+            #     curves[key].append(stats.mode(features[positions], axis=0, keepdims=True)[0][0])
+            # elif key == "Standard Deviation":
+            #     curves[key].append(np.std(features[positions], axis=0))
             legends[key].append("Nota de "+str(c))
         # graphics_interactive(features[positions], np.array(images_name)[positions], file_path.replace("XXX", c))
     for key in legends.keys():
@@ -272,24 +272,24 @@ def graphics_lines(classes: set, labels: List[str],  features: List[List[int]], 
 
 def graphics_save(files_name: str, images_features: list):
     """Save graphics of the features to compare quality of distribution"""
-    if len(images_features) < 1000:
-        if len(images_features[0][1]) <= 500:
-            features = []
-            labels = np.array([])
-            for item in images_features:
-                labels = np.append(labels, item[0].split(".")[0])
-                features.append(item[1])
-            features = np.array(features)
-            images_name = np.array(images_features, dtype=object)[:, 0]
-            classes = set(labels)
-            graphics_lines(classes, labels, features, files_name, images_name)
-            # graphic_points(labels, features, files_name)
-            # if len(images_features[0][1]) <= 10:
-            #     graphics_box1(classes, labels, features, files_name)
-            #     graphics_box2(classes, labels, features, files_name)
-            #     graphics_splom(labels, features, files_name)
-    else:
-        print("O numero de padrões é grande demais para construir gráficos!")
+    # if len(images_features) < 1000:
+    # if len(images_features[0][1]) <= 500:
+    features = []
+    labels = np.array([])
+    for item in images_features:
+        labels = np.append(labels, item[0].split(".")[0])
+        features.append(item[1])
+    features = np.array(features)
+    images_name = np.array(images_features, dtype=object)[:, 0]
+    classes = set(labels)
+    graphics_lines(classes, labels, features, files_name, images_name)
+        # graphic_points(labels, features, files_name)
+        # if len(images_features[0][1]) <= 10:
+        #     graphics_box1(classes, labels, features, files_name)
+        #     graphics_box2(classes, labels, features, files_name)
+        #     graphics_splom(labels, features, files_name)
+    # else:
+    #     print("O numero de padrões é grande demais para construir gráficos!")
 
 
 def features_save(csv_name: str, images_features: list):

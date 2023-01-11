@@ -25,15 +25,15 @@ def mls_optimate(mls):
     for ml in mls:
         methods_todo = ml.methods.keys()
         if "SVM" in methods_todo:
-            ml.optimization(method="SVM", svm_kernels=["linear","poly"],#,  "rbf", "sigmoid", "chi2", "inter"],
-                            quantity_C=1, first_C=0.1, quantity_gamma=1, first_gamma=0.1, quantity_degree=1,
+            ml.optimization(method="SVM", svm_kernels=["linear", "poly",  "rbf", "sigmoid", "chi2", "inter"],
+                            quantity_C=5, first_C=0.1, quantity_gamma=5, first_gamma=0.1, quantity_degree=5,
                             first_degree=1, parallel=parallel)
         if "KNN" in methods_todo:
             ml.optimization(method="KNN", quantity_k=2, first_k=1, last_k=10, parallel=parallel)
         if "MLP" in methods_todo:
-            ml.optimization(method="MLP", activation=["sigmoid_sym"],#, "gaussian", "relu"],
+            ml.optimization(method="MLP", activation=["sigmoid_sym"],  # , "gaussian", "relu"],
                             quantity_networks=1, quantity_inside_layers=1, range_layer=300, quantity_alpha=5,
-                            first_alpha=.001,last_alpha=2.5, quantity_beta=1, first_beta=1, parallel=parallel)
+                            first_alpha=.001, last_alpha=2.5, quantity_beta=1, first_beta=1, parallel=parallel)
 
 
 def mls_start(mls):
@@ -79,68 +79,108 @@ def mls_construct(todos: List[str],
 if __name__ == "__main__":
     # User Interface
     start_time = time.time()
-    todos = constants.todos(start=True, optimate=False, labeling_only=False)
+    todos = constants.todos(start=False, optimate=True, labeling_only=False)
     method_libraries = constants.methods_libraries(OpenCV=True, scikit_learn=False)
     img_libraries = constants.img_libraries(OpenCV=True)
     features = []
     # [Run?, features len, img_processing**] # [order, option]
-    features += constants.features(histogramFull_256=[False, 256,
+    features += constants.features(histogramFull_XXX=[False, 256,
                                                       constants.img_processing(HSV=[1, ""], getChannel=[2, 0])])
     n_features = [5]  # grid search kernel size blur
     for n in n_features:
-        features += constants.features(histogramFull_256=[False, 256, constants.img_processing(filterGaussianBlur=[1, n], HSV=[
+        features += constants.features(histogramFull_XXX=[False, 256, constants.img_processing(filterGaussianBlur=[1, n], HSV=[
                                        2, ""], getChannel=[3, 0])])  # [Run?, features len, img_processing**] # [order, option]
-        features += constants.features(histogramFull_256=[False, 256, constants.img_processing(filterMedianBlur=[1, n], HSV=[
+        features += constants.features(histogramFull_XXX=[False, 256, constants.img_processing(filterMedianBlur=[1, n], HSV=[
                                        2, ""], getChannel=[3, 0])])  # [Run?, features len, img_processing**] # [order, option]
     n_features = [5]  # grid search kernel size blur to bilateral
     for n in n_features:
-        features += constants.features(histogramFull_256=[False, 256, constants.img_processing(filterBilateral=[1, n], HSV=[
+        features += constants.features(histogramFull_XXX=[True, 256, constants.img_processing(filterBilateral=[1, n], HSV=[
                                        2, ""], getChannel=[3, 0])])  # [Run?, features len, img_processing**] # [order, option]
-    n_features = [1,2,3,5, 30, 60, 100,200]  # grid search k from k means
+    n_features = [200]  # grid search k from k means
     for n in n_features:
         features += constants.features(
-            histogramFull_256=[True, 256, constants.img_processing(
+            histogramFull_XXX=[False, 256, constants.img_processing(
                 filterKMeans=[1, n],
                 HSV=[2, ""],
                 getChannel=[3, 0])])  # [Run?, features len, img_processing**] # [order, option]
+    features += constants.features(histogramFull_XXX=[False, 255, constants.img_processing(
+        HSV=[1, ""],
+        getChannel=[2, 0],
+        histogramEqualization=[3, ""])])  # [Run?, features len, img_processing**] # [order, option]
     pixels_len = constants.RESOLUTION[0]*constants.RESOLUTION[1]
     n_features = np.linspace(int(pixels_len*0.1), pixels_len, 4, dtype=int)  # grid search best size paths
     for n in n_features:
-        features += constants.features(histogramFull_256=[False, 256, constants.img_processing(
-            filterMedianBlur=[1, 25],
-            HSV=[2, ""],
-            getChannel=[3, 0],
-            patchSlip=[4, n])])  # [Run?, features len, img_processing**] # [order, option]
-    features += constants.features(histogramFull_256=[False, 256, constants.img_processing(
-        filterMedianBlur=[1, 25],
-        HSV=[2, ""],
-        getChannel=[3, 0],
-        contourSlip=[4, ""])])  # [Run?, features len, img_processing**] # [order, option]
+        features += constants.features(histogramFull_XXX=[False, 256, constants.img_processing(
+            HSV=[1, ""],
+            getChannel=[2, 0],
+            patchSlip=[3, n])])  # [Run?, features len, img_processing**] # [order, option]
+    features += constants.features(histogramFull_XXX=[False, 255, constants.img_processing(
+        gray=[1, 0],
+        histogramEqualization=[2, ""],
+        filterMedianBlur=[3, 15],
+        canny=[4, ""],
+        filterMorphology=[5, ""],
+        processingBreak=[6, ""],
+        HSV=[7, ""],
+        getChannel=[8, 0],
+        contourSlip=[9, ""])])  # [Run?, features len, img_processing**] # [order, option]
+    features += constants.features(histogramFull_XXX=[False, 255, constants.img_processing(
+        filterKMeans=[1, 2],
+        gray=[2, 0],
+        thresh=[3, 0],
+        processingBreak=[4, ""])+"_" +
+        constants.img_processing(
+        HSV=[5, ""],
+        getChannel=[6, 0],
+        segmentation=[7, ""])])  # [Run?, features len, img_processing**] # [order, option]
     features += constants.features(histogramFilter_256=[False,
                                                         256,
-                                                        constants.img_processing(HSV=[1, ""], getChannel=[2, ""],
-                                                                                 filterGaussianBlur=[3, ""])])
-    n_features = np.linspace(6, 255, 4, dtype=int)  # grid search best reduction
+                                                        constants.img_processing(HSV=[1, ""])])
+    n_features = [60]  # np.linspace(6, 255, 4, dtype=int)  # grid search best reduction
     for n in n_features:
         features += constants.features(histogramReduce_XXX=[False,
                                                             n,
-                                                            constants.img_processing(HSV=[1, ""], getChannel=[2, 0],
-                                                                                     filterGaussianBlur=[3, ""])])
-    n_features = np.linspace(int(pixels_len*0.1), pixels_len, 4, dtype=int)  # grid search best size paths
+                                                            constants.img_processing(HSV=[1, ""], getChannel=[2, 0],)])
+    # np.linspace(int(pixels_len*0.1), pixels_len, 4, dtype=int)  # grid search best size paths
+    n_features = [pixels_len]
     for n in n_features:
-        features += constants.features(imagePatches_XXX=[False, 25*25,
-                                                         constants.img_processing(gray=[1, ""], filterGaussianBlur=[2, ""])])
-    features += constants.features(siftHistogram_XXX=[False, n,
-                                                      constants.img_processing(
-                                                          gray=[1, 0], dontSlip=[2,0])])
-    features += constants.features(gradienteHistogram_XXX=[False, 36*4, ""])
-    
-    data_base_paths = constants.data_base_paths(Data_Base_Cedulas=True, temp=False, Data_Base_Refencia=False)
-    methods_parameters = constants.methods_parameters(
+        features += constants.features(imageFull_XXX=[False, n,
+                                                         constants.img_processing(HSV=[1, ""], getChannel=[2, 0])])
+    n_features = [600]  # np.linspace(6, 600, 4, dtype=int)  # grid search best n sift
+    for n in n_features:
+        features += constants.features(siftHistogram_XXX=[False, n,
+                                                        constants.img_processing(
+                                                            gray=[1, 0], dontSlip=[2, 0])])
+        features += constants.features(siftHistogram_XXX=[False, n,
+                                                        constants.img_processing(
+                                                            gray=[1, 0], filterGaussianBlur=[2, 5])])
+        features += constants.features(siftHistogram_XXX=[False, n,
+                                                        constants.img_processing(
+                                                            gray=[1, 0], filterMedianBlur=[2, 5])])
+        features += constants.features(siftHistogram_XXX=[False, n,
+                                                        constants.img_processing(
+                                                            gray=[1, 0], filterBilateral=[2, 5])])
+        # HOG
+        n_features = int(pixels_len*0.1)
+        features += constants.features(gradienteHistogram_XXX=[False, 54288,
+                                                        constants.img_processing(
+                                                            gray=[1, 0], patchSlip=[0,n_features])])
+        features += constants.features(gradienteHistogram_XXX=[False, 54288,
+                                                        constants.img_processing(
+                                                            gray=[1, 0], patchSlip=[0,n_features], filterGaussianBlur=[3, 5])])
+        features += constants.features(gradienteHistogram_XXX=[False, 54288,
+                                                        constants.img_processing(
+                                                            gray=[1, 0], patchSlip=[0,n_features], filterMedianBlur=[3, 5])])
+        features += constants.features(gradienteHistogram_XXX=[False, 54288,
+                                                        constants.img_processing(
+                                                            gray=[1, 0], patchSlip=[0,n_features], filterBilateral=[3, 5])])
+
+    data_base_paths=constants.data_base_paths(Data_Base_Cedulas=True, temp=False, Data_Base_Refencia=False)
+    methods_parameters=constants.methods_parameters(
         knn_k=3, mlp_layers=[10],
         svm_c=1, svm_kernel=constants.svm_kernel(inter=True),
         svm_gamma=1, svm_degree=1, activation="sigmoid_sym", alpha=0.5, beta=1)
-    methods_selected = constants.methods_selected(SVM=True, KNN=True, MLP=True )
+    methods_selected=constants.methods_selected(SVM=True, KNN=False, MLP=False)
     mls_construct(todos, method_libraries, img_libraries, features,
                   data_base_paths, methods_parameters, methods_selected)
     print("".join(("Tempo de execução:", str(others.TimeConversion(time.time()-start_time)))))

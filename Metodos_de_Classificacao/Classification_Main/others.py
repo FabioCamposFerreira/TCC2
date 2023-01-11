@@ -11,7 +11,10 @@ def class_sort(e: str):
     return float(e)
 
 def labels_sort(e: str):
-    return float(e.replace("Nota de ",""))
+    try:
+        return float(e.replace("Nota de ",""))
+    except:
+        return e
 
 class TimeConversion():
     def __init__(self, seconds) -> None:

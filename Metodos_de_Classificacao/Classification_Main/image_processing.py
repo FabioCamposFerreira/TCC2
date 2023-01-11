@@ -11,6 +11,16 @@ from PIL import Image, ImageFilter
 import constants
 
 
+def image2segmentation(im, im2, library_img):
+    """Do segmentation to exatract main colors
+    im image to create mask
+    im2 image to apply mask"""
+    if library_img == "OpenCV":
+        im_final = np.array(im2)
+        im_final[im == 255] = 0
+    return [im_final]
+
+
 def image2contours(im, im2, library_img):
     """Find contours"""
     returns = []
@@ -27,7 +37,7 @@ def image2contours(im, im2, library_img):
     return returns
 
 
-def image2patches(im, library_img, patches_len: int):
+def image2patches(im, library_img, patches_len: int): 
     """Split image  in paths"""
     patches = []
     step = int(patches_len**(1/2))
@@ -60,6 +70,8 @@ def image2images(im, im2, library_img: str, img_processing: list):
                 ims = image2patches(im, library_img, int(img_processing[index+1]))
             elif "contourSlip" in processing:
                 ims = image2contours(im, im2, library_img)
+            elif "segmentation" in processing:
+                ims = image2segmentation(im, im2, library_img)
     if len(ims) == 0:
         ims.append(im)
 
@@ -112,7 +124,10 @@ def processing(im, library_img: str, img_processing: List[str]):
                     im, int(img_processing[index + 1]),
                     int(img_processing[index + 1]) * 2, int(img_processing[index + 1]) / 2)
             elif "thresh" in processing:
-                im = cv.threshold(im, 127, 255, 0)[1]
+                im = cv.threshold(im,127,255,cv.THRESH_BINARY)[1]
+            elif "threshAdaptive" in processing:
+                im = im.astype(np.uint8)
+                im = cv.adaptiveThreshold(im,255,cv.ADAPTIVE_THRESH_MEAN_C,cv.THRESH_BINARY,11,2)
             elif "filterMorphology" in processing:
                 cv.morphologyEx(src=im, op=cv.MORPH_CLOSE,
                                 kernel=cv.getStructuringElement(shape=cv.MORPH_RECT, ksize=(10, 15)), dst=im)
@@ -136,7 +151,7 @@ def processing(im, library_img: str, img_processing: List[str]):
                     for x in range(im.shape[1]):
                         for c in range(im.shape[2]):
                             im[y, x, c] = np.clip(2.2*im[y, x, c] + 50, 0, 255)
-            elif processing in constants.img_processing(dontSlip=[1, ""], patchSlip=[1, ""], contourSlip=[1, ""]):
+            elif processing in constants.img_processing(dontSlip=[1, ""], patchSlip=[1, ""], contourSlip=[1, ""], segmentation=[1, ""]):
                 # Skip split processings
                 pass
             else:
@@ -177,7 +192,8 @@ def img_process(arq, library_img, features: str, inverted=False):
     im = processing(im, library_img, img_processing)
     try:
         img_processing = [p for p in features.split("processingBreak")[1].split("_")[0:-1] if p != ""]
-        im2 = processing(im, library_img, img_processing)
+        im2 = open_image(arq, library_img, inverted=False)
+        im2 = processing(im2, library_img, img_processing)
     except IndexError:
         im2 = []
     ims = image2images(im, im2, library_img, img_processing)

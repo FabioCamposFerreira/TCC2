@@ -331,7 +331,7 @@ def temp3():
         data_base[index] = "".join((path, "/", data_base[index]))
     ims = []
     for path in data_base:
-        ims.append(image_processing.img_process(path, "OpenCV", "filterGaussianBlur_10001_x", inverted=False)[0])
+        ims.append(image_processing.img_process(path, "OpenCV", "gray_filterGaussianBlur_5_x", inverted=False)[0])
     images_union(ims)
 
 

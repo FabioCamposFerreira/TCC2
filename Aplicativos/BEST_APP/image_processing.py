@@ -7,8 +7,8 @@ import constants
 
 def processing(im: np.ndarray):
     """Make processing image"""
+    im = cv.bilateralFilter(im, 5,5 * 2, 5 / 2)
     im = cv.cvtColor(im, cv.COLOR_BGR2HSV_FULL)
-    im = cv.GaussianBlur(im, (5, 5), 0)
     im = im[:, :, 0]
     return im
 
