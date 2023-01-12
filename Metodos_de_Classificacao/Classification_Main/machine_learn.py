@@ -378,9 +378,9 @@ class MachineLearn:
         print("Começando processo de otimização...")
         if method == "SVM":
             grid_svc = {"kernel": svm_kernels,
-                        "C": np.linspace(first_C, 1000, num=quantity_C, dtype=float),
+                        "C": [0.1,1,10,100,1000],#np.linspace(first_C, 1000, num=quantity_C, dtype=float),
                         "gamma": np.linspace(first_gamma, 100, num=quantity_gamma, dtype=float),
-                        "degree": np.linspace(first_degree, 10, num=quantity_degree, dtype=int)}
+                        "degree": [1,2,3,4,5]#np.linspace(first_degree, 10, num=quantity_degree, dtype=int)}
             if False:  # Testing grid from opencv
                 grid_svc = {"kernel": svm_kernels,
                             "C": cv.ml.ParamGrid_create(first_C, 1000, 1),
