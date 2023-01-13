@@ -42,6 +42,28 @@ def filterKmeans(im, k=10, index=0):
     im = center[label.flatten()].reshape((im.shape))
     cv.imwrite("".join((str(index), "kmeans.png")), im)
 
+def images_union2(ims: List[np.ndarray], blank_size=10):
+    im_final1 = ims[0]
+    im_final2 = ims[2]
+    for index in range(1, 2):
+        try:
+            im_final1 = np.concatenate((im_final1, np.zeros((ims[0].shape[0], blank_size))+255, ims[index]), axis=1)
+        except ValueError:
+            im_final1 = np.concatenate((im_final1, np.zeros((ims[0].shape[0], blank_size, ims[0].shape[2]))+255,
+                                        ims[index]), axis=1)
+    for index in range(3, len(ims)):
+        try:
+            im_final2 = np.concatenate((im_final2, np.zeros((ims[0].shape[0], blank_size))+255,
+                                        ims[index]), axis=1)
+        except ValueError:
+            im_final2 = np.concatenate((im_final2, np.zeros((ims[0].shape[0], blank_size, ims[0].shape[2]))+255,
+                                        ims[index]), axis=1)
+    try:
+        im_final = np.concatenate((im_final1, np.zeros((blank_size, im_final2.shape[1]))+255, im_final2), axis=0)
+    except ValueError:
+        im_final = np.concatenate((im_final1, np.zeros((blank_size, im_final2.shape[1], im_final2.shape[2]))+255,
+                                   im_final2), axis=0)
+    cv.imwrite("images_merged.png", im_final)
 
 def images_union(ims: List[np.ndarray], blank_size=10):
     im_final1 = ims[0]
@@ -383,9 +405,32 @@ def temp7():
         im = image_processing.img_process(path, "OpenCV", "filterBilateralFilter_x", inverted=False)
         cv.imwrite(str(index)+"bilateral.png", im)
 
+def temp8():
+    "Merge imagens"
+    data_base=["2.png","5.png","10.png","20.png","50.png","100.png"]
+    # data_base=["2.png","10.png","20.png","50.png"]
+    ims = []
+    for path in data_base:
+        ims.append(image_processing.img_process(path, "OpenCV", "filterGaussianBlur_1_x", inverted=False)[0])
+    images_union(ims)
+    # images_union2('ims)'
+
+def temp9():
+    "sift imagens"
+    data_base=["2.jpg"]
+    # data_base=["2.png","10.png","20.png","50.png"]
+    ims = []
+    for path in data_base:
+        ims.append(image_processing.img_process(path, "OpenCV", "gray_filterGaussianBlur_5_x", inverted=False)[0])
+    im = ims[0]
+    # from skimage.feature import SIFT
+    sift = cv.SIFT_create()
+    kp = sift.detect(im,None)
+    im=cv.drawKeypoints(im,kp,im,flags=cv.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+    cv.imwrite("temp.png",im)
 
 if __name__ == "__main__":
     import others
     import image_processing
     import constants
-    temp3()
+    temp9()

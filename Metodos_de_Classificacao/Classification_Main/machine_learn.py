@@ -183,7 +183,7 @@ class MachineLearn:
         results = np.array(self.results)
         classes_correct = results[:, 1]
         classes_correct = np.array(classes_correct, dtype=int)
-        classes_set = list(set(classes_correct))
+        classes_set = sorted(set(classes_correct))
         results = results[:, 2:]  # remove image name and class correct
         results = np.array(results, dtype=float)
         results = np.array(results, dtype=int)
@@ -419,7 +419,7 @@ class MachineLearn:
             grid_svc = {"kernel": svm_kernels,
                         "C": [0.1, 1, 10, 100, 1000],  # [0.1],#np.linspace(first_C, 1000, num=quantity_C, dtype=float),
                         "gamma": np.linspace(first_gamma, 100, num=quantity_gamma, dtype=float),
-                        "degree": [1, 2, 3, 4, 5]}  # np.linspace(first_degree, 10, num=quantity_degree, dtype=int)}
+                        "degree": [1,2,3,4,5]}#np.linspace(first_degree, 10, num=quantity_degree, dtype=int)}
             if False:  # Testing grid from opencv
                 grid_svc = {"kernel": svm_kernels,
                             "C": cv.ml.ParamGrid_create(first_C, 1000, 1),

@@ -34,6 +34,15 @@ def image2contours(im, im2, library_img):
                     temp = np.array(im2)
                     temp[mask == 0] = 0
                     returns.append(temp)
+    # Teste comente depois
+    final = np.zeros(im2.shape, dtype = "uint8")
+    for imagem in returns:
+        print(final.shape)
+        print(imagem.shape)
+        final = cv.add(final,imagem)
+    import time
+    cv.imwrite(str(time.time())+".png", final)
+    # fim do teste
     return returns
 
 

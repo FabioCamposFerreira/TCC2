@@ -84,7 +84,7 @@ if __name__ == "__main__":
     img_libraries = constants.img_libraries(OpenCV=True)
     features = []
     # [Run?, features len, img_processing**] # [order, option]
-    features += constants.features(histogramFull_XXX=[True, 256,
+    features += constants.features(histogramFull_XXX=[False, 256,
                                                       constants.img_processing(HSV=[1, ""], getChannel=[2, 0])])
     n_features = [5]  # grid search kernel size blur
     for n in n_features:
@@ -124,6 +124,17 @@ if __name__ == "__main__":
         HSV=[7, ""],
         getChannel=[8, 0],
         contourSlip=[9, ""])])  # [Run?, features len, img_processing**] # [order, option]
+    #Begin teste
+    features += constants.features(histogramFull_XXX=[True, 255, constants.img_processing(
+        gray=[1, 0],
+        histogramEqualization=[2, ""],
+        filterMedianBlur=[3, 15],
+        canny=[4, ""],
+        filterMorphology=[5, ""],
+        processingBreak=[6, ""],
+        filterGaussianBlur=[7, 1],
+        contourSlip=[9, ""])])  
+    # END teste
     features += constants.features(histogramFull_XXX=[False, 255, constants.img_processing(
         filterKMeans=[1, 2],
         gray=[2, 0],
@@ -175,7 +186,7 @@ if __name__ == "__main__":
                                                         constants.img_processing(
                                                             gray=[1, 0], patchSlip=[0,n_features], filterBilateral=[3, 5])])
 
-    data_base_paths=constants.data_base_paths(Data_Base_Cedulas=True, temp=False, Data_Base_Refencia=False)
+    data_base_paths=constants.data_base_paths(Data_Base_Cedulas=False, temp=False, Data_Base_Refencia=True)
     methods_parameters=constants.methods_parameters(
         knn_k=3, mlp_layers=[10],
         svm_c=1, svm_kernel=constants.svm_kernel(inter=True),
