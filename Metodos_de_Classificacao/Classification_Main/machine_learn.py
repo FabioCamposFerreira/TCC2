@@ -174,8 +174,8 @@ class MachineLearn:
                 #     result_temp += [max(set(y_mlp), key=list(y_mlp).count),  # y_mlp
                 #                     np.mean(np.array(results_to_merge[:, 2*(index+1)+1], dtype=float))]  # time_mlp
                 # else:
-                    result_temp += [max(set(results_to_merge[:, 2*(index+1)]), key=list(results_to_merge[:, 2*(index+1)]).count),  # y
-                                    np.mean(np.array(results_to_merge[:, 2*(index+1)+1], dtype=float))]  # time
+                result_temp += [max(set(results_to_merge[:, 2*(index+1)]), key=list(results_to_merge[:, 2*(index+1)]).count),  # y
+                                np.mean(np.array(results_to_merge[:, 2*(index+1)+1], dtype=float))]  # time
             temp = [img_name, results_to_merge[0, 1]]
             [temp.append(item) for item in result_temp]
             self.results.append(temp)
@@ -366,6 +366,45 @@ class MachineLearn:
         result_save.optimization_graph(dict(results_xy_label),
                                        self.path_graphics.replace("XXX", "".join((method, "_otimização"))))
 
+    def optimization_svm_by_kernel(self, grid: dict, method: str, parallel: bool = True):
+        """"""
+        if "linear" in grid['kernel']:
+            grid_one_kernel = {"kernel": ['linear'],
+                               "C": grid['C'],
+                               "gamma": grid['gamma'],
+                               "degree": grid['degree']}
+            self.method_optimization(grid_one_kernel, "SVM", parallel)
+        if "poli" in grid['kernel']:
+            grid_one_kernel = {"kernel": ['poli'],
+                               "C": grid['C'],
+                               "gamma": grid['gamma'],
+                               "degree": grid['degree']}
+            self.method_optimization(grid_one_kernel, "SVM", parallel)
+        if "rbf" in grid['kernel']:
+            grid_one_kernel = {"kernel": ['rbf'],
+                               "C": grid['C'],
+                               "gamma": grid['gamma'],
+                               "degree": grid['degree']}
+            self.method_optimization(grid_one_kernel, "SVM", parallel)
+        if "sigmoid" in grid['kernel']:
+            grid_one_kernel = {"kernel": ['sigmoid'],
+                               "C": grid['C'],
+                               "gamma": grid['gamma'],
+                               "degree": grid['degree']}
+            self.method_optimization(grid_one_kernel, "SVM", parallel)
+        if "chi2" in grid['kernel']:
+            grid_one_kernel = {"kernel": ['chi2'],
+                               "C": grid['C'],
+                               "gamma": grid['gamma'],
+                               "degree": grid['degree']}
+            self.method_optimization(grid_one_kernel, "SVM", parallel)
+        if "inter" in grid['kernel']:
+            grid_one_kernel = {"kernel": ['inter'],
+                               "C": grid['C'],
+                               "gamma": grid['gamma'],
+                               "degree": grid['degree']}
+            self.method_optimization(grid_one_kernel, "SVM", parallel)
+
     def optimization(
             self, method: str, svm_kernels=["linear", "poly", "rbf", "sigmoid", "chi2", "inter"],
             quantity_C=10, first_C=0.1, quantity_gamma=10, first_gamma=0.1, quantity_degree=10, first_degree=1,
@@ -378,9 +417,9 @@ class MachineLearn:
         print("Começando processo de otimização...")
         if method == "SVM":
             grid_svc = {"kernel": svm_kernels,
-                        "C": [0.1,1,10,100,1000],#np.linspace(first_C, 1000, num=quantity_C, dtype=float),
+                        "C": [0.1, 1, 10, 100, 1000],  # [0.1],#np.linspace(first_C, 1000, num=quantity_C, dtype=float),
                         "gamma": np.linspace(first_gamma, 100, num=quantity_gamma, dtype=float),
-                        "degree": [1,2,3,4,5]#np.linspace(first_degree, 10, num=quantity_degree, dtype=int)}
+                        "degree": [1, 2, 3, 4, 5]}  # np.linspace(first_degree, 10, num=quantity_degree, dtype=int)}
             if False:  # Testing grid from opencv
                 grid_svc = {"kernel": svm_kernels,
                             "C": cv.ml.ParamGrid_create(first_C, 1000, 1),
@@ -406,7 +445,8 @@ class MachineLearn:
                 print("".join(("Melhor Nu = ", str(self.methods["SVM"].getNu()))))
                 print("".join(("Melhor P = ", str(self.methods["SVM"].getP()))))
             else:
-                self.method_optimization(grid_svc, "SVM", parallel)
+                # self.method_optimization(grid_svc, "SVM", parallel)
+                self.optimization_svm_by_kernel(grid_svc, "SVM", parallel)
         elif method == "KNN":
             grid_knn = {"k": np.linspace(first_k, last_k, num=quantity_k, dtype=int)}
             self.method_optimization(grid_knn, "KNN", parallel)

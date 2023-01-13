@@ -57,12 +57,12 @@ def optimization_graph(points: dict, file_path: str):
     f = bokeh.figure(sizing_mode="stretch_both", output_backend="svg", tools="pan,wheel_zoom,box_zoom,reset,hover,save",
                      tooltips=labels)
     if legend_id == "k":
-        f.scatter("x", "y", source=source, size=20)
+        f.scatter("x", "y", source=source, size=40)
     else:
-        f.scatter("x", "y", source=source, legend_field=legend_id, size=20,
-                  color=factor_cmap(legend_id, 'Category10_3', sorted(set(points[legend_id]))),
+        f.scatter("x", "y", source=source, legend_field=legend_id, size=40,
+                  color=factor_cmap(legend_id, constants.COLORS, sorted(set(points[legend_id]))),
                   marker=factor_mark(legend_id, constants.MARKERS, sorted(set(points[legend_id]))))
-    font_size = "20pt"
+    font_size = "40pt"
     f.add_layout(f.legend[0], 'right')
     f.legend[0].click_policy = "hide"
     f.legend.label_text_font_size = font_size

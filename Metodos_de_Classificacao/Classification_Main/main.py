@@ -26,7 +26,7 @@ def mls_optimate(mls):
         methods_todo = ml.methods.keys()
         if "SVM" in methods_todo:
             ml.optimization(method="SVM", svm_kernels=["linear", "poly",  "rbf", "sigmoid", "chi2", "inter"],
-                            quantity_C=5, first_C=0.1, quantity_gamma=5, first_gamma=0.1, quantity_degree=5,
+                            quantity_C=1, first_C=0.1, quantity_gamma=5, first_gamma=0.1, quantity_degree=1,
                             first_degree=1, parallel=parallel)
         if "KNN" in methods_todo:
             ml.optimization(method="KNN", quantity_k=2, first_k=1, last_k=10, parallel=parallel)
@@ -84,7 +84,7 @@ if __name__ == "__main__":
     img_libraries = constants.img_libraries(OpenCV=True)
     features = []
     # [Run?, features len, img_processing**] # [order, option]
-    features += constants.features(histogramFull_XXX=[False, 256,
+    features += constants.features(histogramFull_XXX=[True, 256,
                                                       constants.img_processing(HSV=[1, ""], getChannel=[2, 0])])
     n_features = [5]  # grid search kernel size blur
     for n in n_features:
@@ -94,7 +94,7 @@ if __name__ == "__main__":
                                        2, ""], getChannel=[3, 0])])  # [Run?, features len, img_processing**] # [order, option]
     n_features = [5]  # grid search kernel size blur to bilateral
     for n in n_features:
-        features += constants.features(histogramFull_XXX=[True, 256, constants.img_processing(filterBilateral=[1, n], HSV=[
+        features += constants.features(histogramFull_XXX=[False, 256, constants.img_processing(filterBilateral=[1, n], HSV=[
                                        2, ""], getChannel=[3, 0])])  # [Run?, features len, img_processing**] # [order, option]
     n_features = [200]  # grid search k from k means
     for n in n_features:
