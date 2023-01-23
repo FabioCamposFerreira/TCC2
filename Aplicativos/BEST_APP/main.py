@@ -35,7 +35,7 @@ class ScreenCamera(Screen):
         self.labeling_status = False
         self.classes = [2, 5, 10, 20, 50, 100]
         self.correct_class = 0
-        # self.event = Clock.schedule_interval(self.classify_image, 2)
+        self.event = Clock.schedule_interval(self.classify_image, 5)
 
     def change_class(self):
         select_class = self.ids["select_class"]
@@ -51,7 +51,7 @@ class ScreenCamera(Screen):
             try:
                 self.event()
             except:
-                self.event = Clock.schedule_interval(self.classify_image, 2)
+                self.event = Clock.schedule_interval(self.classify_image, 5)
             start_stop.background_color = .37, .17, .59, 1
             start_stop.text = "Stop!"
         else:
