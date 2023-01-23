@@ -79,7 +79,7 @@ def mls_construct(todos: List[str],
 if __name__ == "__main__":
     # User Interface
     start_time = time.time()
-    todos = constants.todos(start=False, optimate=True, labeling_only=False)
+    todos = constants.todos(start=True, optimate=False, labeling_only=False)
     method_libraries = constants.methods_libraries(OpenCV=True, scikit_learn=False)
     img_libraries = constants.img_libraries(OpenCV=True)
     features = []

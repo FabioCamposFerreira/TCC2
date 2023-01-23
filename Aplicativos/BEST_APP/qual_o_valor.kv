@@ -48,33 +48,33 @@
         color: 1,1,0,0
         font_size: root.size[1]/3
         pos_hint: {"right": 1, 'top':1}
-    # Button:
-    #     id: select_class
-    #     text:"R$ 2,00"
-    #     background_color:.37,.17, .59,1
-    #     size_hint_y: None
-    #     size_hint_x: None
-    #     pos_hint: {"right":0.2,"top":1}
-    #     on_release: root.change_class()
-    # Button:
-    #     id:start_stop
-    #     text:"Start!"
-    #     background_color:.37,.17, .59,.5
-    #     size_hint_y: None
-    #     size_hint_x: None
-    #     pos_hint: {"right":0.2}
-    #     on_release: root.start_stop_labeling()
-    #     canvas.before:
-    #         Color:
-    #             rgba:.37, .17, .59, 1
-    #         Line:
-    #             points:
-    #                 start_stop.x, start_stop.y,\
-    #                 start_stop.x, start_stop.y+start_stop.height,\
-    #                 start_stop.x+start_stop.width,start_stop.y+start_stop.height,\
-    #                 start_stop.x+start_stop.width,start_stop.y,\
-    #                 start_stop.x, start_stop.y
-    #             width:2
+    Button:
+        id: select_class
+        text:"R$ 2,00"
+        background_color:.37,.17, .59,1
+        size_hint_y: None
+        size_hint_x: None
+        pos_hint: {"right":0.2,"top":1}
+        on_release: root.change_class()
+    Button:
+        id:start_stop
+        text:"Start!"
+        background_color:.37,.17, .59,.5
+        size_hint_y: None
+        size_hint_x: None
+        pos_hint: {"right":0.2}
+        on_release: root.start_stop_labeling()
+        canvas.before:
+            Color:
+                rgba:.37, .17, .59, 1
+            Line:
+                points:
+                    start_stop.x, start_stop.y,\
+                    start_stop.x, start_stop.y+start_stop.height,\
+                    start_stop.x+start_stop.width,start_stop.y+start_stop.height,\
+                    start_stop.x+start_stop.width,start_stop.y,\
+                    start_stop.x, start_stop.y
+                width:2
 
 <TelaDeConfiguracao>
     name: 'tela_de_configuracao'
