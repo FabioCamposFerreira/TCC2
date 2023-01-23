@@ -3,7 +3,7 @@
 Contém versões dos codigos usados para construir o aplicatvo para reconhecer notas de real para o TCC de Fábio Campos
 
 ## Instalando o aplicativo
-Baixe e instale em um disositivo android o APP localizado em TCC2/Aplicativos/BEST_APP/bin/ ([acesso rápido](TCC2/Aplicativos/BEST_APP/bin/))
+Baixe e instale em um disositivo android o APP localizado em TCC2/Aplicativos/BEST_APP/bin/ ([acesso rápido](Aplicativos/BEST_APP/bin/))
 Caso ele feche antes de abrir, verifique see ele possui permissão para acessar a camera.
 
 
