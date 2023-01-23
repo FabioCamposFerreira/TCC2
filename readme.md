@@ -10,11 +10,11 @@ Caso ele feche antes de abrir, verifique see ele possui permissão para acessar 
 ## Localização de Codigos importantes
 
 * O codigo utilizado para realizar o treinamento e teste de caracteristcas esta localizado em 
- TCC2/Metodos_de_Classificacao/Classification_Main/main.py ([acesso rápido](TCC2/Metodos_de_Classificacao/Classification_Main/main.py))
+ TCC2/Metodos_de_Classificacao/Classification_Main/main.py ([acesso rápido](Metodos_de_Classificacao/Classification_Main/main.py))
 
-* O código do aplicativo que pode ser executado no cumputador ou compilado para gera o ".apk" esta localizado em TCC2/Aplicativos/BEST_APP/main.py ([acesso rápido](TCC2/Aplicativos/BEST_APP/main.py))
+* O código do aplicativo que pode ser executado no cumputador ou compilado para gera o ".apk" esta localizado em TCC2/Aplicativos/BEST_APP/main.py ([acesso rápido](Aplicativos/BEST_APP/main.py))
 
-* O banco de dados com as 300 imagens está localizado em Data_Base/Data_Base_Cedulas/ ([acesso rápido](TCC2/Data_Base/Data_Base_Cedulas/))
+* O banco de dados com as 300 imagens está localizado em Data_Base/Data_Base_Cedulas/ ([acesso rápido](Data_Base/Data_Base_Cedulas/))
 
 ## Author
 
