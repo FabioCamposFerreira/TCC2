@@ -7,7 +7,7 @@ title = Qual o valor?
 package.name = qualOvalor
 
 # (str) Package domain (needed for android/ios packaging)
-package.domain = org.test
+package.domain = com.qualovalor
 
 # (str) Source code where the main.py live
 source.dir = .
@@ -265,7 +265,7 @@ android.permissions = CAMERA, WRITE_EXTERNAL_STORAGE
 
 # (list) The Android archs to build for, choices: armeabi-v7a, arm64-v8a, x86, x86_64
 # In past, was `android.arch` as we weren't supporting builds for multiple archs at the same time.
-android.archs = arm64-v8a, armeabi-v7a
+android.archs = arm64-v8a
 
 # (int) overrides automatic versionCode computation (used in build.gradle)
 # this is not the same as app version and should only be edited if you know what you're doing
@@ -287,7 +287,7 @@ android.allow_backup = True
 # android.no-compile-pyo = True
 
 # (str) The format used to package the app for release mode (aab or apk or aar).
-android.release_artifact = aab
+android.release_artifact = apk
 
 # (str) The format used to package the app for debug mode (apk or aar).
 # android.debug_artifact = apk
@@ -384,7 +384,7 @@ ios.codesign.allowed = false
 [buildozer]
 
 # (int) Log level (0 = error only, 1 = info, 2 = debug (with command output))
-log_level = 2
+log_level = 0
 
 # (int) Display warning if buildozer is run as root (0 = False, 1 = True)
 warn_on_root = 2

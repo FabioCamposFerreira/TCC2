@@ -75,3 +75,9 @@ def install_buildozer():
 # Is CN=Fabio Ferreira, OU=Unversidade Federal de Urbelandia, O=FEELT, L=Patos de Minas, ST=Minas Gerais, C=BR correct?
 #   [no]:  yes
 
+export P4A_RELEASE_KEYSTORE="key.jsk"
+export P4A_RELEASE_KEYSTORE_PASSWD="Federalizacao1313"
+export P4A_RELEASE_KEYALIAS_PASSWD="Federalizacao1313"
+export P4A_RELEASE_KEYALIAS="key"
+
+
