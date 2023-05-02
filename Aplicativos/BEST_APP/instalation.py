@@ -56,3 +56,22 @@ def install_buildozer():
     else:
         print("\033[92m[ERROR] Install buildoze fail!\033[00m")
         print("Use um sistema Ubunto ou WSL!")
+
+## Google Store
+# keytool -genkey -v -keystore key.jks -keyalg RSA -keysize 2048 -validity 10000 -alias key
+# password: Federalizacao1313
+# What is your first and last name?
+#   [Unknown]:  Fabio Ferreira    
+# What is the name of your organizational unit?
+#   [Unknown]:  Unversidade Federal de Urbelandia
+# What is the name of your organization?
+#   [Unknown]:  FEELT
+# What is the name of your City or Locality?
+#   [Unknown]:  Patos de Minas
+# What is the name of your State or Province?
+#   [Unknown]:  Minas Gerais
+# What is the two-letter country code for this unit?
+#   [Unknown]:  BR
+# Is CN=Fabio Ferreira, OU=Unversidade Federal de Urbelandia, O=FEELT, L=Patos de Minas, ST=Minas Gerais, C=BR correct?
+#   [no]:  yes
+
