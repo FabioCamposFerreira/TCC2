@@ -2,8 +2,6 @@ Pedir para os alunos trazerem os seus cadernos
 
 Imprimir apostilas
 
-Atualizar lanche
-
 Testar Wifi
 
 Testar Make Make
@@ -11,6 +9,7 @@ Testar Make Make
 Testar batatas
 
 Atualizar chamada de segunda 16h com os nomes do otavio e rafael
+Chamada de quarta acabou as datas
 
 Chamada de sabado ta com datas erradas
 
