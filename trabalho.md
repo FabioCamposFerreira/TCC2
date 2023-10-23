@@ -1,3 +1,7 @@
+Imprimir 1 alimentador para pets, 3 detector de tornados, 1 walter, 3 genius
+
+Comprar servos motores 360°;
+
 Urgente:  Fazer entrevista com os estagiários.
 
 Imprimir apostilas
