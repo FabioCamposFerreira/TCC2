@@ -1,5 +1,10 @@
 Imprimir 1 alimentador para pets, 3 detector de tornados, 1 walter, 3 genius
 
+Fazer planejamento do cronograma de aulas de automação
+
+Fazer planejamento do cronograma de aulas de automação
+
+
 Comprar servos motores 360°;
 
 Urgente:  Fazer entrevista com os estagiários;
