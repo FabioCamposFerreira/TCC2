@@ -8,8 +8,6 @@ Fazer cronograma/estudar de WebFull, buscar 3 livros para basear-se o curso;
 
 Imprimir apostilas
 
-Testar Wifi
-
 Atualizar chamada de segunda 16h com os nomes do otavio e rafael
 
 Chamada de sabado ta com datas erradas
