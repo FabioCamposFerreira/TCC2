@@ -1,20 +1,14 @@
 Imprimir 1 alimentador para pets, 3 detector de tornados, 1 walter, 3 genius
 
-Fazer planejamento do cronograma de aulas de automação
-
 Fazer planejamento do cronograma de aulas de web full
 
 Comprar servos motores 360°;
-
-Urgente:  Fazer entrevista com os estagiários;
 
 Fazer cronograma/estudar de WebFull, buscar 3 livros para basear-se o curso; 
 
 Imprimir apostilas
 
 Atualizar chamada de segunda 16h com os nomes do otavio e rafael
-
-Chamada de sabado ta com datas erradas
 
 Mandar para Para Daniel e para o Julio (2 vagas)
 
