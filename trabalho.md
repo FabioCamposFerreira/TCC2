@@ -1,3 +1,7 @@
+Fazer um bate bola, quero ver se o que você sabe, ver que conhecimentos, trazer os conhecimentos dele para ver se podemos criar um curso para eleministrar?
+
+fazer HOVER
+
 tem que ligar depois no Senai kkk pra chamar estagiários pra nós
 
 Sinval rosa conhece?
