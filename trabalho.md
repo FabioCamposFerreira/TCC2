@@ -4,15 +4,7 @@ fazer HOVER
 
 tem que ligar depois no Senai kkk pra chamar estagiários pra nós
 
-Sinval rosa conhece?
-
-installar word no cp8
-
-volto  dia 3 e saio dia 15.
-
 Aplicativo do alarme
-
-fazer um pix de 70$
 
 Imprimir 1 alimentador para pets, 3 detector de tornados, 1 walter, 3 genius
 
@@ -80,4 +72,3 @@ Horientações sobre o curso de automação:
 	Smart home;
  	Escacez  de curdos ate RM uma faculdade, não foca na automação, programação, Arduíno;
   	
-
