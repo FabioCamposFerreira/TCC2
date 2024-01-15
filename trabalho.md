@@ -1,7 +1,9 @@
 Adicionar https://codeforces.com/ e https://www.beecrowd.com.br/judge/pt/login como fonte de exeercicios e aquecimentos
 
 Fazendo:
+
 	* fazer HOVER
+ 
 	* IA, rostos
  
 tem que ligar depois no Senai kkk pra chamar estagiários pra nós
