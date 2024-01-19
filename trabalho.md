@@ -1,3 +1,5 @@
+Tutorial do bluetooth, tirar serial.h
+
 Adicionar https://codeforces.com/ e https://www.beecrowd.com.br/judge/pt/login como fonte de exeercicios e aquecimentos
 
 tem que ligar depois no Senai kkk pra chamar estagiários pra nós
