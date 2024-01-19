@@ -1,7 +1,5 @@
 Adicionar https://codeforces.com/ e https://www.beecrowd.com.br/judge/pt/login como fonte de exeercicios e aquecimentos
 
-IA, rostos
- 
 tem que ligar depois no Senai kkk pra chamar estagiários pra nós
 
 fazer banco de dados de blocos e explicações  sobre componentes (reorganizar pastas)
