@@ -16,7 +16,7 @@ Fazer cronograma/estudar de WebFull, buscar 3 livros para basear-se o curso;
 
 Imprimir apostilas
 
-Usar deep free e deixar para só a pastas dos alunos, Testar deep freeze	
+Usar o time freeze para travar a maquina e deixar so a pasta dowloads e documentos acessiveis para os usuarios
 
 Comprar mais dois xadrez: https://shopee.com.br/Jogo-Xadrez-e-Trilha-Dama-e-Trilha-Pl%C3%A1stico-32x32cm-Dutati-Envio-Imediato-i.558048520.11759131196?sp_atk=558f0e43-9294-4f60-a43e-4905136ee41c&xptdk=558f0e43-9294-4f60-a43e-4905136ee41c
 
