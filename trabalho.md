@@ -1,3 +1,5 @@
+https://www.thingiverse.com/thing:4746108
+
 Tutorial do bluetooth, tirar serial.h
 
 Adicionar https://codeforces.com/ e https://www.beecrowd.com.br/judge/pt/login como fonte de exeercicios e aquecimentos
