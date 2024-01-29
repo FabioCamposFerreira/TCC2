@@ -28,15 +28,7 @@ Blooquear sites:
 		https://www.youtube.com/watch?v=byDezCU9Z-I
 		https://www.youtube.com/watch?v=nWdZ9_v7hqU
 
-Mandar para Sandro Martins coordenador de sistemas (2 vagas)
-
 achar livro e passar para eles: web full stack (3 livros), grafico e ID visual, redes e computadores e servidores (um para manuntenção de computadores)
-
-Pedir para os alunos trazerem os seus cadernos
-
-Testar Make Make
-
-Testar batatas
 
 Horientações sobre o curso de automação:
 	Smart home;
