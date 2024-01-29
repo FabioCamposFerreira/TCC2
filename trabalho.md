@@ -1,9 +1,5 @@
 [https://www.thingiverse.com/thing:4746108](https://thingiverse.com/thing:6393008)
 
-Tutorial do bluetooth, tirar serial.h
-
-Adicionar https://codeforces.com/ e https://www.beecrowd.com.br/judge/pt/login como fonte de exeercicios e aquecimentos
-
 tem que ligar depois no Senai kkk pra chamar estagiários pra nós
 
 fazer banco de dados de blocos e explicações  sobre componentes (reorganizar pastas)
@@ -18,7 +14,7 @@ Fazer cronograma/estudar de WebFull, buscar 3 livros para basear-se o curso;
 
 Imprimir apostilas
 
-Usar o time freeze para travar a maquina e deixar so a pasta dowloads e documentos acessiveis para os usuarios
+Usar o time freeze (31/01) para travar a maquina e deixar so a pasta dowloads e documentos acessiveis para os usuarios
 
 Comprar mais dois xadrez: https://shopee.com.br/Jogo-Xadrez-e-Trilha-Dama-e-Trilha-Pl%C3%A1stico-32x32cm-Dutati-Envio-Imediato-i.558048520.11759131196?sp_atk=558f0e43-9294-4f60-a43e-4905136ee41c&xptdk=558f0e43-9294-4f60-a43e-4905136ee41c
 
