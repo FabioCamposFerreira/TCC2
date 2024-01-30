@@ -1,3 +1,5 @@
+pedir para o Lucas verificar Revisão dos projetos (falta hora de testar)
+
 [https://www.thingiverse.com/thing:4746108](https://thingiverse.com/thing:6393008)
 
 tem que ligar depois no Senai kkk pra chamar estagiários pra nós
