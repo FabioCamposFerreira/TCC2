@@ -1,3 +1,7 @@
+Jogo da Lauane (jogo do harry potter) no Teens
+Jogo da Kamila (jogo vertical peto de pegar coisas) no Junior
+
+
 pedir para o Lucas verificar Revisão dos projetos (falta hora de testar)
 
 [https://www.thingiverse.com/thing:4746108](https://thingiverse.com/thing:6393008)
