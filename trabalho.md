@@ -1,8 +1,7 @@
 
 Reposição do Gabriel qurta de 5 de março
-TCF Benjamin de games Roblox
 
-pedir para o Lucas verificar Revisão dos projetos (falta hora de testar)
+TCF Benjamin de games Roblox
 
 [https://www.thingiverse.com/thing:4746108](https://thingiverse.com/thing:6393008)
 
