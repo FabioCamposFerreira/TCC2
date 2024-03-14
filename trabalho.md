@@ -1,3 +1,4 @@
+Me devendo 0,5h, +2h
 Usar o Word para fazer anatações dos projetos e pedir para eles explicarem como cada peça do jogo funciona
 
 Passar Excel para os alunos de robotica para pesquisar produtos para fazer os preços do projeto de robotica.
