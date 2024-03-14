@@ -2,12 +2,6 @@ Usar o Word para fazer anatações dos projetos e pedir para eles explicarem com
 
 Passar Excel para os alunos de robotica para pesquisar produtos para fazer os preços do projeto de robotica.
 
-TCF Benjamin de games Roblox
-
-TCF Isaque Games Construct
-
-[https://www.thingiverse.com/thing:4746108](https://thingiverse.com/thing:6393008)
-
 tem que ligar depois no Senai kkk pra chamar estagiários pra nós
 
 fazer banco de dados de blocos e explicações  sobre componentes (reorganizar pastas)
