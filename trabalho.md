@@ -4,6 +4,8 @@ Nivelar a impressora
 
 Salvar os TCFs dos Alunos
 
+Estudar comunicação Bluetooth mestre e escravo
+
 Estudar para o curso de Programação:
 	* Estudar module para o reis
  	* Nunes blur imagem
