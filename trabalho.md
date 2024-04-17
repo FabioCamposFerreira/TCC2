@@ -1,3 +1,16 @@
+Montar os videos dos projetos de robotica que eles irão fazer durante a aulas
+
+Nivelar a impressora
+
+Salvar os TCFs dos Alunos
+
+Estudar para o curso de Programação:
+	* Estudar module para o reis
+ 	* Nunes blur imagem
+
+________________________________________________________________________________________________________________________________
+
+
 Sistema que cadastra só uma   vez e já gera contrato requerimento e com filtragem com opções de adicionar os campos corretos
 
 Medir distancia de uma sala
@@ -5,16 +18,6 @@ Medir distancia de uma sala
 Sensor de distancia com bengala
 
 André colocar um obstaculo para ele parar
-
-Nunes blur imagem
-
-CEP valor frete reis
-
-Me devendo 0,5h, +2h
-
-Usar o Word para fazer anatações dos projetos e pedir para eles explicarem como cada peça do jogo funciona
-
-Passar Excel para os alunos de robotica para pesquisar produtos para fazer os preços do projeto de robotica.
 
 tem que ligar depois no Senai kkk pra chamar estagiários pra nós
 
