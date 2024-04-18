@@ -1,3 +1,5 @@
+Fazer slides para o curso de web
+
 Montar os videos dos projetos de robotica que eles irão fazer durante a aulas
 
 Nivelar a impressora
