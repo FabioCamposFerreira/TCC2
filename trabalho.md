@@ -4,8 +4,6 @@ Montar os videos dos projetos de robotica que eles irão fazer durante a aulas
 
 Nivelar a impressora
 
-Salvar os TCFs dos Alunos
-
 Estudar comunicação Bluetooth mestre e escravo
 
 Estudar para o curso de Programação:
