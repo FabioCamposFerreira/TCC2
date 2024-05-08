@@ -1,4 +1,4 @@
-Corrigir o godot do Kamila
+Corrigir o godot do Kamila, parei na pagina 56
 
 Corrigir o construct da Lauane
 
