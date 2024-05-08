@@ -1,3 +1,9 @@
+Corrigir o godot do Kamila
+
+Corrigir o construct da Lauane
+
+Caio: Gravar videos dos aplicativos, documentação do MBlock, pegar os projetos corrigidos do mblock e aplicativos, projeto do LCD
+
 Fazer slides para o curso de web
 
 Montar os videos dos projetos de robotica que eles irão fazer durante a aulas
@@ -9,6 +15,7 @@ Estudar comunicação Bluetooth mestre e escravo
 Estudar para o curso de Programação:
 	* Estudar module para o reis
  	* Nunes blur imagem
+  	* Menu que aparece para baixo
 
 ________________________________________________________________________________________________________________________________
 
