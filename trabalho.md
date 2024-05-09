@@ -1,7 +1,5 @@
 Corrigir o godot do Kamila, parei na pagina 56
 
-Corrigir o construct da Lauane
-
 Caio: Gravar videos dos aplicativos, documentação do MBlock, pegar os projetos corrigidos do mblock e aplicativos, projeto do LCD
 
 Fazer slides para o curso de web
