@@ -1,4 +1,4 @@
-Corrigir o godot do Kamila, parei na pagina 56
+Corrigir o godot do Kamila, parei na pagina 81
 
 Caio: Gravar videos dos aplicativos, documentação do MBlock, pegar os projetos corrigidos do mblock e aplicativos, projeto do LCD
 
