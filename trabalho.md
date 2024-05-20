@@ -1,3 +1,5 @@
+Camila: Aplicativos, Banco de Dados, Cyber Segurança, Hardware, visão geral OS Linix (talvez)
+
 Corrigir o godot do Kamila, parei na pagina 81
 
 Caio: Gravar videos dos aplicativos, documentação do MBlock, pegar os projetos corrigidos do mblock e aplicativos, projeto do LCD
