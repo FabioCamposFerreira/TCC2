@@ -1,3 +1,5 @@
+Lucas: construct aula demonstrativa, quero Hardware, GODOT, flapy bird, roblox.
+
 Camila: Aplicativos, Banco de Dados, Cyber Segurança, Hardware, visão geral OS Linix (talvez)
 
 Corrigir o godot do Kamila, parei na pagina 81
