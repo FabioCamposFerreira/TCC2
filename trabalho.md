@@ -6,6 +6,8 @@ Corrigir o godot do Kamila, parei na pagina 81
 
 Caio: Gravar videos dos aplicativos, documentação do MBlock, pegar os projetos corrigidos do mblock e aplicativos, projeto do LCD
 
+Planejar urgente sequencia de aulas das turmas de robotica, não demorar mais de duas aulas em cada projeto
+
 Lista de compras da robótica
 
 Fazer slides para o curso de web
