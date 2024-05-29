@@ -1,3 +1,5 @@
+https://www.instructables.com/Arduino-L293D-Motor-Driver-Shield-Tutorial/
+
 Lucas: construct aula demonstrativa, quero Hardware, GODOT, flapy bird, roblox.
 
 Camila: Aplicativos, Banco de Dados, Cyber Segurança, Hardware, visão geral OS Linix (talvez)
