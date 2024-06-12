@@ -8,6 +8,8 @@ Corrigir o godot do Kamila, parei na pagina 81
 
 Caio: Gravar videos dos aplicativos, documentação do MBlock, pegar os projetos corrigidos do mblock e aplicativos, projeto do LCD
 
+um slide no inicio com todos os projetos feitos durante o curso. Outro slide explicando a ferramenta usada no TCF e sobre a temática do jogo (para os pais entenderem). No final um slide mostrando os jogos da próxima fase.
+
 Planejar urgente sequencia de aulas das turmas de robotica, não demorar mais de duas aulas em cada projeto
 
 Lista de compras da robótica
