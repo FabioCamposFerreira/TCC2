@@ -2,8 +2,6 @@ https://www.instructables.com/Arduino-L293D-Motor-Driver-Shield-Tutorial/
 
 Lucas: construct aula demonstrativa, quero Hardware, GODOT, flapy bird, roblox.
 
-Camila: Aplicativos, Banco de Dados, Cyber Segurança, Hardware, visão geral OS Linix (talvez)
-
 Corrigir o godot do Kamila, parei na pagina 81
 
 Caio: Gravar videos dos aplicativos, documentação do MBlock, pegar os projetos corrigidos do mblock e aplicativos, projeto do LCD
