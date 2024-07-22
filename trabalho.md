@@ -1,3 +1,5 @@
+Lucas me passar os a aula de construct para adolecentes
+
 https://www.instructables.com/Arduino-L293D-Motor-Driver-Shield-Tutorial/
 
 Lucas: construct aula demonstrativa, quero Hardware, GODOT, flapy bird, roblox.
