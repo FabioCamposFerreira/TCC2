@@ -1,3 +1,44 @@
+# Geral
+- Organizar arquivos (projetos de aulas)
+- Organizar apostilas
+- Planejar o cronograma de aulas e projetos de cada fase
+- Organizar projetos para montar o plano de aula e identificar os que estão faltando
+- Criar as apostilas para imprimir e passar as regras de como juntá-las
+- Fazer planejamento do cronograma de aulas de web full
+
+# Games
+- Documentar os projetos:
+  - Documentar a aula demonstrativa criada pelo Lucas para os alunos mais velhos
+  - Documentar o projeto do Godot criado pelo Lucas para as aulas
+  - Documentar o projeto do Flappy Bird criado pelo Lucas no Unity
+  - Documentar o projeto do "Terror" criado pelo Lucas no Unity
+  - Documentar o projeto do "FPS" criado pelo Lucas no Unity
+  - Documentar o projeto do Hero Village criado pelo Lucas no Roblox
+  - Documentar o projeto do Tower Defense criado pelo Lucas no Roblox para o TCF do Miguel Rodrigues
+  - Documentar os projetos de TCF, como os do Thiago (quinta 18h) e dos alunos de sexta 16h
+  - Corrigir a apostila da Kamila de Godot
+
+# Robótica
+- Planejar as aulas de cada turma de robótica
+- Passar as regras de robótica. Ex.: não demorar mais de duas aulas em cada projeto, não pedir para eles remontarem os projetos
+- Lista de compras da robótica
+- Nivelar a impressora de resina
+- Documentas TCFs: do Joel APP de inteligencia artificial, do Andre (Robo entregador da amazon).
+- Organizar apresentação dos TCFs de Robótica
+
+# Programação Web e de Aplicativos
+- Criar aulas com base nos projetos existentes:
+    - Biblioteca do Gustavo usando PHP
+    - Sistema de agendamento de pedidos de eventos do Gabriel Nunes usando PHP 
+    - Lanchonete do Gabriel Reis usando firebase
+    - Projeto 1: Criar página de login, página de escolha de ferramentas e página da ferramenta escolhida. Perguntar para o Fábio, que pode explicar melhor.
+    - Projeto do Instragem usando react e PHP feito pelo Gabriel Reis.
+- Continuar o aplicativo da lanchonete no Android Studio
+- Continuar fazendo os slides de WEB com base na apostila
+- Terminar a apostila de Python
+- Documentar os projetos de IA da colonia
+
+
 Dar aula para a Lauane de Robótica e para o Lucas também
 
 Lucas me passar os a aula de construct para adolecentes
